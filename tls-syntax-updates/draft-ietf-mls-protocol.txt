@@ -5,7 +5,7 @@
 Network Working Group                                          R. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                             B. Beurdouche
-Expires: 19 August 2022                                  Inria & Mozilla
+Expires: 22 August 2022                                  Inria & Mozilla
                                                                R. Robert
                                                                         
                                                              J. Millican
@@ -14,7 +14,7 @@ Expires: 19 August 2022                                  Inria & Mozilla
                                                                   Google
                                                           K. Cohn-Gordon
                                                     University of Oxford
-                                                        15 February 2022
+                                                        18 February 2022
 
 
               The Messaging Layer Security (MLS) Protocol
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 19 August 2022.
+   This Internet-Draft will expire on 22 August 2022.
 
 Copyright Notice
 
@@ -543,9 +543,11 @@ Table of Contents
 
    In MLS, there are several vectors whose sizes vary over significant
    ranges.  So instead of using a fixed-size length field, we use a
-   variable-size length using the variable-length integer encoding
-   described in Section 16 of [RFC9000].  Instead of presenting min and
-   max values, the vector description simply includes a V.  For example:
+   variable-size length using a variable-length integer encoding based
+   on the one in Section 16 of [RFC9000].  (They differ only in that the
+   one here requires a minimum-size encoding.)  Instead of presenting
+   min and max values, the vector description simply includes a V.  For
+   example:
 
    struct {
        uint32 fixed<0..255>;
@@ -583,6 +585,34 @@ Table of Contents
    four byte sequence 9d 7f 3e 7d decodes to 494878333; the two byte
    sequence 7b bd decodes to 15293; and the single byte 25 decodes to 37
    (as does the two byte sequence 40 25).
+
+   The following figure adapts the pseudocode provided in [RFC9000] to
+   add a check for minimum-length encoding:
+
+   ReadVarint(data):
+     // The length of variable-length integers is encoded in the
+     // first two bits of the first byte.
+     v = data.next_byte()
+     prefix = v >> 6
+     length = 1 << prefix
+
+     // Once the length is known, remove these bits and read any
+     // remaining bytes.
+     v = v & 0x3f
+     repeat length-1 times:
+       v = (v << 8) + data.next_byte()
+     return v
+
+     // Check that the encoder used the minimum bits required
+     if length > 1 && v < (1 << (length - 1)):
+       raise an exception
+
+   The use of variable-size integers for vector lengths allows vectors
+   to grow very large, up to 2^62 bytes.  Implementations should take
+   care not to allow vectors to overflow available storage.  To
+   facilitate debugging of potential interoperatbility problems,
+   implementations should provide a clear error when such an overflow
+   condition occurs.
 
 3.  Operating Context
 
@@ -5454,34 +5484,28 @@ Authors' Addresses
 
    Richard Barnes
    Cisco
-
    Email: rlb@ipv.sx
 
 
    Benjamin Beurdouche
    Inria & Mozilla
-
    Email: ietf@beurdouche.com
 
 
    Raphael Robert
-
    Email: ietf@raphaelrobert.com
 
 
    Jon Millican
    Facebook
-
    Email: jmillican@fb.com
 
 
    Emad Omara
    Google
-
    Email: emadomara@google.com
 
 
    Katriel Cohn-Gordon
    University of Oxford
-
    Email: me@katriel.co.uk
