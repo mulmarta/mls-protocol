@@ -3268,7 +3268,7 @@ member of the group.<a href="#section-7.3.2-9" class="pilcrow">¶</a></p>
 <a href="#section-8" class="section-number selfRef">8. </a><a href="#name-ratchet-tree-operations" class="section-name selfRef">Ratchet Tree Operations</a>
       </h2>
 <p id="section-8-1">The ratchet tree for an epoch describes the membership of a group in that epoch,
-providing public-key encryption keys that can be used to encrypt to subsets of
+providing public-key encryption (HPKE) keys that can be used to encrypt to subsets of
 the group as well as information to authenticate the members.  In order to
 reflect changes to the membership of the group from one epoch to the next,
 corresponding changes are made to the ratchet tree.  In this section, we
@@ -3479,38 +3479,50 @@ Commit):<a href="#section-8.1.1-4.6.1" class="pilcrow">¶</a></p>
         <h3 id="name-ratchet-tree-evolution">
 <a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-ratchet-tree-evolution" class="section-name selfRef">Ratchet Tree Evolution</a>
         </h3>
-<p id="section-8.2-1">A member of an MLS group advances the key schedule to provide forward secrecy
-and post-compromise security by providing the group with fresh key material to
-be added into the group's shared secret.
-To do so, one member of the group generates fresh key
-material, applies it to their local tree state, and then sends this key material
-to other members in the group via an UpdatePath message (see <a href="#update-paths" class="xref">Section 8.7</a>) .
-All other group members then apply the key material in the UpdatePath to their
-own local tree state to derive the group's now-updated shared secret.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
-<p id="section-8.2-2">To begin, the generator of the UpdatePath updates its leaf node and its
-direct path to the root with new secret values.  The HPKE leaf public key within
-the KeyPackage MUST be derived from a freshly generated HPKE secret key to
-provide post-compromise security.<a href="#section-8.2-2" class="pilcrow">¶</a></p>
-<p id="section-8.2-3">The generator of the UpdatePath starts by sampling a fresh random value called
-"leaf_secret", and uses the leaf_secret to generate their leaf HPKE key pair
-(see <a href="#key-packages" class="xref">Section 11</a>) and to seed a sequence of "path secrets", one for each
-ancestor of its leaf. In this setting,
-path_secret[0] refers to the leaf's parent,
-path_secret[1] to the parent's parent, and so on. At each step, the path
-secret is used to derive a new secret value for the corresponding
-node, from which the node's key pair is derived.<a href="#section-8.2-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-8.2-4">
+<p id="section-8.2-1">In order to provide forward secrecy and post-compromise security, whenever a
+member initiates an epoch change (i.e., commits; see <a href="#commit" class="xref">Section 13.2</a>), they refresh
+all HPKE key pairs in the ratchet tree for which they know the secret keys.
+More precisely, they refresh the key pairs of their leaf and of all nodes on
+their leaf's direct path.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
+<p id="section-8.2-2">The member initiating the epoch change generates the fresh key pairs using the
+following procedure. The procedure is designed in a way that allows group members to
+efficiently communicate the fresh secret keys to other group members, as
+described in <a href="#update-paths" class="xref">Section 8.7</a>.<a href="#section-8.2-2" class="pilcrow">¶</a></p>
+<p id="section-8.2-3">To begin with, the generator of the UpdatePath updates its leaf and its leaf's
+<em>filtered direct path</em> with new key pairs. The filtered direct path  of a node
+is obtained from the node's direct path by removing all nodes whose child on
+the nodes's copath has an empty resolution (any unmerged leaves of the copath
+child count towards its resolution). Such a removed node does not need a key
+pair, since after blanking it, its resolution consists of a single node on the
+filtered direct path. Using the key pair of the node in the resolution is
+equivalent to using the key pair of the removed node.<a href="#section-8.2-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-8.2-4.1">Blank all the nodes on the direct path from the leaf to the root.<a href="#section-8.2-4.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-8.2-4.2">Generate a fresh HPKE key pair for the leaf.<a href="#section-8.2-4.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-8.2-4.3">
+            <p id="section-8.2-4.3.1">Generate a sequence of path secrets, one for each node on the leaf's filtered direct
+path, as follows. In this setting, <code>path_secret[0]</code> refers to the first parent node 
+in the filtered direct path, <code>path_secret[1]</code> to the second parent node, and so on.<a href="#section-8.2-4.3.1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.2-4.3.2">
 <pre>
-leaf_node_secret = DeriveSecret(leaf_secret, "node")
-path_secret[0] = DeriveSecret(leaf_secret, "path")
-
+path_secret[0] is sampled at random
 path_secret[n] = DeriveSecret(path_secret[n-1], "path")
-node_secret[n] = DeriveSecret(path_secret[n], "node")
-
-leaf_priv, leaf_pub = KEM.DeriveKeyPair(leaf_node_secret)
-node_priv[n], node_pub[n] = KEM.DeriveKeyPair(node_secret[n])
-</pre><a href="#section-8.2-4" class="pilcrow">¶</a>
+</pre><a href="#section-8.2-4.3.2" class="pilcrow">¶</a>
 </div>
+</li>
+          <li class="normal" id="section-8.2-4.4">
+            <p id="section-8.2-4.4.1">Compute the sequence of HPKE key pairs <code>(node_priv,node_pub)</code>, one for each
+node on the leaf's direct path, as follows.<a href="#section-8.2-4.4.1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.2-4.4.2">
+<pre>
+node_secret[n] = DeriveSecret(path_secret[n], "node")
+node_priv[n], node_pub[n] = KEM.DeriveKeyPair(node_secret[n])
+</pre><a href="#section-8.2-4.4.2" class="pilcrow">¶</a>
+</div>
+</li>
+        </ul>
 <p id="section-8.2-5">The node secret is derived as a temporary intermediate secret so that each
 secret is only used with one algorithm: The path secret is used as an input to
 DeriveSecret and the node secret is used as an input to DeriveKeyPair.<a href="#section-8.2-5" class="pilcrow">¶</a></p>
@@ -3561,8 +3573,6 @@ np[0] -&gt; X'      Z[C]
        0 1 2 3 4 5 6
 </pre><a href="#section-8.2-11" class="pilcrow">¶</a>
 </div>
-<p id="section-8.2-12">After performing these operations, the generator of the UpdatePath MUST
-delete the leaf_secret.<a href="#section-8.2-12" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="adding-and-removing-leaves">
@@ -3634,12 +3644,12 @@ apply it to keep their local views of the tree in
 sync with the sender's.  More specifically, when a member commits a change to
 the tree (e.g., to add or remove a member), it transmits an UpdatePath
 containing a set of public keys and encrypted path secrets
-for intermediate nodes in the direct path of its leaf. The
+for intermediate nodes in the filtered direct path of its leaf. The
 other members of the group use these values to update
 their view of the tree, aligning their copy of the tree to the
 sender's.<a href="#section-8.4-1" class="pilcrow">¶</a></p>
 <p id="section-8.4-2">An UpdatePath contains
-the following information for each node in the direct path of the
+the following information for each node in the filtered direct path of the
 sender's leaf, including the root:<a href="#section-8.4-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-8.4-3.1">The public key for the node<a href="#section-8.4-3.1" class="pilcrow">¶</a>
@@ -3658,7 +3668,7 @@ of the non-updated child.<a href="#section-8.4-4" class="pilcrow">¶</a></p>
 <li id="section-8.4-6.1">
             <p id="section-8.4-6.1.1">Compute the updated path secrets.<a href="#section-8.4-6.1.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-8.4-6.1.2.1">Identify a node in the direct path for which the local member
+<li class="normal" id="section-8.4-6.1.2.1">Identify a node in the filtered direct path for which the local member
 is in the subtree of the non-updated child.<a href="#section-8.4-6.1.2.1" class="pilcrow">¶</a>
 </li>
               <li class="normal" id="section-8.4-6.1.2.2">Identify a node in the resolution of the copath node for
@@ -3678,22 +3688,24 @@ with the public keys derived from the new path_secret values.<a href="#section-8
           <li id="section-8.4-6.2">
             <p id="section-8.4-6.2.1">Merge the updated path secrets into the tree.<a href="#section-8.4-6.2.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-8.4-6.2.2.1">
-                <p id="section-8.4-6.2.2.1.1">For all updated nodes,<a href="#section-8.4-6.2.2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-8.4-6.2.2.1">Blank all nodes on the direct path of the sender's leaf.<a href="#section-8.4-6.2.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-8.4-6.2.2.2">
+                <p id="section-8.4-6.2.2.2.1">For all nodes on the filtered direct path of the sender's leaf,<a href="#section-8.4-6.2.2.2.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-8.4-6.2.2.1.2.1">Replace the public key for each node with the received public key.<a href="#section-8.4-6.2.2.1.2.1" class="pilcrow">¶</a>
+<li class="normal" id="section-8.4-6.2.2.2.2.1">Set the public key to the received public key.<a href="#section-8.4-6.2.2.2.2.1" class="pilcrow">¶</a>
 </li>
-                  <li class="normal" id="section-8.4-6.2.2.1.2.2">Set the list of unmerged leaves to the empty list.<a href="#section-8.4-6.2.2.1.2.2" class="pilcrow">¶</a>
+                  <li class="normal" id="section-8.4-6.2.2.2.2.2">Set the list of unmerged leaves to the empty list.<a href="#section-8.4-6.2.2.2.2.2" class="pilcrow">¶</a>
 </li>
-                  <li class="normal" id="section-8.4-6.2.2.1.2.3">Store the updated hash of the node's parent (represented as a ParentNode
-struct), going from root to leaf, so that each hash incorporates all the
-nodes above it. The root node always has a zero-length hash for this
-value.<a href="#section-8.4-6.2.2.1.2.3" class="pilcrow">¶</a>
+                  <li class="normal" id="section-8.4-6.2.2.2.2.3">Store the updated hash of the next node on the filtered direct path
+(represented as a ParentNode struct), going from root to leaf, so that
+each hash incorporates all the non-blank nodes above it. The root node
+always has a zero-length hash for this value.<a href="#section-8.4-6.2.2.2.2.3" class="pilcrow">¶</a>
 </li>
                 </ul>
 </li>
-              <li class="normal" id="section-8.4-6.2.2.2">For nodes where a path secret was recovered in step 1,
-compute and store the node's updated private key.<a href="#section-8.4-6.2.2.2" class="pilcrow">¶</a>
+              <li class="normal" id="section-8.4-6.2.2.3">For nodes where a path secret was recovered in step 1,
+compute and store the node's updated private key.<a href="#section-8.4-6.2.2.3" class="pilcrow">¶</a>
 </li>
             </ul>
 </li>
@@ -3776,22 +3788,18 @@ left and right children, respectively.<a href="#section-8.5-6" class="pilcrow">�
         <h3 id="name-parent-hash">
 <a href="#section-8.6" class="section-number selfRef">8.6. </a><a href="#name-parent-hash" class="section-name selfRef">Parent Hash</a>
         </h3>
-<p id="section-8.6-1">The <code>parent_hash</code> extension carries information to authenticate the structure of
-the tree, as described below.<a href="#section-8.6-1" class="pilcrow">¶</a></p>
+<p id="section-8.6-1">The <code>parent_hash</code> extension carries information to authenticate the HPKE keys
+in the ratchet tree, as described below.<a href="#section-8.6-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.6-2">
 <pre>
 opaque parent_hash&lt;V&gt;;
 </pre><a href="#section-8.6-2" class="pilcrow">¶</a>
 </div>
-<p id="section-8.6-3">Consider a ratchet tree with a parent node P and children V and S. The parent hash
-of P changes whenever an <code>UpdatePath</code> object is applied to the ratchet tree along
-a path traversing node V (and hence also P). The new "Parent Hash of P (with Co-Path
-Child S)" is obtained by hashing P's <code>ParentHashInput</code> struct using the resolution
-of S to populate the <code>original_child_resolution</code> field. This way, P's Parent Hash
-fixes the new HPKE public keys of all nodes on the path from P to the root.
-Furthermore, for each such key PK the hash also binds the set of HPKE public keys
-to which PK's secret key was encrypted in the Commit that contained the
-<code>UpdatePath</code> object.<a href="#section-8.6-3" class="pilcrow">¶</a></p>
+<p id="section-8.6-3">Consider a ratchet tree with a non-blank parent node P and children V and S.
+The parent hash of P changes whenever an <code>UpdatePath</code> object is applied to
+the ratchet tree along a path from a leaf U traversing node V (and hence also
+P). The new "Parent Hash of P (with Co-Path Child S)" is obtained by hashing P's
+<code>ParentHashInput</code> struct.<a href="#section-8.6-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.6-4">
 <pre>
 struct {
@@ -3801,30 +3809,41 @@ struct {
 } ParentHashInput;
 </pre><a href="#section-8.6-4" class="pilcrow">¶</a>
 </div>
-<p id="section-8.6-5">The Parent Hash of P with Co-Path Child S is the hash of a <code>ParentHashInput</code> object
-populated as follows. The field <code>public_key</code> contains the HPKE public key of P. If P
-is the root, then <code>parent_hash</code> is set to a zero-length octet string.
-Otherwise <code>parent_hash</code> is the Parent Hash of P's parent with P's sibling as the
-co-path child.<a href="#section-8.6-5" class="pilcrow">¶</a></p>
-<p id="section-8.6-6">Finally, <code>original_child_resolution</code> is the array of <code>HPKEPublicKey</code> values of the
+<p id="section-8.6-5">The field <code>public_key</code> contains the HPKE public key of P. If P is the root,
+then the <code>parent_hash</code> field is set to a zero-length octet string. Otherwise,
+<code>parent_hash</code> is the Parent Hash of the next node after P on the filtered
+direct path of U. This way, P's Parent Hash fixes
+the new HPKE public key of each node V on the path from P to the root. Note
+that the path from P to the root may contain some blank nodes that are not
+fixed by P's Parent Hash. However, for each node that has an HPKE key, this key
+is fixed by P's Parent Hash.<a href="#section-8.6-5" class="pilcrow">¶</a></p>
+<p id="section-8.6-6">Finally, <code>original_child_resolution</code> is the array of HPKE public keys of the
 nodes in the resolution of S but with the <code>unmerged_leaves</code> of P omitted. For
 example, in the ratchet tree depicted in <a href="#ratchet-tree-nodes" class="xref">Section 5.3</a> the
 <code>ParentHashInput</code> of node Z with co-path child C would contain an empty
 <code>original_child_resolution</code> since C's resolution includes only itself but C is also
 an unmerged leaf of Z. Meanwhile, the <code>ParentHashInput</code> of node Z with co-path child
 D has an array with one element in it: the HPKE public key of D.<a href="#section-8.6-6" class="pilcrow">¶</a></p>
+<p id="section-8.6-7">Observe that <code>original_child_resolution</code> is equal to the resolution of S at the
+time the <code>UpdatePath</code> was generated, since at that point P's set of unmerged
+leaves was emptied. (Observe also that <code>original_child_resolution</code> contains all
+unmerged leaves of S.) Therefore, P's Parent Hash fixes, for each node V on the
+path from P to the root, not only the HPKE public key of V, but also the set of
+HPKE public keys to which the corresponding HPKE secret key of V was encrypted by
+the generator of the <code>UpdatePath</code>.<a href="#section-8.6-7" class="pilcrow">¶</a></p>
 <div id="using-parent-hashes">
 <section id="section-8.6.1">
           <h4 id="name-using-parent-hashes">
 <a href="#section-8.6.1" class="section-number selfRef">8.6.1. </a><a href="#name-using-parent-hashes" class="section-name selfRef">Using Parent Hashes</a>
           </h4>
 <p id="section-8.6.1-1">The Parent Hash of P appears in three types of structs. If V is itself a parent node
-then P's Parent Hash is stored in the <code>parent_hash</code> fields of both V's
-<code>ParentHashInput</code> struct and V's <code>ParentNode</code> struct. (The <code>ParentNode</code> struct is
-used to encapsulate all public information about V that must be conveyed to a new
-member joining the group as well as to define the Tree Hash of node V.)<a href="#section-8.6.1-1" class="pilcrow">¶</a></p>
-<p id="section-8.6.1-2">If, on the other hand, V is a leaf and the <code>parent_hash</code> field of its LeafNode
-is populated then the Parent Hash of P (with V's sibling as co-path child) is stored in
+then P's Parent Hash is stored in the <code>parent_hash</code> fields of the structs
+<code>ParentHashInput</code> and <code>ParentNode</code> of the node before P on the filtered direct
+path of U. (The <code>ParentNode</code> struct is used to encapsulate all public
+information about that node that must be conveyed to a new
+member joining the group as well as to define its Tree Hash.)<a href="#section-8.6.1-1" class="pilcrow">¶</a></p>
+<p id="section-8.6.1-2">If, on the other hand, V is the leaf U and its LeafNode contains the <code>parent_hash</code>
+extension then the Parent Hash of P (with V's sibling as co-path child) is stored in
 that field. In particular, the extension MUST be present in the <code>leaf_key_package</code>
 field of an <code>UpdatePath</code> object. (This way, the signature of such a LeafNode also
 serves to attest to which keys the group member introduced into the ratchet tree and
@@ -3843,24 +3862,9 @@ at V. Indeed, such a ratchet tree would violate the tree invariant.)<a href="#se
 expected value of <code>parent_hash</code> for the committer's new leaf and verify that it
 matches the <code>parent_hash</code> value in the supplied <code>leaf_key_package</code>. Moreover, when
 joining a group, new members MUST authenticate each non-blank parent node P. A parent
-node P is authenticated by performing the following check:<a href="#section-8.6.2-1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-8.6.2-2.1">Let L and R be the left and right children of P, respectively<a href="#section-8.6.2-2.1" class="pilcrow">¶</a>
-</li>
-            <li class="normal" id="section-8.6.2-2.2">If L.parent_hash is equal to the Parent Hash of P with Co-Path Child R, the check passes<a href="#section-8.6.2-2.2" class="pilcrow">¶</a>
-</li>
-            <li class="normal" id="section-8.6.2-2.3">If R is blank, replace R with its left child until R is either non-blank or a leaf node<a href="#section-8.6.2-2.3" class="pilcrow">¶</a>
-</li>
-            <li class="normal" id="section-8.6.2-2.4">If R is a blank leaf node, the check fails<a href="#section-8.6.2-2.4" class="pilcrow">¶</a>
-</li>
-            <li class="normal" id="section-8.6.2-2.5">If R.parent_hash is equal to the Parent Hash of P with Co-Path Child L, the check passes<a href="#section-8.6.2-2.5" class="pilcrow">¶</a>
-</li>
-            <li class="normal" id="section-8.6.2-2.6">Otherwise, the check fails<a href="#section-8.6.2-2.6" class="pilcrow">¶</a>
-</li>
-          </ul>
-<p id="section-8.6.2-3">The left-child recursion under the right child of P is necessary because the expansion of
-the tree to the right due to Add proposals can cause blank nodes to be interposed
-between a parent node and its right child.<a href="#section-8.6.2-3" class="pilcrow">¶</a></p>
+node P is authenticated by checking that there exists a child V of P and a node U in the
+resolution of V such that V.<code>parent_hash</code> is equal to the Parent Hash of P with V's
+sibling as the co-path child.<a href="#section-8.6.2-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -3873,7 +3877,8 @@ between a parent node and its right child.<a href="#section-8.6.2-3" class="pilc
 <p id="section-8.7-1">As described in <a href="#commit" class="xref">Section 13.2</a>, each MLS Commit message may optionally
 transmit a LeafNode and parent node values along its direct path.
 The path contains a public key and encrypted secret value for all
-intermediate nodes in the path above the leaf.  The path is ordered
+intermediate nodes in the filtered direct path from the leaf to the
+root. The path is ordered
 from the closest node to the leaf to the root; each node MUST be the
 parent of its predecessor.<a href="#section-8.7-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.7-2">
@@ -5040,16 +5045,8 @@ LeafNode stored at a leaf.  Let L be this leaf node.<a href="#section-13.1.3-4.1
 </li>
             <li class="normal" id="section-13.1.3-4.3">Blank the intermediate nodes along the path from L to the root<a href="#section-13.1.3-4.3" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-13.1.3-4.4">
-              <p id="section-13.1.3-4.4.1">Truncate the tree by removing leaves from the right side of the tree as long
-as all of the following conditions hold (since non-blank intermediate nodes hold
-information that is necessary for verifying parent hashes):<a href="#section-13.1.3-4.4.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-13.1.3-4.4.2.1">The rightmost leaf is blank<a href="#section-13.1.3-4.4.2.1" class="pilcrow">¶</a>
-</li>
-                <li class="normal" id="section-13.1.3-4.4.2.2">The parent of the rightmost leaf is either blank or the root of the tree<a href="#section-13.1.3-4.4.2.2" class="pilcrow">¶</a>
-</li>
-              </ul>
+            <li class="normal" id="section-13.1.3-4.4">Truncate the tree by removing leaves from the right side of the tree until the
+rightmost leaf node is not blank.<a href="#section-13.1.3-4.4" class="pilcrow">¶</a>
 </li>
           </ul>
 </section>
