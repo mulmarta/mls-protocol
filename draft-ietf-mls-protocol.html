@@ -3301,7 +3301,7 @@ appearance in the group, signed by that client:<a href="#section-8.1-4" class="p
 <pre>
 enum {
     reserved(0),
-    add(1),
+    key_package(1),
     update(2),
     commit(3),
     (255)
@@ -3348,7 +3348,7 @@ struct {
 
     LeafNodeSource leaf_node_source;
     select (leaf_node_source) {
-        case add:
+        case key_package:
             Lifetime lifetime;
 
         case update:
@@ -3361,7 +3361,7 @@ struct {
     Extension extensions&lt;V&gt;;
 
     select (leaf_node_source) {
-        case add:
+        case key_package:
             struct{};
 
         case update:
@@ -3431,11 +3431,10 @@ acceptable relative to the identities attested by the old credential.<a href="#s
             <li class="normal" id="section-8.1.1-4.2">Verify that the signature on the LeafNode is valid using the public key
 in the LeafNode's credential<a href="#section-8.1.1-4.2" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-8.1.1-4.3">Verify that the LeafNode is compatible with the group's parameters.  The
-ciphersuite and protocol version of the KeyPackage must match those in
-use in the group.  If the GroupContext has a <code>required_capabilities</code>
-extension, then the required extensions and proposals MUST be listed in
-the KeyPackage's <code>capabilities</code> extension.<a href="#section-8.1.1-4.3" class="pilcrow">¶</a>
+            <li class="normal" id="section-8.1.1-4.3">Verify that the LeafNode is compatible with the group's parameters.  If the
+GroupContext has a <code>required_capabilities</code> extension, then the required
+extensions and proposals MUST be listed in the LeafNode's <code>capabilities</code>
+field.<a href="#section-8.1.1-4.3" class="pilcrow">¶</a>
 </li>
             <li class="normal" id="section-8.1.1-4.4">
               <p id="section-8.1.1-4.4.1">Verify the <code>lifetime</code> field:<a href="#section-8.1.1-4.4.1" class="pilcrow">¶</a></p>
@@ -3452,8 +3451,8 @@ points in the protocol.<a href="#section-8.1.1-4.4.2.2" class="pilcrow">¶</a>
 </li>
               </ul>
 </li>
-            <li class="normal" id="section-8.1.1-4.5">Verify that the <code>membership</code> field has the appropriate contents for the
-context in which the KeyPackage is being validated (as defined in
+            <li class="normal" id="section-8.1.1-4.5">Verify that the <code>leaf_node_source</code> field has the appropriate value for the
+context in which the LeafNode is being validated (as defined in
 <a href="#ratchet-tree-node-contents" class="xref">Section 8.1</a>).<a href="#section-8.1.1-4.5" class="pilcrow">¶</a>
 </li>
             <li class="normal" id="section-8.1.1-4.6">
@@ -3552,7 +3551,7 @@ path_secret[0] --&gt; node_secret[0] --&gt; node_priv[0], node_pub[0]
      ^
      |
 leaf_secret    --&gt; leaf_node_secret --&gt; leaf_priv, leaf_pub
-                                     ~&gt; leaf_key_package
+                                     ~&gt; leaf_node
 </pre><a href="#section-8.2-9" class="pilcrow">¶</a>
 </div>
 <p id="section-8.2-10">After applying the UpdatePath, the tree will have the following structure, where
@@ -3788,69 +3787,79 @@ left and right children, respectively.<a href="#section-8.5-6" class="pilcrow">�
         <h3 id="name-parent-hash">
 <a href="#section-8.6" class="section-number selfRef">8.6. </a><a href="#name-parent-hash" class="section-name selfRef">Parent Hash</a>
         </h3>
-<p id="section-8.6-1">The <code>parent_hash</code> extension carries information to authenticate the HPKE keys
-in the ratchet tree, as described below.<a href="#section-8.6-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-8.6-2">
+<p id="section-8.6-1">The <code>parent_hash</code> field in ratchet tree nodes carries information to
+authenticate the information in the ratchet tree.  Parent hashes chain together
+so that the signature on a leaf node, by covering the leaf node's parent hash,
+indirectly includes information about the structure of the tree at the time the
+leaf node was last updated.<a href="#section-8.6-1" class="pilcrow">¶</a></p>
+<p id="section-8.6-2">Consider a ratchet tree with a non-blank parent node P and children V and S.<a href="#section-8.6-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.6-3">
 <pre>
-opaque parent_hash&lt;V&gt;;
-</pre><a href="#section-8.6-2" class="pilcrow">¶</a>
+        ...
+        /
+       P
+     __|__
+    /     \
+   V       S
+  / \     / \
+... ... ... ...
+</pre><a href="#section-8.6-3" class="pilcrow">¶</a>
 </div>
-<p id="section-8.6-3">Consider a ratchet tree with a non-blank parent node P and children V and S.
-The parent hash of P changes whenever an <code>UpdatePath</code> object is applied to
+<p id="section-8.6-4">The parent hash of P changes whenever an <code>UpdatePath</code> object is applied to
 the ratchet tree along a path from a leaf U traversing node V (and hence also
 P). The new "Parent Hash of P (with Co-Path Child S)" is obtained by hashing P's
-<code>ParentHashInput</code> struct.<a href="#section-8.6-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-8.6-4">
+<code>ParentHashInput</code> struct.<a href="#section-8.6-4" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.6-5">
 <pre>
 struct {
     HPKEPublicKey public_key;
     opaque parent_hash&lt;V&gt;;
     HPKEPublicKey original_child_resolution&lt;V&gt;;
 } ParentHashInput;
-</pre><a href="#section-8.6-4" class="pilcrow">¶</a>
+</pre><a href="#section-8.6-5" class="pilcrow">¶</a>
 </div>
-<p id="section-8.6-5">The field <code>public_key</code> contains the HPKE public key of P. If P is the root,
+<p id="section-8.6-6">The field <code>public_key</code> contains the HPKE public key of P. If P is the root,
 then the <code>parent_hash</code> field is set to a zero-length octet string. Otherwise,
 <code>parent_hash</code> is the Parent Hash of the next node after P on the filtered
 direct path of U. This way, P's Parent Hash fixes
 the new HPKE public key of each node V on the path from P to the root. Note
 that the path from P to the root may contain some blank nodes that are not
 fixed by P's Parent Hash. However, for each node that has an HPKE key, this key
-is fixed by P's Parent Hash.<a href="#section-8.6-5" class="pilcrow">¶</a></p>
-<p id="section-8.6-6">Finally, <code>original_child_resolution</code> is the array of HPKE public keys of the
+is fixed by P's Parent Hash.<a href="#section-8.6-6" class="pilcrow">¶</a></p>
+<p id="section-8.6-7">Finally, <code>original_child_resolution</code> is the array of HPKE public keys of the
 nodes in the resolution of S but with the <code>unmerged_leaves</code> of P omitted. For
 example, in the ratchet tree depicted in <a href="#ratchet-tree-nodes" class="xref">Section 5.3</a> the
 <code>ParentHashInput</code> of node Z with co-path child C would contain an empty
 <code>original_child_resolution</code> since C's resolution includes only itself but C is also
 an unmerged leaf of Z. Meanwhile, the <code>ParentHashInput</code> of node Z with co-path child
-D has an array with one element in it: the HPKE public key of D.<a href="#section-8.6-6" class="pilcrow">¶</a></p>
-<p id="section-8.6-7">Observe that <code>original_child_resolution</code> is equal to the resolution of S at the
+D has an array with one element in it: the HPKE public key of D.<a href="#section-8.6-7" class="pilcrow">¶</a></p>
+<p id="section-8.6-8">Observe that <code>original_child_resolution</code> is equal to the resolution of S at the
 time the <code>UpdatePath</code> was generated, since at that point P's set of unmerged
 leaves was emptied. (Observe also that <code>original_child_resolution</code> contains all
 unmerged leaves of S.) Therefore, P's Parent Hash fixes, for each node V on the
 path from P to the root, not only the HPKE public key of V, but also the set of
 HPKE public keys to which the corresponding HPKE secret key of V was encrypted by
-the generator of the <code>UpdatePath</code>.<a href="#section-8.6-7" class="pilcrow">¶</a></p>
+the generator of the <code>UpdatePath</code>.<a href="#section-8.6-8" class="pilcrow">¶</a></p>
 <div id="using-parent-hashes">
 <section id="section-8.6.1">
           <h4 id="name-using-parent-hashes">
 <a href="#section-8.6.1" class="section-number selfRef">8.6.1. </a><a href="#name-using-parent-hashes" class="section-name selfRef">Using Parent Hashes</a>
           </h4>
 <p id="section-8.6.1-1">The Parent Hash of P appears in three types of structs. If V is itself a parent node
-then P's Parent Hash is stored in the <code>parent_hash</code> fields of the structs
+then P's Parent Hash is stored in the <code>parent_hash</code> field of the structs
 <code>ParentHashInput</code> and <code>ParentNode</code> of the node before P on the filtered direct
 path of U. (The <code>ParentNode</code> struct is used to encapsulate all public
 information about that node that must be conveyed to a new
 member joining the group as well as to define its Tree Hash.)<a href="#section-8.6.1-1" class="pilcrow">¶</a></p>
-<p id="section-8.6.1-2">If, on the other hand, V is the leaf U and its LeafNode contains the <code>parent_hash</code>
-extension then the Parent Hash of P (with V's sibling as co-path child) is stored in
-that field. In particular, the extension MUST be present in the <code>leaf_key_package</code>
-field of an <code>UpdatePath</code> object. (This way, the signature of such a LeafNode also
-serves to attest to which keys the group member introduced into the ratchet tree and
+<p id="section-8.6.1-2">If, on the other hand, V is the leaf U and its LeafNode has <code>leaf_node_source</code> set to <code>commit</code>,
+then the Parent Hash of P (with V's sibling as co-path child) is stored in
+the <code>parent_hash</code> field.  This is true in particular of the LeafNode object sent
+in the <code>leaf_node</code> field of an UpdatePath. The signature of such a LeafNode thus also
+attests to which keys the group member introduced into the ratchet tree and
 to whom the corresponding secret keys were sent. This helps prevent malicious insiders
 from constructing artificial ratchet trees with a node V whose HPKE secret key is
 known to the insider yet where the insider isn't assigned a leaf in the subtree rooted
-at V. Indeed, such a ratchet tree would violate the tree invariant.)<a href="#section-8.6.1-2" class="pilcrow">¶</a></p>
+at V. Indeed, such a ratchet tree would violate the tree invariant.<a href="#section-8.6.1-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="verifying-parent-hashes">
@@ -3860,7 +3869,7 @@ at V. Indeed, such a ratchet tree would violate the tree invariant.)<a href="#se
           </h4>
 <p id="section-8.6.2-1">To this end, when processing a Commit message clients MUST recompute the
 expected value of <code>parent_hash</code> for the committer's new leaf and verify that it
-matches the <code>parent_hash</code> value in the supplied <code>leaf_key_package</code>. Moreover, when
+matches the <code>parent_hash</code> value in the supplied <code>leaf_node</code>. Moreover, when
 joining a group, new members MUST authenticate each non-blank parent node P. A parent
 node P is authenticated by checking that there exists a child V of P and a node U in the
 resolution of V such that V.<code>parent_hash</code> is equal to the Parent Hash of P with V's
@@ -4623,6 +4632,8 @@ struct {
 establishment to be safe from downgrade attacks on the parameters described (as
 discussed in <a href="#group-creation" class="xref">Section 12</a>), while still only advertising one version /
 ciphersuite per KeyPackage.<a href="#section-11-7" class="pilcrow">¶</a></p>
+<p id="section-11-8">The <code>leaf_node_source</code> field of the LeafNode in a KeyPackage MUST be set to
+<code>key_package</code>.<a href="#section-11-8" class="pilcrow">¶</a></p>
 <div id="keypackage-validation">
 <section id="section-11.1">
         <h3 id="name-keypackage-validation">
@@ -4633,44 +4644,19 @@ ciphersuite per KeyPackage.<a href="#section-11-7" class="pilcrow">¶</a></p>
 <li class="normal" id="section-11.1-2.1">When a KeyPackage is downloaded by a group member, before it is used
 to add the client to the group<a href="#section-11.1-2.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-11.1-2.2">When a KeyPackage is received by a group member in an Add, Update, or Commit
-message<a href="#section-11.1-2.2" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-11.1-2.3">When a client joining a group receives KeyPackages for the other members of
-the group in the group's ratchet tree<a href="#section-11.1-2.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-11.1-2.2">When a KeyPackage is received by a group member in an Add message<a href="#section-11.1-2.2" class="pilcrow">¶</a>
 </li>
         </ul>
 <p id="section-11.1-3">The client verifies the validity of a KeyPackage using the following steps:<a href="#section-11.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.1-4.1">Verify that the credential in the KeyPackage is valid according to the
-authentication service and the client's local policy. These actions MUST be
-the same regardless of at what point in the protocol the KeyPackage is being
-verified with the following exception: If the KeyPackage is an update to
-another KeyPackage, the authentication service MUST additionally validate that
-the set of identities attested by the credential in the new KeyPackage is
-acceptable relative to the identities attested by the old credential.<a href="#section-11.1-4.1" class="pilcrow">¶</a>
+<li class="normal" id="section-11.1-4.1">Verify the LeafNode in the KeyPackage according to the process defined in
+<a href="#leaf-node-validation" class="xref">Section 8.1.1</a>.<a href="#section-11.1-4.1" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-11.1-4.2">Verify that the signature on the KeyPackage is valid using the public key
-in the KeyPackage's credential<a href="#section-11.1-4.2" class="pilcrow">¶</a>
+in the LeafNode's credential<a href="#section-11.1-4.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-11.1-4.3">Verify that the KeyPackage is compatible with the group's parameters.  The
-ciphersuite and protocol version of the KeyPackage must match those in
-use in the group.  If the GroupContext has a <code>required_capabilities</code>
-extension, then the required extensions and proposals MUST be listed in
-the KeyPackage's <code>capabilities</code> extension.<a href="#section-11.1-4.3" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-11.1-4.4">
-            <p id="section-11.1-4.4.1">Verify that the following fields in the KeyPackage are unique among the
-members of the group (including any other members added in the same
-Commit):<a href="#section-11.1-4.4.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-11.1-4.4.2.1">
-                <code>credential.signature_key</code><a href="#section-11.1-4.4.2.1" class="pilcrow">¶</a>
-</li>
-              <li class="normal" id="section-11.1-4.4.2.2">
-                <code>hpke_init_key</code><a href="#section-11.1-4.4.2.2" class="pilcrow">¶</a>
-</li>
-            </ul>
+          <li class="normal" id="section-11.1-4.3">Verify that the ciphersuite and protocol version of the LeafNode match
+those in use in the group.<a href="#section-11.1-4.3" class="pilcrow">¶</a>
 </li>
         </ul>
 </section>
@@ -4976,7 +4962,8 @@ placed in the leftmost empty leaf in the tree, for the second Add, the next
 empty leaf to the right, etc. If no empty leaf exists, the tree is extended to
 the right.<a href="#section-13.1.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13.1.1-4.1">Validate the KeyPackage as specified in <a href="#keypackage-validation" class="xref">Section 11.1</a><a href="#section-13.1.1-4.1" class="pilcrow">¶</a>
+<li class="normal" id="section-13.1.1-4.1">Validate the KeyPackage as specified in <a href="#keypackage-validation" class="xref">Section 11.1</a>.  The
+<code>leaf_node_source</code> field in the LeafNode MUST be set to <code>key_package</code>.<a href="#section-13.1.1-4.1" class="pilcrow">¶</a>
 </li>
             <li class="normal" id="section-13.1.1-4.2">Identify the leaf L for the new member: if there are empty leaves in the tree,
 L is the leftmost empty leaf.  Otherwise, the tree is extended to the right
@@ -5008,10 +4995,11 @@ struct {
 </div>
 <p id="section-13.1.2-3">A member of the group applies an Update message by taking the following steps:<a href="#section-13.1.2-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13.1.2-4.1">Validate the LeafNode as specified in <a href="#keypackage-validation" class="xref">Section 11.1</a><a href="#section-13.1.2-4.1" class="pilcrow">¶</a>
+<li class="normal" id="section-13.1.2-4.1">Validate the LeafNode as specified in <a href="#leaf-node-validation" class="xref">Section 8.1.1</a>.  The
+<code>leaf_node_source</code> field MUST be set to <code>update</code>.<a href="#section-13.1.2-4.1" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-13.1.2-4.2">Verify that the <code>public_key</code> value is different from the corresponding
-field in the LeafNode being replaced.<a href="#section-13.1.2-4.2" class="pilcrow">¶</a>
+            <li class="normal" id="section-13.1.2-4.2">Verify that the <code>public_key</code> value in the LeafNode is different from the
+corresponding field in the LeafNode being replaced.<a href="#section-13.1.2-4.2" class="pilcrow">¶</a>
 </li>
             <li class="normal" id="section-13.1.2-4.3">Replace the sender's LeafNode with the one contained in the Update proposal<a href="#section-13.1.2-4.3" class="pilcrow">¶</a>
 </li>
@@ -5444,10 +5432,10 @@ populated.  Otherwise, the sender MAY omit the <code>path</code> field at its di
               <p id="section-13.2.1-4.4.1">If populating the <code>path</code> field: Create an UpdatePath using the provisional
 ratchet tree and GroupContext. Any new member (from an add proposal) MUST be
 excluded from the resolution during the computation of the UpdatePath.  The
-<code>leaf_key_package</code> for this UpdatePath must have a <code>parent_hash</code> extension.
+<code>leaf_node</code> for this UpdatePath MUST have <code>leaf_node_source</code> set to <code>commit</code>.
 Note that the LeafNode in the <code>UpdatePath</code> effectively updates an existing
 LeafNode in the group and thus MUST adhere to the same restrictions as
-LeafNodess used in <code>Update</code> proposals.<a href="#section-13.2.1-4.4.1" class="pilcrow">¶</a></p>
+LeafNodes used in <code>Update</code> proposals (aside from <code>leaf_node_source</code>).<a href="#section-13.2.1-4.4.1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-13.2.1-4.4.2.1">Assign this UpdatePath to the <code>path</code> field in the Commit.<a href="#section-13.2.1-4.4.2.1" class="pilcrow">¶</a>
 </li>
@@ -5591,18 +5579,21 @@ MAY be omitted.<a href="#section-13.2.2-2.5" class="pilcrow">¶</a>
 provisional ratchet tree and GroupContext, to generate the new ratchet tree
 and the <code>commit_secret</code>:<a href="#section-13.2.2-2.6.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13.2.2-2.6.2.1">Verify that the LeafNode is acceptable according to the rules for Update
-(see <a href="#update" class="xref">Section 13.1.2</a>)<a href="#section-13.2.2-2.6.2.1" class="pilcrow">¶</a>
+<li class="normal" id="section-13.2.2-2.6.2.1">Validate the LeafNode as specified in <a href="#leaf-node-validation" class="xref">Section 8.1.1</a>.  The
+<code>leaf_node_source</code> field MUST be set to <code>commit</code>.<a href="#section-13.2.2-2.6.2.1" class="pilcrow">¶</a>
 </li>
-                <li class="normal" id="section-13.2.2-2.6.2.2">Apply the UpdatePath to the tree, as described in
-<a href="#synchronizing-views-of-the-tree" class="xref">Section 8.4</a>, and store <code>leaf_key_package</code> at the
-Committer's leaf.<a href="#section-13.2.2-2.6.2.2" class="pilcrow">¶</a>
+                <li class="normal" id="section-13.2.2-2.6.2.2">Verify that the <code>public_key</code> value in the LeafNode is different from the
+committer's current leaf node.<a href="#section-13.2.2-2.6.2.2" class="pilcrow">¶</a>
 </li>
-                <li class="normal" id="section-13.2.2-2.6.2.3">Verify that the LeafNode has a <code>parent_hash</code> field and that its value
-matches the new parent of the sender's leaf node.<a href="#section-13.2.2-2.6.2.3" class="pilcrow">¶</a>
+                <li class="normal" id="section-13.2.2-2.6.2.3">Apply the UpdatePath to the tree, as described in
+<a href="#synchronizing-views-of-the-tree" class="xref">Section 8.4</a>, and store <code>leaf_node</code> at the
+committer's leaf.<a href="#section-13.2.2-2.6.2.3" class="pilcrow">¶</a>
 </li>
-                <li class="normal" id="section-13.2.2-2.6.2.4">Define <code>commit_secret</code> as the value <code>path_secret[n+1]</code> derived from the
-<code>path_secret[n]</code> value assigned to the root node.<a href="#section-13.2.2-2.6.2.4" class="pilcrow">¶</a>
+                <li class="normal" id="section-13.2.2-2.6.2.4">Verify that the LeafNode has a <code>parent_hash</code> field and that its value
+matches the new parent of the sender's leaf node.<a href="#section-13.2.2-2.6.2.4" class="pilcrow">¶</a>
+</li>
+                <li class="normal" id="section-13.2.2-2.6.2.5">Define <code>commit_secret</code> as the value <code>path_secret[n+1]</code> derived from the
+<code>path_secret[n]</code> value assigned to the root node.<a href="#section-13.2.2-2.6.2.5" class="pilcrow">¶</a>
 </li>
               </ul>
 </li>
@@ -5768,7 +5759,7 @@ application for the removed participant.<a href="#section-13.2.3.1-12.3.2.2" cla
 </li>
               <li class="normal" id="section-13.2.3.1-12.4">External Commits MUST be signed by the new member.  In particular, the
 signature on the enclosing MLSPlaintext MUST verify using the public key for
-the credential in the <code>leaf_key_package</code> of the <code>path</code> field.<a href="#section-13.2.3.1-12.4" class="pilcrow">¶</a>
+the credential in the <code>leaf_node</code> of the <code>path</code> field.<a href="#section-13.2.3.1-12.4" class="pilcrow">¶</a>
 </li>
               <li class="normal" id="section-13.2.3.1-12.5">When processing a Commit, both existing and new members MUST use the external
 init secret as described in <a href="#external-initialization" class="xref">Section 9.3</a>.<a href="#section-13.2.3.1-12.5" class="pilcrow">¶</a>
