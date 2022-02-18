@@ -1477,7 +1477,7 @@ Table of Contents
        SenderType sender_type;
        switch (sender_type) {
            case member:        LeafNodeRef member;
-           case preconfigured: opaque external_key_id<V>;
+           case preconfigured: opaque sender_id<V>;
            case new_member:    struct{};
        }
    } Sender;

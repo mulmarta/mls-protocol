@@ -2951,7 +2951,7 @@ struct {
     SenderType sender_type;
     switch (sender_type) {
         case member:        LeafNodeRef member;
-        case preconfigured: opaque external_key_id&lt;V&gt;;
+        case preconfigured: opaque sender_id&lt;V&gt;;
         case new_member:    struct{};
     }
 } Sender;
@@ -3503,7 +3503,7 @@ equivalent to using the key pair of the removed node.<a href="#section-8.2-3" cl
 </li>
           <li class="normal" id="section-8.2-4.3">
             <p id="section-8.2-4.3.1">Generate a sequence of path secrets, one for each node on the leaf's filtered direct
-path, as follows. In this setting, <code>path_secret[0]</code> refers to the first parent node 
+path, as follows. In this setting, <code>path_secret[0]</code> refers to the first parent node
 in the filtered direct path, <code>path_secret[1]</code> to the second parent node, and so on.<a href="#section-8.2-4.3.1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.2-4.3.2">
 <pre>
