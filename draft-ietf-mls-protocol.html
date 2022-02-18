@@ -3268,7 +3268,7 @@ member of the group.<a href="#section-7.3.2-9" class="pilcrow">¶</a></p>
 <a href="#section-8" class="section-number selfRef">8. </a><a href="#name-ratchet-tree-operations" class="section-name selfRef">Ratchet Tree Operations</a>
       </h2>
 <p id="section-8-1">The ratchet tree for an epoch describes the membership of a group in that epoch,
-providing public-key encryption keys that can be used to encrypt to subsets of
+providing public-key encryption (HPKE) keys that can be used to encrypt to subsets of
 the group as well as information to authenticate the members.  In order to
 reflect changes to the membership of the group from one epoch to the next,
 corresponding changes are made to the ratchet tree.  In this section, we
@@ -3479,44 +3479,46 @@ Commit):<a href="#section-8.1.1-4.6.1" class="pilcrow">¶</a></p>
         <h3 id="name-ratchet-tree-evolution">
 <a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-ratchet-tree-evolution" class="section-name selfRef">Ratchet Tree Evolution</a>
         </h3>
-<p id="section-8.2-1">A member of an MLS group advances the key schedule to provide forward secrecy
-and post-compromise security by providing the group with fresh key material to
-be added into the group's shared secret.
-To do so, one member of the group generates fresh key
-material, applies it to their local tree state, and then sends this key material
-to other members in the group via an UpdatePath message (see <a href="#update-paths" class="xref">Section 8.7</a>) .
-All other group members then apply the key material in the UpdatePath to their
-own local tree state to derive the group's now-updated shared secret.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
-<p id="section-8.2-2">To begin, the generator of the UpdatePath updates its leaf node and its
-direct path to the root with new secret values.  The HPKE leaf public key within
-the KeyPackage MUST be derived from a freshly generated HPKE secret key to
-provide post-compromise security.<a href="#section-8.2-2" class="pilcrow">¶</a></p>
-<p id="section-8.2-3">The generator of the UpdatePath starts by sampling a fresh random value called
-"leaf_secret", and uses the leaf_secret to generate their leaf HPKE key pair
-(see <a href="#key-packages" class="xref">Section 11</a>) and to seed a sequence of "path secrets", one for each
-ancestor of its leaf. In this setting,
-path_secret[0] refers to the leaf's parent,
-path_secret[1] to the parent's parent, and so on. At each step, the path
-secret is used to derive a new secret value for the corresponding
-node, from which the node's key pair is derived.<a href="#section-8.2-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-8.2-4">
+<p id="section-8.2-1">In order to provide forward secrecy and post-compromise security, whenever a
+member initiates an epoch change (i.e., commits; see <a href="#commit" class="xref">Section 13.2</a>), they refresh
+all HPKE key pairs in the ratchet tree for which they know the secret keys.
+More precisely, they refresh the key pairs of their leaf and of all nodes on
+their leaf's direct path.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
+<p id="section-8.2-2">The member initiating the epoch change generates the fresh key pairs using the
+following procedure. The procedure is designed in a way that allows group members to
+efficiently communicate the fresh secret keys to other group members, as
+described in <a href="#update-paths" class="xref">Section 8.7</a>.<a href="#section-8.2-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-8.2-3.1">Generate a fresh HPKE key pair for the leaf.<a href="#section-8.2-3.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-8.2-3.2">
+            <p id="section-8.2-3.2.1">Generate a sequence of path secrets, one for each node on the leaf's direct
+path as follows. In this context, <code>path_secret[0]</code> is generated for the
+leaf's parent, <code>path_secret[1]</code> is generated for the leaf's grandparent, etc.<a href="#section-8.2-3.2.1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.2-3.2.2">
 <pre>
-leaf_node_secret = DeriveSecret(leaf_secret, "node")
-path_secret[0] = DeriveSecret(leaf_secret, "path")
-
+path_secret[0] is sampled at random
 path_secret[n] = DeriveSecret(path_secret[n-1], "path")
-node_secret[n] = DeriveSecret(path_secret[n], "node")
-
-leaf_priv, leaf_pub = KEM.DeriveKeyPair(leaf_node_secret)
-node_priv[n], node_pub[n] = KEM.DeriveKeyPair(node_secret[n])
-</pre><a href="#section-8.2-4" class="pilcrow">¶</a>
+</pre><a href="#section-8.2-3.2.2" class="pilcrow">¶</a>
 </div>
-<p id="section-8.2-5">The node secret is derived as a temporary intermediate secret so that each
+</li>
+          <li class="normal" id="section-8.2-3.3">
+            <p id="section-8.2-3.3.1">Compute the sequence of HPKE key pairs <code>(node_priv,node_pub)</code>, one for each
+node on the leaf's direct path, as follows.<a href="#section-8.2-3.3.1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.2-3.3.2">
+<pre>
+node_secret[n] = DeriveSecret(path_secret[n], "node")
+node_priv[n], node_pub[n] = KEM.DeriveKeyPair(node_secret[n])
+</pre><a href="#section-8.2-3.3.2" class="pilcrow">¶</a>
+</div>
+</li>
+        </ul>
+<p id="section-8.2-4">The node secret is derived as a temporary intermediate secret so that each
 secret is only used with one algorithm: The path secret is used as an input to
-DeriveSecret and the node secret is used as an input to DeriveKeyPair.<a href="#section-8.2-5" class="pilcrow">¶</a></p>
-<p id="section-8.2-6">For example, suppose there is a group with four members, with C an unmerged leaf
-at node 5:<a href="#section-8.2-6" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-8.2-7">
+DeriveSecret and the node secret is used as an input to DeriveKeyPair.<a href="#section-8.2-4" class="pilcrow">¶</a></p>
+<p id="section-8.2-5">For example, suppose there is a group with four members, with C an unmerged leaf
+at node 5:<a href="#section-8.2-5" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.2-6">
 <pre>
       Y
     __|__
@@ -3526,12 +3528,12 @@ at node 5:<a href="#section-8.2-6" class="pilcrow">¶</a></p>
 A   B   C   D
 
 0 1 2 3 4 5 6
-</pre><a href="#section-8.2-7" class="pilcrow">¶</a>
+</pre><a href="#section-8.2-6" class="pilcrow">¶</a>
 </div>
-<p id="section-8.2-8">If member B subsequently generates an UpdatePath based on a secret
+<p id="section-8.2-7">If member B subsequently generates an UpdatePath based on a secret
 "leaf_secret", then it would generate the following sequence
-of path secrets:<a href="#section-8.2-8" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-8.2-9">
+of path secrets:<a href="#section-8.2-7" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.2-8">
 <pre>
 path_secret[1] --&gt; node_secret[1] --&gt; node_priv[1], node_pub[1]
      ^
@@ -3541,12 +3543,12 @@ path_secret[0] --&gt; node_secret[0] --&gt; node_priv[0], node_pub[0]
      |
 leaf_secret    --&gt; leaf_node_secret --&gt; leaf_priv, leaf_pub
                                      ~&gt; leaf_key_package
-</pre><a href="#section-8.2-9" class="pilcrow">¶</a>
+</pre><a href="#section-8.2-8" class="pilcrow">¶</a>
 </div>
-<p id="section-8.2-10">After applying the UpdatePath, the tree will have the following structure, where
+<p id="section-8.2-9">After applying the UpdatePath, the tree will have the following structure, where
 <code>lp</code> and <code>np[i]</code> represent the leaf_priv and node_priv values generated as
-described above:<a href="#section-8.2-10" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-8.2-11">
+described above:<a href="#section-8.2-9" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.2-10">
 <pre>
     np[1] -&gt; Y'
            __|__
@@ -3559,10 +3561,8 @@ np[0] -&gt; X'      Z[C]
            lp
 
        0 1 2 3 4 5 6
-</pre><a href="#section-8.2-11" class="pilcrow">¶</a>
+</pre><a href="#section-8.2-10" class="pilcrow">¶</a>
 </div>
-<p id="section-8.2-12">After performing these operations, the generator of the UpdatePath MUST
-delete the leaf_secret.<a href="#section-8.2-12" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="adding-and-removing-leaves">
@@ -5323,40 +5323,70 @@ a Commit resets the sender's leaf and the nodes along its direct path, and
 provides forward secrecy and post-compromise security with regard to the sender
 of the Commit.  An Update proposal can be regarded as a "lazy" version of this
 operation, where only the leaf changes and intermediate nodes are blanked out.<a href="#section-13.2-8" class="pilcrow">¶</a></p>
-<p id="section-13.2-9">The <code>path</code> field of a Commit message MUST be populated if the Commit covers at
-least one Update or Remove proposal. The <code>path</code> field MUST also be populated
-if the Commit covers no proposals at all (i.e., if the proposals vector
-is empty). The <code>path</code> field MAY be omitted if the Commit covers only Add
-proposals.  In pseudocode, the logic for validating a Commit is as follows:<a href="#section-13.2-9" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-13.2-10">
+<p id="section-13.2-9">By default, the <code>path</code> field of a Commit MUST be populated.  The <code>path</code> field
+MAY be omitted if (a) it covers at least one proposal and (b) none proposals
+covered by the Commit are of "path required" types.  A proposal type requires a
+path if it cannot change the group membership in a way that requires the forward
+secrecy and post-compromise security guarantees that an UpdatePath provides.
+The only proposal types defined in this document that do not require a path are:<a href="#section-13.2-9" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-13.2-10.1">
+            <code>add</code><a href="#section-13.2-10.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-13.2-10.2">
+            <code>psk</code><a href="#section-13.2-10.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-13.2-10.3">
+            <code>app_ack</code><a href="#section-13.2-10.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-13.2-10.4">
+            <code>reinit</code><a href="#section-13.2-10.4" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-13.2-11">New proposal types MUST state whether they require a path. If any instance of a
+proposal type requires a path, then the proposal type requires a path. This
+attribute of a proposal type is reflected in the "Path Required" field of the
+proposal type registry defined in <a href="#mls-proposal-types" class="xref">Section 18.3</a>.<a href="#section-13.2-11" class="pilcrow">¶</a></p>
+<p id="section-13.2-12">Update and Remove proposals are the clearest examples of proposals that require
+a path.  An UpdatePath is required to evict the removed member or the old
+appearance of the updated member.<a href="#section-13.2-12" class="pilcrow">¶</a></p>
+<p id="section-13.2-13">In pseudocode, the logic for validating the <code>path</code> field of a Commit is as
+follows:<a href="#section-13.2-13" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-13.2-14">
 <pre>
-hasUpdates = false
-hasRemoves = false
+pathRequiredTypes = [
+    update,
+    remove,
+    external_init,
+    group_context_extensions
+]
+
+pathRequired = false
 
 for i, id in commit.proposals:
     proposal = proposalCache[id]
     assert(proposal != null)
 
-    hasUpdates = hasUpdates || proposal.msg_type == update
-    hasRemoves = hasRemoves || proposal.msg_type == remove
+    pathRequired = pathRequired ||
+                   (proposal.msg_type in pathRequiredTypes)
 
-if len(commit.proposals) == 0 || hasUpdates || hasRemoves:
-  assert(commit.path != null)
-</pre><a href="#section-13.2-10" class="pilcrow">¶</a>
+if len(commit.proposals) == 0 || pathRequired:
+    assert(commit.path != null)
+</pre><a href="#section-13.2-14" class="pilcrow">¶</a>
 </div>
-<p id="section-13.2-11">To summarize, a Commit can have three different configurations, with different
-uses:<a href="#section-13.2-11" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-13.2-12">
-<li id="section-13.2-12.1">An "empty" Commit that references no proposals, which updates the committer's
-contribution to the group and provides PCS with regard to the committer.<a href="#section-13.2-12.1" class="pilcrow">¶</a>
+<p id="section-13.2-15">To summarize, a Commit can have three different configurations, with different
+uses:<a href="#section-13.2-15" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-13.2-16">
+<li id="section-13.2-16.1">An "empty" Commit that references no proposals, which updates the committer's
+contribution to the group and provides PCS with regard to the committer.<a href="#section-13.2-16.1" class="pilcrow">¶</a>
 </li>
-          <li id="section-13.2-12.2">A "partial" Commit that references Add, PreSharedKey, or ReInit proposals but
+          <li id="section-13.2-16.2">A "partial" Commit that references proposals that do not require a path, and
 where the path is empty. Such a commit doesn't provide PCS with regard to the
-committer.<a href="#section-13.2-12.2" class="pilcrow">¶</a>
+committer.<a href="#section-13.2-16.2" class="pilcrow">¶</a>
 </li>
-          <li id="section-13.2-12.3">A "full" Commit that references proposals of any type, which provides FS with
+          <li id="section-13.2-16.3">A "full" Commit that references proposals of any type, which provides FS with
 regard to any removed members and PCS for the committer and any updated
-members.<a href="#section-13.2-12.3" class="pilcrow">¶</a>
+members.<a href="#section-13.2-16.3" class="pilcrow">¶</a>
 </li>
         </ol>
 <div id="creating-a-commit">
@@ -6833,6 +6863,7 @@ is REQUIRED for a Y-&gt;N transition.<a href="#section-18.3-3.3" class="pilcrow"
               <th class="text-left" rowspan="1" colspan="1">Value</th>
               <th class="text-left" rowspan="1" colspan="1">Name</th>
               <th class="text-left" rowspan="1" colspan="1">Recommended</th>
+              <th class="text-left" rowspan="1" colspan="1">Path Required</th>
               <th class="text-left" rowspan="1" colspan="1">Reference</th>
             </tr>
           </thead>
@@ -6841,17 +6872,20 @@ is REQUIRED for a Y-&gt;N transition.<a href="#section-18.3-3.3" class="pilcrow"
               <td class="text-left" rowspan="1" colspan="1">0x0000</td>
               <td class="text-left" rowspan="1" colspan="1">RESERVED</td>
               <td class="text-left" rowspan="1" colspan="1">N/A</td>
+              <td class="text-left" rowspan="1" colspan="1">N/A</td>
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">0x0001</td>
               <td class="text-left" rowspan="1" colspan="1">add</td>
               <td class="text-left" rowspan="1" colspan="1">Y</td>
+              <td class="text-left" rowspan="1" colspan="1">N</td>
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">0x0002</td>
               <td class="text-left" rowspan="1" colspan="1">update</td>
+              <td class="text-left" rowspan="1" colspan="1">Y</td>
               <td class="text-left" rowspan="1" colspan="1">Y</td>
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>
@@ -6859,23 +6893,27 @@ is REQUIRED for a Y-&gt;N transition.<a href="#section-18.3-3.3" class="pilcrow"
               <td class="text-left" rowspan="1" colspan="1">0x0003</td>
               <td class="text-left" rowspan="1" colspan="1">remove</td>
               <td class="text-left" rowspan="1" colspan="1">Y</td>
+              <td class="text-left" rowspan="1" colspan="1">Y</td>
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">0x0004</td>
               <td class="text-left" rowspan="1" colspan="1">psk</td>
               <td class="text-left" rowspan="1" colspan="1">Y</td>
+              <td class="text-left" rowspan="1" colspan="1">N</td>
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">0x0005</td>
               <td class="text-left" rowspan="1" colspan="1">reinit</td>
               <td class="text-left" rowspan="1" colspan="1">Y</td>
+              <td class="text-left" rowspan="1" colspan="1">N</td>
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">0x0006</td>
               <td class="text-left" rowspan="1" colspan="1">external_init</td>
+              <td class="text-left" rowspan="1" colspan="1">Y</td>
               <td class="text-left" rowspan="1" colspan="1">Y</td>
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>
@@ -6883,17 +6921,20 @@ is REQUIRED for a Y-&gt;N transition.<a href="#section-18.3-3.3" class="pilcrow"
               <td class="text-left" rowspan="1" colspan="1">0x0007</td>
               <td class="text-left" rowspan="1" colspan="1">app_ack</td>
               <td class="text-left" rowspan="1" colspan="1">Y</td>
+              <td class="text-left" rowspan="1" colspan="1">N</td>
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">0x0008</td>
               <td class="text-left" rowspan="1" colspan="1">group_context_extensions</td>
               <td class="text-left" rowspan="1" colspan="1">Y</td>
+              <td class="text-left" rowspan="1" colspan="1">Y</td>
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">0xff00  - 0xffff</td>
               <td class="text-left" rowspan="1" colspan="1">Reserved for Private Use</td>
+              <td class="text-left" rowspan="1" colspan="1">N/A</td>
               <td class="text-left" rowspan="1" colspan="1">N/A</td>
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>

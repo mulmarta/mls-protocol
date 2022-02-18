@@ -1760,8 +1760,8 @@ struct {
 8.  Ratchet Tree Operations
 
    The ratchet tree for an epoch describes the membership of a group in
-   that epoch, providing public-key encryption keys that can be used to
-   encrypt to subsets of the group as well as information to
+   that epoch, providing public-key encryption (HPKE) keys that can be
+   used to encrypt to subsets of the group as well as information to
    authenticate the members.  In order to reflect changes to the
    membership of the group from one epoch to the next, corresponding
    changes are made to the ratchet tree.  In this section, we describe
@@ -1965,38 +1965,33 @@ struct {
 
 8.2.  Ratchet Tree Evolution
 
-   A member of an MLS group advances the key schedule to provide forward
-   secrecy and post-compromise security by providing the group with
-   fresh key material to be added into the group's shared secret.  To do
-   so, one member of the group generates fresh key material, applies it
-   to their local tree state, and then sends this key material to other
-   members in the group via an UpdatePath message (see Section 8.7) .
-   All other group members then apply the key material in the UpdatePath
-   to their own local tree state to derive the group's now-updated
-   shared secret.
+   In order to provide forward secrecy and post-compromise security,
+   whenever a member initiates an epoch change (i.e., commits; see
+   Section 13.2), they refresh all HPKE key pairs in the ratchet tree
+   for which they know the secret keys.  More precisely, they refresh
+   the key pairs of their leaf and of all nodes on their leaf's direct
+   path.
 
-   To begin, the generator of the UpdatePath updates its leaf node and
-   its direct path to the root with new secret values.  The HPKE leaf
-   public key within the KeyPackage MUST be derived from a freshly
-   generated HPKE secret key to provide post-compromise security.
+   The member initiating the epoch change generates the fresh key pairs
+   using the following procedure.  The procedure is designed in a way
+   that allows group members to efficiently communicate the fresh secret
+   keys to other group members, as described in Section 8.7.
 
-   The generator of the UpdatePath starts by sampling a fresh random
-   value called "leaf_secret", and uses the leaf_secret to generate
-   their leaf HPKE key pair (see Section 11) and to seed a sequence of
-   "path secrets", one for each ancestor of its leaf.  In this setting,
-   path_secret[0] refers to the leaf's parent, path_secret[1] to the
-   parent's parent, and so on.  At each step, the path secret is used to
-   derive a new secret value for the corresponding node, from which the
-   node's key pair is derived.
+   *  Generate a fresh HPKE key pair for the leaf.
 
-   leaf_node_secret = DeriveSecret(leaf_secret, "node")
-   path_secret[0] = DeriveSecret(leaf_secret, "path")
+   *  Generate a sequence of path secrets, one for each node on the
+      leaf's direct path as follows.  In this context, path_secret[0] is
+      generated for the leaf's parent, path_secret[1] is generated for
+      the leaf's grandparent, etc.
 
-   path_secret[n] = DeriveSecret(path_secret[n-1], "path")
-   node_secret[n] = DeriveSecret(path_secret[n], "node")
+      path_secret[0] is sampled at random
+      path_secret[n] = DeriveSecret(path_secret[n-1], "path")
 
-   leaf_priv, leaf_pub = KEM.DeriveKeyPair(leaf_node_secret)
-   node_priv[n], node_pub[n] = KEM.DeriveKeyPair(node_secret[n])
+   *  Compute the sequence of HPKE key pairs (node_priv,node_pub), one
+      for each node on the leaf's direct path, as follows.
+
+      node_secret[n] = DeriveSecret(path_secret[n], "node")
+      node_priv[n], node_pub[n] = KEM.DeriveKeyPair(node_secret[n])
 
    The node secret is derived as a temporary intermediate secret so that
    each secret is only used with one algorithm: The path secret is used
@@ -2043,9 +2038,6 @@ struct {
               lp
 
           0 1 2 3 4 5 6
-
-   After performing these operations, the generator of the UpdatePath
-   MUST delete the leaf_secret.
 
 8.3.  Adding and Removing Leaves
 
@@ -3612,25 +3604,54 @@ struct {
    "lazy" version of this operation, where only the leaf changes and
    intermediate nodes are blanked out.
 
-   The path field of a Commit message MUST be populated if the Commit
-   covers at least one Update or Remove proposal.  The path field MUST
-   also be populated if the Commit covers no proposals at all (i.e., if
-   the proposals vector is empty).  The path field MAY be omitted if the
-   Commit covers only Add proposals.  In pseudocode, the logic for
-   validating a Commit is as follows:
+   By default, the path field of a Commit MUST be populated.  The path
+   field MAY be omitted if (a) it covers at least one proposal and (b)
+   none proposals covered by the Commit are of "path required" types.  A
+   proposal type requires a path if it cannot change the group
+   membership in a way that requires the forward secrecy and post-
+   compromise security guarantees that an UpdatePath provides.  The only
+   proposal types defined in this document that do not require a path
+   are:
 
-   hasUpdates = false
-   hasRemoves = false
+   *  add
+
+   *  psk
+
+   *  app_ack
+
+   *  reinit
+
+   New proposal types MUST state whether they require a path.  If any
+   instance of a proposal type requires a path, then the proposal type
+   requires a path.  This attribute of a proposal type is reflected in
+   the "Path Required" field of the proposal type registry defined in
+   Section 18.3.
+
+   Update and Remove proposals are the clearest examples of proposals
+   that require a path.  An UpdatePath is required to evict the removed
+   member or the old appearance of the updated member.
+
+   In pseudocode, the logic for validating the path field of a Commit is
+   as follows:
+
+   pathRequiredTypes = [
+       update,
+       remove,
+       external_init,
+       group_context_extensions
+   ]
+
+   pathRequired = false
 
    for i, id in commit.proposals:
        proposal = proposalCache[id]
        assert(proposal != null)
 
-       hasUpdates = hasUpdates || proposal.msg_type == update
-       hasRemoves = hasRemoves || proposal.msg_type == remove
+       pathRequired = pathRequired ||
+                      (proposal.msg_type in pathRequiredTypes)
 
-   if len(commit.proposals) == 0 || hasUpdates || hasRemoves:
-     assert(commit.path != null)
+   if len(commit.proposals) == 0 || pathRequired:
+       assert(commit.path != null)
 
    To summarize, a Commit can have three different configurations, with
    different uses:
@@ -3639,8 +3660,8 @@ struct {
        committer's contribution to the group and provides PCS with
        regard to the committer.
 
-   2.  A "partial" Commit that references Add, PreSharedKey, or ReInit
-       proposals but where the path is empty.  Such a commit doesn't
+   2.  A "partial" Commit that references proposals that do not require
+       a path, and where the path is empty.  Such a commit doesn't
        provide PCS with regard to the committer.
 
    3.  A "full" Commit that references proposals of any type, which
@@ -4925,30 +4946,32 @@ struct {
 
    Initial contents:
 
-     +==========+==========================+=============+===========+
-     | Value    | Name                     | Recommended | Reference |
-     +==========+==========================+=============+===========+
-     | 0x0000   | RESERVED                 | N/A         | RFC XXXX  |
-     +----------+--------------------------+-------------+-----------+
-     | 0x0001   | add                      | Y           | RFC XXXX  |
-     +----------+--------------------------+-------------+-----------+
-     | 0x0002   | update                   | Y           | RFC XXXX  |
-     +----------+--------------------------+-------------+-----------+
-     | 0x0003   | remove                   | Y           | RFC XXXX  |
-     +----------+--------------------------+-------------+-----------+
-     | 0x0004   | psk                      | Y           | RFC XXXX  |
-     +----------+--------------------------+-------------+-----------+
-     | 0x0005   | reinit                   | Y           | RFC XXXX  |
-     +----------+--------------------------+-------------+-----------+
-     | 0x0006   | external_init            | Y           | RFC XXXX  |
-     +----------+--------------------------+-------------+-----------+
-     | 0x0007   | app_ack                  | Y           | RFC XXXX  |
-     +----------+--------------------------+-------------+-----------+
-     | 0x0008   | group_context_extensions | Y           | RFC XXXX  |
-     +----------+--------------------------+-------------+-----------+
-     | 0xff00 - | Reserved for Private Use | N/A         | RFC XXXX  |
-     | 0xffff   |                          |             |           |
-     +----------+--------------------------+-------------+-----------+
+   +======+==========================+=============+========+==========+
+   |Value | Name                     | Recommended |Path    |Reference |
+   |      |                          |             |Required|          |
+   +======+==========================+=============+========+==========+
+   |0x0000| RESERVED                 | N/A         |N/A     |RFC XXXX  |
+   +------+--------------------------+-------------+--------+----------+
+   |0x0001| add                      | Y           |N       |RFC XXXX  |
+   +------+--------------------------+-------------+--------+----------+
+   |0x0002| update                   | Y           |Y       |RFC XXXX  |
+   +------+--------------------------+-------------+--------+----------+
+   |0x0003| remove                   | Y           |Y       |RFC XXXX  |
+   +------+--------------------------+-------------+--------+----------+
+   |0x0004| psk                      | Y           |N       |RFC XXXX  |
+   +------+--------------------------+-------------+--------+----------+
+   |0x0005| reinit                   | Y           |N       |RFC XXXX  |
+   +------+--------------------------+-------------+--------+----------+
+   |0x0006| external_init            | Y           |Y       |RFC XXXX  |
+   +------+--------------------------+-------------+--------+----------+
+   |0x0007| app_ack                  | Y           |N       |RFC XXXX  |
+   +------+--------------------------+-------------+--------+----------+
+   |0x0008| group_context_extensions | Y           |Y       |RFC XXXX  |
+   +------+--------------------------+-------------+--------+----------+
+   |0xff00| Reserved for Private Use | N/A         |N/A     |RFC XXXX  |
+   |-     |                          |             |        |          |
+   |0xffff|                          |             |        |          |
+   +------+--------------------------+-------------+--------+----------+
 
                                   Table 8
 
