@@ -23,11 +23,11 @@ protocol that provides efficient asynchronous group key establishment
 with forward secrecy and post-compromise security for groups
 in size ranging from two to thousands. 
     " name="description">
-<meta content="xml2rfc 3.12.1" name="generator">
+<meta content="xml2rfc 3.12.2" name="generator">
 <meta content="Internet-Draft" name="keyword">
 <meta content="draft-ietf-mls-protocol-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.12.1
+  xml2rfc 3.12.2
     Python 3.9.7
     appdirs 1.4.4
     ConfigArgParse 1.3
@@ -1030,7 +1030,7 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 19 August 2022</td>
+<td class="center">Expires 22 August 2022</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1043,12 +1043,12 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 <dd class="internet-draft">draft-ietf-mls-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2022-02-15" class="published">15 February 2022</time>
+<time datetime="2022-02-18" class="published">18 February 2022</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2022-08-19">19 August 2022</time></dd>
+<dd class="expires"><time datetime="2022-08-22">22 August 2022</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1118,7 +1118,7 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 19 August 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 22 August 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1156,7 +1156,20 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
-            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="xref">2</a>.  <a href="#name-terminology" class="xref">Terminology</a></p>
+            <p id="section-toc.1-1.2.1"><a href="#section-2" class="xref">2</a>.  <a href="#name-terminology" class="xref">Terminology</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1">
+                <p id="section-toc.1-1.2.2.1.1"><a href="#section-2.1" class="xref">2.1</a>.  <a href="#name-presentation-langauge" class="xref">Presentation Langauge</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1.2.1">
+                    <p id="section-toc.1-1.2.2.1.2.1.1" class="keepWithNext"><a href="#section-2.1.1" class="xref">2.1.1</a>.  <a href="#name-optional-value" class="xref">Optional Value</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1.2.2">
+                    <p id="section-toc.1-1.2.2.1.2.2.1"><a href="#section-2.1.2" class="xref">2.1.2</a>.  <a href="#name-variable-size-vector-header" class="xref">Variable-size Vector Headers</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
             <p id="section-toc.1-1.3.1"><a href="#section-3" class="xref">3</a>.  <a href="#name-operating-context" class="xref">Operating Context</a></p>
@@ -1875,8 +1888,150 @@ Application Message:  </dt>
 </dl>
 <p id="section-2-3">Terminology specific to tree computations is described in
 <a href="#ratchet-tree-terminology" class="xref">Section 5.1</a>.<a href="#section-2-3" class="pilcrow">¶</a></p>
-<p id="section-2-4">We use the TLS presentation language <span>[<a href="#RFC8446" class="xref">RFC8446</a>]</span> to
-describe the structure of protocol messages.<a href="#section-2-4" class="pilcrow">¶</a></p>
+<div id="presentation-langauge">
+<section id="section-2.1">
+        <h3 id="name-presentation-langauge">
+<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-presentation-langauge" class="section-name selfRef">Presentation Langauge</a>
+        </h3>
+<p id="section-2.1-1">We use the TLS presentation language <span>[<a href="#RFC8446" class="xref">RFC8446</a>]</span> to describe the structure of
+protocol messages.  In addition to the base syntax, we add two additional
+features, the ability for fields to be optional and the ability for vectors to
+have variable-size length headers.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+<div id="optional-value">
+<section id="section-2.1.1">
+          <h4 id="name-optional-value">
+<a href="#section-2.1.1" class="section-number selfRef">2.1.1. </a><a href="#name-optional-value" class="section-name selfRef">Optional Value</a>
+          </h4>
+<p id="section-2.1.1-1">An optional value is encoded with a presence-signaling octet, followed by the
+value itself if present.  When decoding, a presence octet with a value other
+than 0 or 1 MUST be rejected as malformed.<a href="#section-2.1.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-2.1.1-2">
+<pre>
+struct {
+    uint8 present;
+    select (present) {
+        case 0: struct{};
+        case 1: T value;
+    }
+} optional&lt;T&gt;;
+</pre><a href="#section-2.1.1-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="variable-size-vector-headers">
+<section id="section-2.1.2">
+          <h4 id="name-variable-size-vector-header">
+<a href="#section-2.1.2" class="section-number selfRef">2.1.2. </a><a href="#name-variable-size-vector-header" class="section-name selfRef">Variable-size Vector Headers</a>
+          </h4>
+<p id="section-2.1.2-1">In the TLS presentation language, vectors are encoded as a sequence of encoded
+elements prefixed with a length.  The length field has a fixed size set by
+specifying the minimum and maximum lengths of the encoded sequence of elements.<a href="#section-2.1.2-1" class="pilcrow">¶</a></p>
+<p id="section-2.1.2-2">In MLS, there are several vectors whose sizes vary over significant ranges.  So
+instead of using a fixed-size length field, we use a variable-size length using
+a variable-length integer encoding based on the one in Section 16 of
+<span>[<a href="#RFC9000" class="xref">RFC9000</a>]</span>. (They differ only in that the one here requires a minimum-size
+encoding.) Instead of presenting min and max values, the vector description
+simply includes a <code>V</code>. For example:<a href="#section-2.1.2-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-2.1.2-3">
+<pre>
+struct {
+    uint32 fixed&lt;0..255&gt;;
+    opaque variable&lt;V&gt;;
+} StructWithVectors;
+</pre><a href="#section-2.1.2-3" class="pilcrow">¶</a>
+</div>
+<p id="section-2.1.2-4">Such a vector can represent values with length from 0 bytes to 2^62 bytes.
+The variable-length integer encoding reserves the two most significant bits
+of the first byte to encode the base 2 logarithm of the integer encoding length
+in bytes.  The integer value is encoded on the remaining bits, in network byte
+order.  The encoded value MUST use the smallest number of bits required to
+represent the value.  When decoding, values using more bits than necessary MUST
+be treated as malformed.<a href="#section-2.1.2-4" class="pilcrow">¶</a></p>
+<p id="section-2.1.2-5">This means that integers are encoded on 1, 2, 4, or 8 bytes and can encode 6-,
+14-, 30-, or 62-bit values respectively.<a href="#section-2.1.2-5" class="pilcrow">¶</a></p>
+<span id="name-summary-of-integer-encoding"></span><div id="integer-summary">
+<table class="center" id="table-1">
+            <caption>
+<a href="#table-1" class="selfRef">Table 1</a>:
+<a href="#name-summary-of-integer-encoding" class="selfRef">Summary of Integer Encodings</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">Prefix</th>
+                <th class="text-left" rowspan="1" colspan="1">Length</th>
+                <th class="text-left" rowspan="1" colspan="1">Usable Bits</th>
+                <th class="text-left" rowspan="1" colspan="1">Min</th>
+                <th class="text-left" rowspan="1" colspan="1">Max</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">00</td>
+                <td class="text-left" rowspan="1" colspan="1">1</td>
+                <td class="text-left" rowspan="1" colspan="1">6</td>
+                <td class="text-left" rowspan="1" colspan="1">0</td>
+                <td class="text-left" rowspan="1" colspan="1">63</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">01</td>
+                <td class="text-left" rowspan="1" colspan="1">2</td>
+                <td class="text-left" rowspan="1" colspan="1">14</td>
+                <td class="text-left" rowspan="1" colspan="1">64</td>
+                <td class="text-left" rowspan="1" colspan="1">16383</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">10</td>
+                <td class="text-left" rowspan="1" colspan="1">4</td>
+                <td class="text-left" rowspan="1" colspan="1">30</td>
+                <td class="text-left" rowspan="1" colspan="1">16384</td>
+                <td class="text-left" rowspan="1" colspan="1">1073741823</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">11</td>
+                <td class="text-left" rowspan="1" colspan="1">8</td>
+                <td class="text-left" rowspan="1" colspan="1">62</td>
+                <td class="text-left" rowspan="1" colspan="1">1073741824</td>
+                <td class="text-left" rowspan="1" colspan="1">4611686018427387903</td>
+              </tr>
+            </tbody>
+          </table>
+</div>
+<p id="section-2.1.2-7">For example, the eight-byte sequence c2 19 7c 5e ff 14 e8 8c (in hexadecimal)
+decodes to the decimal value 151288809941952652; the four byte sequence 9d 7f 3e
+7d decodes to 494878333; the two byte sequence 7b bd decodes to 15293; and the
+single byte 25 decodes to 37 (as does the two byte sequence 40 25).<a href="#section-2.1.2-7" class="pilcrow">¶</a></p>
+<p id="section-2.1.2-8">The following figure adapts the pseudocode provided in <span>[<a href="#RFC9000" class="xref">RFC9000</a>]</span> to add a
+check for minimum-length encoding:<a href="#section-2.1.2-8" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-2.1.2-9">
+<pre>
+ReadVarint(data):
+  // The length of variable-length integers is encoded in the
+  // first two bits of the first byte.
+  v = data.next_byte()
+  prefix = v &gt;&gt; 6
+  length = 1 &lt;&lt; prefix
+
+  // Once the length is known, remove these bits and read any
+  // remaining bytes.
+  v = v &amp; 0x3f
+  repeat length-1 times:
+    v = (v &lt;&lt; 8) + data.next_byte()
+  return v
+
+  // Check that the encoder used the minimum bits required
+  if length &gt; 1 &amp;&amp; v &lt; (1 &lt;&lt; (length - 1)):
+    raise an exception
+</pre><a href="#section-2.1.2-9" class="pilcrow">¶</a>
+</div>
+<p id="section-2.1.2-10">The use of variable-size integers for vector lengths allows vectors to grow
+very large, up to 2^62 bytes.  Implementations should take care not to allow
+vectors to overflow available storage.  To facilitate debugging of potential
+interoperatbility problems, implementations should provide a clear error when
+such an overflow condition occurs.<a href="#section-2.1.2-10" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
 </section>
 </div>
 <div id="operating-context">
@@ -1989,7 +2144,7 @@ subsets of the group.  Each epoch has a distinct ratchet tree. It seeds the
 </li>
           <li class="normal" id="section-4.1-3.2">A <em>key schedule</em> that describes the chain of key derivations used to progress from
 epoch to epoch (mainly using the <em>init_secret</em> and <em>epoch_secret</em>); and to derive
-a variety of other secrets (see <a href="#epoch-derived-secrets" class="xref">Table 2</a>) used during the current
+a variety of other secrets (see <a href="#epoch-derived-secrets" class="xref">Table 3</a>) used during the current
 epoch. One of these (the <em>encryption_secret</em>) is the root of <em>secret_tree</em>.<a href="#section-4.1-3.2" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-4.1-3.3">A <em>secret tree</em> derived from the key schedule that represents shared secrets
@@ -2568,7 +2723,7 @@ protocol (see the Cryptographic Dependencies section of the HPKE specification f
 information).<a href="#section-6.1-4" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-6.1-5">
 <pre>
-opaque HPKEPublicKey&lt;1..2^16-1&gt;;
+opaque HPKEPublicKey&lt;V&gt;;
 </pre><a href="#section-6.1-5" class="pilcrow">¶</a>
 </div>
 <p id="section-6.1-6">The signature algorithm specified in the ciphersuite is the mandatory algorithm
@@ -2589,8 +2744,8 @@ VerifyWithLabel(VerificationKey, Label, Content) =
 Where SignContent is specified as:
 
 struct {
-    opaque label&lt;9..255&gt; = "MLS 1.0 " + Label;
-    opaque content&lt;0..2^32-1&gt; = Content;
+    opaque label&lt;V&gt; = "MLS 1.0 " + Label;
+    opaque content&lt;V&gt; = Content;
 } SignContent;
 </pre><a href="#section-6.1-8" class="pilcrow">¶</a>
 </div>
@@ -2673,14 +2828,14 @@ uint16 SignatureScheme;
 uint16 CredentialType;
 
 struct {
-    opaque identity&lt;0..2^16-1&gt;;
-    opaque extra_data&lt;0..2^16-1&gt;;
+    opaque identity&lt;V&gt;;
+    opaque extra_data&lt;V&gt;;
     SignatureScheme signature_scheme;
-    opaque signature_key&lt;0..2^16-1&gt;;
+    opaque signature_key&lt;V&gt;;
 } BasicCredential;
 
 struct {
-    opaque cert_data&lt;0..2^16-1&gt;;
+    opaque cert_data&lt;V&gt;;
 } Certificate;
 
 struct {
@@ -2696,7 +2851,7 @@ struct {
             BasicCredential;
 
         case x509:
-            Certificate chain&lt;1..2^32-1&gt;;
+            Certificate chain&lt;V&gt;;
 
         case proof:
             ProofCredential;
@@ -2816,7 +2971,7 @@ struct {
     SenderType sender_type;
     switch (sender_type) {
         case member:        LeafNodeRef member;
-        case preconfigured: opaque external_key_id&lt;0..255&gt;;
+        case preconfigured: opaque sender_id&lt;V&gt;;
         case new_member:    struct{};
     }
 } Sender;
@@ -2832,15 +2987,15 @@ enum {
 } WireFormat;
 
 struct {
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     uint64 epoch;
     Sender sender;
-    opaque authenticated_data&lt;0..2^32-1&gt;;
+    opaque authenticated_data&lt;V&gt;;
 
     ContentType content_type;
     select (MLSMessageContent.content_type) {
         case application:
-          opaque application_data&lt;0..2^32-1&gt;;
+          opaque application_data&lt;V&gt;;
 
         case proposal:
           Proposal proposal;
@@ -2889,12 +3044,12 @@ struct MLSMessageContentAuth {
 <div class="alignLeft art-text artwork" id="section-7.1-2">
 <pre>
 struct {
-    opaque mac_value&lt;0..255&gt;;
+    opaque mac_value&lt;V&gt;;
 } MAC;
 
 struct {
     // SignWithLabel(., "MLSMessageContentTBS", MLSMessageContentTBS)
-    opaque signature&lt;0..2^16-1&gt;;
+    opaque signature&lt;V&gt;;
     select (MLSMessageContent.content_type) {
         case commit:
             // MAC(confirmation_key, GroupContext.confirmed_transcript_hash)
@@ -2984,12 +3139,12 @@ MLSMessageAuth is valid.<a href="#section-7.2-5" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.3-2">
 <pre>
 struct {
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     uint64 epoch;
     ContentType content_type;
-    opaque authenticated_data&lt;0..2^32-1&gt;;
-    opaque encrypted_sender_data&lt;0..255&gt;;
-    opaque ciphertext&lt;0..2^32-1&gt;;
+    opaque authenticated_data&lt;V&gt;;
+    opaque encrypted_sender_data&lt;V&gt;;
+    opaque ciphertext&lt;V&gt;;
 } MLSCiphertext;
 </pre><a href="#section-7.3-2" class="pilcrow">¶</a>
 </div>
@@ -3007,7 +3162,7 @@ and MLSCiphertextContent.<a href="#section-7.3-3" class="pilcrow">¶</a></p>
 struct {
     select (MLSCiphertext.content_type) {
         case application:
-          opaque application_data&lt;0..2^32-1&gt;;
+          opaque application_data&lt;V&gt;;
 
         case proposal:
           Proposal proposal;
@@ -3017,7 +3172,7 @@ struct {
     }
 
     MLSMessageAuth auth;
-    opaque padding&lt;0..2^16-1&gt;;
+    opaque padding&lt;V&gt;;
 } MLSCiphertextContent;
 </pre><a href="#section-7.3.1-2" class="pilcrow">¶</a>
 </div>
@@ -3059,10 +3214,10 @@ identify the key and nonce:<a href="#section-7.3.1-7" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.3.1-8">
 <pre>
 struct {
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     uint64 epoch;
     ContentType content_type;
-    opaque authenticated_data&lt;0..2^32-1&gt;;
+    opaque authenticated_data&lt;V&gt;;
 } MLSCiphertextContentAAD;
 </pre><a href="#section-7.3.1-8" class="pilcrow">¶</a>
 </div>
@@ -3112,7 +3267,7 @@ fields of MLSCiphertext excluding <code>encrypted_sender_data</code>:<a href="#s
 <div class="alignLeft art-text artwork" id="section-7.3.2-8">
 <pre>
 struct {
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     uint64 epoch;
     ContentType content_type;
 } MLSSenderDataAAD;
@@ -3133,7 +3288,7 @@ member of the group.<a href="#section-7.3.2-9" class="pilcrow">¶</a></p>
 <a href="#section-8" class="section-number selfRef">8. </a><a href="#name-ratchet-tree-operations" class="section-name selfRef">Ratchet Tree Operations</a>
       </h2>
 <p id="section-8-1">The ratchet tree for an epoch describes the membership of a group in that epoch,
-providing public-key encryption keys that can be used to encrypt to subsets of
+providing public-key encryption (HPKE) keys that can be used to encrypt to subsets of
 the group as well as information to authenticate the members.  In order to
 reflect changes to the membership of the group from one epoch to the next,
 corresponding changes are made to the ratchet tree.  In this section, we
@@ -3150,8 +3305,8 @@ subgroups of the group (for parent nodes).  Parent nodes are simpler:<a href="#s
 <pre>
 struct {
     HPKEPublicKey public_key;
-    opaque parent_hash&lt;0..255&gt;;
-    uint32 unmerged_leaves&lt;0..2^32-1&gt;;
+    opaque parent_hash&lt;V&gt;;
+    uint32 unmerged_leaves&lt;V&gt;;
 } ParentNode;
 </pre><a href="#section-8.1-2" class="pilcrow">¶</a>
 </div>
@@ -3166,17 +3321,17 @@ appearance in the group, signed by that client:<a href="#section-8.1-4" class="p
 <pre>
 enum {
     reserved(0),
-    add(1),
+    key_package(1),
     update(2),
     commit(3),
     (255)
 } LeafNodeSource;
 
 struct {
-    ProtocolVersion versions&lt;0..255&gt;;
-    CipherSuite ciphersuites&lt;0..255&gt;;
-    ExtensionType extensions&lt;0..255&gt;;
-    ProposalType proposals&lt;0..255&gt;;
+    ProtocolVersion versions&lt;V&gt;;
+    CipherSuite ciphersuites&lt;V&gt;;
+    ExtensionType extensions&lt;V&gt;;
+    ProposalType proposals&lt;V&gt;;
 } Capabilities;
 
 struct {
@@ -3198,12 +3353,12 @@ struct {
             struct {}
 
         case commit:
-            opaque parent_hash&lt;0..255&gt;;
+            opaque parent_hash&lt;V&gt;;
     }
 
-    Extension extensions&lt;8..2^32-1&gt;;
+    Extension extensions&lt;V&gt;;
     // SignWithLabel(., "LeafNodeTBS", LeafNodeTBS)
-    opaque signature&lt;0..2^16-1&gt;;
+    opaque signature&lt;V&gt;;
 } LeafNode;
 
 struct {
@@ -3213,27 +3368,27 @@ struct {
 
     LeafNodeSource leaf_node_source;
     select (leaf_node_source) {
-        case add:
+        case key_package:
             Lifetime lifetime;
 
         case update:
             struct{};
 
         case commit:
-            opaque parent_hash&lt;0..255&gt;;
+            opaque parent_hash&lt;V&gt;;
     }
 
-    Extension extensions&lt;8..2^32-1&gt;;
+    Extension extensions&lt;V&gt;;
 
     select (leaf_node_source) {
-        case add:
+        case key_package:
             struct{};
 
         case update:
-            opaque group_id&lt;0..255&gt;;
+            opaque group_id&lt;V&gt;;
 
         case commit:
-            opaque group_id&lt;0..255&gt;;
+            opaque group_id&lt;V&gt;;
     }
 } LeafNodeTBS;
 </pre><a href="#section-8.1-5" class="pilcrow">¶</a>
@@ -3296,11 +3451,10 @@ acceptable relative to the identities attested by the old credential.<a href="#s
             <li class="normal" id="section-8.1.1-4.2">Verify that the signature on the LeafNode is valid using the public key
 in the LeafNode's credential<a href="#section-8.1.1-4.2" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-8.1.1-4.3">Verify that the LeafNode is compatible with the group's parameters.  The
-ciphersuite and protocol version of the KeyPackage must match those in
-use in the group.  If the GroupContext has a <code>required_capabilities</code>
-extension, then the required extensions and proposals MUST be listed in
-the KeyPackage's <code>capabilities</code> extension.<a href="#section-8.1.1-4.3" class="pilcrow">¶</a>
+            <li class="normal" id="section-8.1.1-4.3">Verify that the LeafNode is compatible with the group's parameters.  If the
+GroupContext has a <code>required_capabilities</code> extension, then the required
+extensions and proposals MUST be listed in the LeafNode's <code>capabilities</code>
+field.<a href="#section-8.1.1-4.3" class="pilcrow">¶</a>
 </li>
             <li class="normal" id="section-8.1.1-4.4">
               <p id="section-8.1.1-4.4.1">Verify the <code>lifetime</code> field:<a href="#section-8.1.1-4.4.1" class="pilcrow">¶</a></p>
@@ -3317,8 +3471,8 @@ points in the protocol.<a href="#section-8.1.1-4.4.2.2" class="pilcrow">¶</a>
 </li>
               </ul>
 </li>
-            <li class="normal" id="section-8.1.1-4.5">Verify that the <code>membership</code> field has the appropriate contents for the
-context in which the KeyPackage is being validated (as defined in
+            <li class="normal" id="section-8.1.1-4.5">Verify that the <code>leaf_node_source</code> field has the appropriate value for the
+context in which the LeafNode is being validated (as defined in
 <a href="#ratchet-tree-node-contents" class="xref">Section 8.1</a>).<a href="#section-8.1.1-4.5" class="pilcrow">¶</a>
 </li>
             <li class="normal" id="section-8.1.1-4.6">
@@ -3344,38 +3498,50 @@ Commit):<a href="#section-8.1.1-4.6.1" class="pilcrow">¶</a></p>
         <h3 id="name-ratchet-tree-evolution">
 <a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-ratchet-tree-evolution" class="section-name selfRef">Ratchet Tree Evolution</a>
         </h3>
-<p id="section-8.2-1">A member of an MLS group advances the key schedule to provide forward secrecy
-and post-compromise security by providing the group with fresh key material to
-be added into the group's shared secret.
-To do so, one member of the group generates fresh key
-material, applies it to their local tree state, and then sends this key material
-to other members in the group via an UpdatePath message (see <a href="#update-paths" class="xref">Section 8.7</a>) .
-All other group members then apply the key material in the UpdatePath to their
-own local tree state to derive the group's now-updated shared secret.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
-<p id="section-8.2-2">To begin, the generator of the UpdatePath updates its leaf node and its
-direct path to the root with new secret values.  The HPKE leaf public key within
-the KeyPackage MUST be derived from a freshly generated HPKE secret key to
-provide post-compromise security.<a href="#section-8.2-2" class="pilcrow">¶</a></p>
-<p id="section-8.2-3">The generator of the UpdatePath starts by sampling a fresh random value called
-"leaf_secret", and uses the leaf_secret to generate their leaf HPKE key pair
-(see <a href="#key-packages" class="xref">Section 11</a>) and to seed a sequence of "path secrets", one for each
-ancestor of its leaf. In this setting,
-path_secret[0] refers to the leaf's parent,
-path_secret[1] to the parent's parent, and so on. At each step, the path
-secret is used to derive a new secret value for the corresponding
-node, from which the node's key pair is derived.<a href="#section-8.2-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-8.2-4">
+<p id="section-8.2-1">In order to provide forward secrecy and post-compromise security, whenever a
+member initiates an epoch change (i.e., commits; see <a href="#commit" class="xref">Section 13.2</a>), they refresh
+all HPKE key pairs in the ratchet tree for which they know the secret keys.
+More precisely, they refresh the key pairs of their leaf and of all nodes on
+their leaf's direct path.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
+<p id="section-8.2-2">The member initiating the epoch change generates the fresh key pairs using the
+following procedure. The procedure is designed in a way that allows group members to
+efficiently communicate the fresh secret keys to other group members, as
+described in <a href="#update-paths" class="xref">Section 8.7</a>.<a href="#section-8.2-2" class="pilcrow">¶</a></p>
+<p id="section-8.2-3">To begin with, the generator of the UpdatePath updates its leaf and its leaf's
+<em>filtered direct path</em> with new key pairs. The filtered direct path  of a node
+is obtained from the node's direct path by removing all nodes whose child on
+the nodes's copath has an empty resolution (any unmerged leaves of the copath
+child count towards its resolution). Such a removed node does not need a key
+pair, since after blanking it, its resolution consists of a single node on the
+filtered direct path. Using the key pair of the node in the resolution is
+equivalent to using the key pair of the removed node.<a href="#section-8.2-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-8.2-4.1">Blank all the nodes on the direct path from the leaf to the root.<a href="#section-8.2-4.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-8.2-4.2">Generate a fresh HPKE key pair for the leaf.<a href="#section-8.2-4.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-8.2-4.3">
+            <p id="section-8.2-4.3.1">Generate a sequence of path secrets, one for each node on the leaf's filtered direct
+path, as follows. In this setting, <code>path_secret[0]</code> refers to the first parent node
+in the filtered direct path, <code>path_secret[1]</code> to the second parent node, and so on.<a href="#section-8.2-4.3.1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.2-4.3.2">
 <pre>
-leaf_node_secret = DeriveSecret(leaf_secret, "node")
-path_secret[0] = DeriveSecret(leaf_secret, "path")
-
+path_secret[0] is sampled at random
 path_secret[n] = DeriveSecret(path_secret[n-1], "path")
-node_secret[n] = DeriveSecret(path_secret[n], "node")
-
-leaf_priv, leaf_pub = KEM.DeriveKeyPair(leaf_node_secret)
-node_priv[n], node_pub[n] = KEM.DeriveKeyPair(node_secret[n])
-</pre><a href="#section-8.2-4" class="pilcrow">¶</a>
+</pre><a href="#section-8.2-4.3.2" class="pilcrow">¶</a>
 </div>
+</li>
+          <li class="normal" id="section-8.2-4.4">
+            <p id="section-8.2-4.4.1">Compute the sequence of HPKE key pairs <code>(node_priv,node_pub)</code>, one for each
+node on the leaf's direct path, as follows.<a href="#section-8.2-4.4.1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.2-4.4.2">
+<pre>
+node_secret[n] = DeriveSecret(path_secret[n], "node")
+node_priv[n], node_pub[n] = KEM.DeriveKeyPair(node_secret[n])
+</pre><a href="#section-8.2-4.4.2" class="pilcrow">¶</a>
+</div>
+</li>
+        </ul>
 <p id="section-8.2-5">The node secret is derived as a temporary intermediate secret so that each
 secret is only used with one algorithm: The path secret is used as an input to
 DeriveSecret and the node secret is used as an input to DeriveKeyPair.<a href="#section-8.2-5" class="pilcrow">¶</a></p>
@@ -3405,7 +3571,7 @@ path_secret[0] --&gt; node_secret[0] --&gt; node_priv[0], node_pub[0]
      ^
      |
 leaf_secret    --&gt; leaf_node_secret --&gt; leaf_priv, leaf_pub
-                                     ~&gt; leaf_key_package
+                                     ~&gt; leaf_node
 </pre><a href="#section-8.2-9" class="pilcrow">¶</a>
 </div>
 <p id="section-8.2-10">After applying the UpdatePath, the tree will have the following structure, where
@@ -3426,8 +3592,6 @@ np[0] -&gt; X'      Z[C]
        0 1 2 3 4 5 6
 </pre><a href="#section-8.2-11" class="pilcrow">¶</a>
 </div>
-<p id="section-8.2-12">After performing these operations, the generator of the UpdatePath MUST
-delete the leaf_secret.<a href="#section-8.2-12" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="adding-and-removing-leaves">
@@ -3499,12 +3663,12 @@ apply it to keep their local views of the tree in
 sync with the sender's.  More specifically, when a member commits a change to
 the tree (e.g., to add or remove a member), it transmits an UpdatePath
 containing a set of public keys and encrypted path secrets
-for intermediate nodes in the direct path of its leaf. The
+for intermediate nodes in the filtered direct path of its leaf. The
 other members of the group use these values to update
 their view of the tree, aligning their copy of the tree to the
 sender's.<a href="#section-8.4-1" class="pilcrow">¶</a></p>
 <p id="section-8.4-2">An UpdatePath contains
-the following information for each node in the direct path of the
+the following information for each node in the filtered direct path of the
 sender's leaf, including the root:<a href="#section-8.4-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-8.4-3.1">The public key for the node<a href="#section-8.4-3.1" class="pilcrow">¶</a>
@@ -3523,7 +3687,7 @@ of the non-updated child.<a href="#section-8.4-4" class="pilcrow">¶</a></p>
 <li id="section-8.4-6.1">
             <p id="section-8.4-6.1.1">Compute the updated path secrets.<a href="#section-8.4-6.1.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-8.4-6.1.2.1">Identify a node in the direct path for which the local member
+<li class="normal" id="section-8.4-6.1.2.1">Identify a node in the filtered direct path for which the local member
 is in the subtree of the non-updated child.<a href="#section-8.4-6.1.2.1" class="pilcrow">¶</a>
 </li>
               <li class="normal" id="section-8.4-6.1.2.2">Identify a node in the resolution of the copath node for
@@ -3543,22 +3707,24 @@ with the public keys derived from the new path_secret values.<a href="#section-8
           <li id="section-8.4-6.2">
             <p id="section-8.4-6.2.1">Merge the updated path secrets into the tree.<a href="#section-8.4-6.2.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-8.4-6.2.2.1">
-                <p id="section-8.4-6.2.2.1.1">For all updated nodes,<a href="#section-8.4-6.2.2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-8.4-6.2.2.1">Blank all nodes on the direct path of the sender's leaf.<a href="#section-8.4-6.2.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-8.4-6.2.2.2">
+                <p id="section-8.4-6.2.2.2.1">For all nodes on the filtered direct path of the sender's leaf,<a href="#section-8.4-6.2.2.2.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-8.4-6.2.2.1.2.1">Replace the public key for each node with the received public key.<a href="#section-8.4-6.2.2.1.2.1" class="pilcrow">¶</a>
+<li class="normal" id="section-8.4-6.2.2.2.2.1">Set the public key to the received public key.<a href="#section-8.4-6.2.2.2.2.1" class="pilcrow">¶</a>
 </li>
-                  <li class="normal" id="section-8.4-6.2.2.1.2.2">Set the list of unmerged leaves to the empty list.<a href="#section-8.4-6.2.2.1.2.2" class="pilcrow">¶</a>
+                  <li class="normal" id="section-8.4-6.2.2.2.2.2">Set the list of unmerged leaves to the empty list.<a href="#section-8.4-6.2.2.2.2.2" class="pilcrow">¶</a>
 </li>
-                  <li class="normal" id="section-8.4-6.2.2.1.2.3">Store the updated hash of the node's parent (represented as a ParentNode
-struct), going from root to leaf, so that each hash incorporates all the
-nodes above it. The root node always has a zero-length hash for this
-value.<a href="#section-8.4-6.2.2.1.2.3" class="pilcrow">¶</a>
+                  <li class="normal" id="section-8.4-6.2.2.2.2.3">Store the updated hash of the next node on the filtered direct path
+(represented as a ParentNode struct), going from root to leaf, so that
+each hash incorporates all the non-blank nodes above it. The root node
+always has a zero-length hash for this value.<a href="#section-8.4-6.2.2.2.2.3" class="pilcrow">¶</a>
 </li>
                 </ul>
 </li>
-              <li class="normal" id="section-8.4-6.2.2.2">For nodes where a path secret was recovered in step 1,
-compute and store the node's updated private key.<a href="#section-8.4-6.2.2.2" class="pilcrow">¶</a>
+              <li class="normal" id="section-8.4-6.2.2.3">For nodes where a path secret was recovered in step 1,
+compute and store the node's updated private key.<a href="#section-8.4-6.2.2.3" class="pilcrow">¶</a>
 </li>
             </ul>
 </li>
@@ -3566,8 +3732,8 @@ compute and store the node's updated private key.<a href="#section-8.4-6.2.2.2" 
 <p id="section-8.4-7">For example, in order to communicate the example update described in
 the previous section, the sender would transmit the following
 values:<a href="#section-8.4-7" class="pilcrow">¶</a></p>
-<table class="center" id="table-1">
-          <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
+<table class="center" id="table-2">
+          <caption><a href="#table-2" class="selfRef">Table 2</a></caption>
 <thead>
             <tr>
               <th class="text-left" rowspan="1" colspan="1">Public Key</th>
@@ -3610,43 +3776,30 @@ of the group, this section defines a scheme for generating a hash value (called
 the "tree hash") that represents the contents of the group's ratchet tree and the
 members' leaf nodes. The tree hash of a tree is the tree hash of its root node,
 which we define recursively, starting with the leaves.<a href="#section-8.5-1" class="pilcrow">¶</a></p>
-<p id="section-8.5-2">As some nodes may be blank while others contain data we use the following struct
-to include data if present.<a href="#section-8.5-2" class="pilcrow">¶</a></p>
+<p id="section-8.5-2">The tree hash of a leaf node is the hash of leaf's <code>LeafNodeHashInput</code> object which
+might include a <code>LeafNode</code> object depending on whether or not it is blank.<a href="#section-8.5-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.5-3">
-<pre>
-struct {
-    uint8 present;
-    select (present) {
-        case 0: struct{};
-        case 1: T value;
-    }
-} optional&lt;T&gt;;
-</pre><a href="#section-8.5-3" class="pilcrow">¶</a>
-</div>
-<p id="section-8.5-4">The tree hash of a leaf node is the hash of leaf's <code>LeafNodeHashInput</code> object which
-might include a <code>LeafNode</code> object depending on whether or not it is blank.<a href="#section-8.5-4" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-8.5-5">
 <pre>
 struct {
     uint32 leaf_index;
     optional&lt;LeafNode&gt; leaf_node;
 } LeafNodeHashInput;
-</pre><a href="#section-8.5-5" class="pilcrow">¶</a>
+</pre><a href="#section-8.5-3" class="pilcrow">¶</a>
 </div>
-<p id="section-8.5-6">Now the tree hash of any non-leaf node is recursively defined to be the hash of
+<p id="section-8.5-4">Now the tree hash of any non-leaf node is recursively defined to be the hash of
 its <code>ParentNodeHashInput</code>. This includes an optional <code>ParentNode</code>
-object depending on whether the node is blank or not.<a href="#section-8.5-6" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-8.5-7">
+object depending on whether the node is blank or not.<a href="#section-8.5-4" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.5-5">
 <pre>
 struct {
     optional&lt;ParentNode&gt; parent_node;
-    opaque left_hash&lt;0..255&gt;;
-    opaque right_hash&lt;0..255&gt;;
+    opaque left_hash&lt;V&gt;;
+    opaque right_hash&lt;V&gt;;
 } ParentNodeHashInput;
-</pre><a href="#section-8.5-7" class="pilcrow">¶</a>
+</pre><a href="#section-8.5-5" class="pilcrow">¶</a>
 </div>
-<p id="section-8.5-8">The <code>left_hash</code> and <code>right_hash</code> fields hold the tree hashes of the node's
-left and right children, respectively.<a href="#section-8.5-8" class="pilcrow">¶</a></p>
+<p id="section-8.5-6">The <code>left_hash</code> and <code>right_hash</code> fields hold the tree hashes of the node's
+left and right children, respectively.<a href="#section-8.5-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="parent-hash">
@@ -3654,62 +3807,79 @@ left and right children, respectively.<a href="#section-8.5-8" class="pilcrow">�
         <h3 id="name-parent-hash">
 <a href="#section-8.6" class="section-number selfRef">8.6. </a><a href="#name-parent-hash" class="section-name selfRef">Parent Hash</a>
         </h3>
-<p id="section-8.6-1">The <code>parent_hash</code> extension carries information to authenticate the structure of
-the tree, as described below.<a href="#section-8.6-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-8.6-2">
+<p id="section-8.6-1">The <code>parent_hash</code> field in ratchet tree nodes carries information to
+authenticate the information in the ratchet tree.  Parent hashes chain together
+so that the signature on a leaf node, by covering the leaf node's parent hash,
+indirectly includes information about the structure of the tree at the time the
+leaf node was last updated.<a href="#section-8.6-1" class="pilcrow">¶</a></p>
+<p id="section-8.6-2">Consider a ratchet tree with a non-blank parent node P and children V and S.<a href="#section-8.6-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.6-3">
 <pre>
-opaque parent_hash&lt;0..255&gt;;
-</pre><a href="#section-8.6-2" class="pilcrow">¶</a>
+        ...
+        /
+       P
+     __|__
+    /     \
+   V       S
+  / \     / \
+... ... ... ...
+</pre><a href="#section-8.6-3" class="pilcrow">¶</a>
 </div>
-<p id="section-8.6-3">Consider a ratchet tree with a parent node P and children V and S. The parent hash
-of P changes whenever an <code>UpdatePath</code> object is applied to the ratchet tree along
-a path traversing node V (and hence also P). The new "Parent Hash of P (with Co-Path
-Child S)" is obtained by hashing P's <code>ParentHashInput</code> struct using the resolution
-of S to populate the <code>original_child_resolution</code> field. This way, P's Parent Hash
-fixes the new HPKE public keys of all nodes on the path from P to the root.
-Furthermore, for each such key PK the hash also binds the set of HPKE public keys
-to which PK's secret key was encrypted in the Commit that contained the
-<code>UpdatePath</code> object.<a href="#section-8.6-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-8.6-4">
+<p id="section-8.6-4">The parent hash of P changes whenever an <code>UpdatePath</code> object is applied to
+the ratchet tree along a path from a leaf U traversing node V (and hence also
+P). The new "Parent Hash of P (with Co-Path Child S)" is obtained by hashing P's
+<code>ParentHashInput</code> struct.<a href="#section-8.6-4" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.6-5">
 <pre>
 struct {
     HPKEPublicKey public_key;
-    opaque parent_hash&lt;0..255&gt;;
-    HPKEPublicKey original_child_resolution&lt;0..2^32-1&gt;;
+    opaque parent_hash&lt;V&gt;;
+    HPKEPublicKey original_child_resolution&lt;V&gt;;
 } ParentHashInput;
-</pre><a href="#section-8.6-4" class="pilcrow">¶</a>
+</pre><a href="#section-8.6-5" class="pilcrow">¶</a>
 </div>
-<p id="section-8.6-5">The Parent Hash of P with Co-Path Child S is the hash of a <code>ParentHashInput</code> object
-populated as follows. The field <code>public_key</code> contains the HPKE public key of P. If P
-is the root, then <code>parent_hash</code> is set to a zero-length octet string.
-Otherwise <code>parent_hash</code> is the Parent Hash of P's parent with P's sibling as the
-co-path child.<a href="#section-8.6-5" class="pilcrow">¶</a></p>
-<p id="section-8.6-6">Finally, <code>original_child_resolution</code> is the array of <code>HPKEPublicKey</code> values of the
+<p id="section-8.6-6">The field <code>public_key</code> contains the HPKE public key of P. If P is the root,
+then the <code>parent_hash</code> field is set to a zero-length octet string. Otherwise,
+<code>parent_hash</code> is the Parent Hash of the next node after P on the filtered
+direct path of U. This way, P's Parent Hash fixes
+the new HPKE public key of each node V on the path from P to the root. Note
+that the path from P to the root may contain some blank nodes that are not
+fixed by P's Parent Hash. However, for each node that has an HPKE key, this key
+is fixed by P's Parent Hash.<a href="#section-8.6-6" class="pilcrow">¶</a></p>
+<p id="section-8.6-7">Finally, <code>original_child_resolution</code> is the array of HPKE public keys of the
 nodes in the resolution of S but with the <code>unmerged_leaves</code> of P omitted. For
 example, in the ratchet tree depicted in <a href="#ratchet-tree-nodes" class="xref">Section 5.3</a> the
 <code>ParentHashInput</code> of node Z with co-path child C would contain an empty
 <code>original_child_resolution</code> since C's resolution includes only itself but C is also
 an unmerged leaf of Z. Meanwhile, the <code>ParentHashInput</code> of node Z with co-path child
-D has an array with one element in it: the HPKE public key of D.<a href="#section-8.6-6" class="pilcrow">¶</a></p>
+D has an array with one element in it: the HPKE public key of D.<a href="#section-8.6-7" class="pilcrow">¶</a></p>
+<p id="section-8.6-8">Observe that <code>original_child_resolution</code> is equal to the resolution of S at the
+time the <code>UpdatePath</code> was generated, since at that point P's set of unmerged
+leaves was emptied. (Observe also that <code>original_child_resolution</code> contains all
+unmerged leaves of S.) Therefore, P's Parent Hash fixes, for each node V on the
+path from P to the root, not only the HPKE public key of V, but also the set of
+HPKE public keys to which the corresponding HPKE secret key of V was encrypted by
+the generator of the <code>UpdatePath</code>.<a href="#section-8.6-8" class="pilcrow">¶</a></p>
 <div id="using-parent-hashes">
 <section id="section-8.6.1">
           <h4 id="name-using-parent-hashes">
 <a href="#section-8.6.1" class="section-number selfRef">8.6.1. </a><a href="#name-using-parent-hashes" class="section-name selfRef">Using Parent Hashes</a>
           </h4>
 <p id="section-8.6.1-1">The Parent Hash of P appears in three types of structs. If V is itself a parent node
-then P's Parent Hash is stored in the <code>parent_hash</code> fields of both V's
-<code>ParentHashInput</code> struct and V's <code>ParentNode</code> struct. (The <code>ParentNode</code> struct is
-used to encapsulate all public information about V that must be conveyed to a new
-member joining the group as well as to define the Tree Hash of node V.)<a href="#section-8.6.1-1" class="pilcrow">¶</a></p>
-<p id="section-8.6.1-2">If, on the other hand, V is a leaf and the <code>parent_hash</code> field of its LeafNode
-is populated then the Parent Hash of P (with V's sibling as co-path child) is stored in
-that field. In particular, the extension MUST be present in the <code>leaf_key_package</code>
-field of an <code>UpdatePath</code> object. (This way, the signature of such a LeafNode also
-serves to attest to which keys the group member introduced into the ratchet tree and
+then P's Parent Hash is stored in the <code>parent_hash</code> field of the structs
+<code>ParentHashInput</code> and <code>ParentNode</code> of the node before P on the filtered direct
+path of U. (The <code>ParentNode</code> struct is used to encapsulate all public
+information about that node that must be conveyed to a new
+member joining the group as well as to define its Tree Hash.)<a href="#section-8.6.1-1" class="pilcrow">¶</a></p>
+<p id="section-8.6.1-2">If, on the other hand, V is the leaf U and its LeafNode has <code>leaf_node_source</code> set to <code>commit</code>,
+then the Parent Hash of P (with V's sibling as co-path child) is stored in
+the <code>parent_hash</code> field.  This is true in particular of the LeafNode object sent
+in the <code>leaf_node</code> field of an UpdatePath. The signature of such a LeafNode thus also
+attests to which keys the group member introduced into the ratchet tree and
 to whom the corresponding secret keys were sent. This helps prevent malicious insiders
 from constructing artificial ratchet trees with a node V whose HPKE secret key is
 known to the insider yet where the insider isn't assigned a leaf in the subtree rooted
-at V. Indeed, such a ratchet tree would violate the tree invariant.)<a href="#section-8.6.1-2" class="pilcrow">¶</a></p>
+at V. Indeed, such a ratchet tree would violate the tree invariant.<a href="#section-8.6.1-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="verifying-parent-hashes">
@@ -3719,26 +3889,11 @@ at V. Indeed, such a ratchet tree would violate the tree invariant.)<a href="#se
           </h4>
 <p id="section-8.6.2-1">To this end, when processing a Commit message clients MUST recompute the
 expected value of <code>parent_hash</code> for the committer's new leaf and verify that it
-matches the <code>parent_hash</code> value in the supplied <code>leaf_key_package</code>. Moreover, when
+matches the <code>parent_hash</code> value in the supplied <code>leaf_node</code>. Moreover, when
 joining a group, new members MUST authenticate each non-blank parent node P. A parent
-node P is authenticated by performing the following check:<a href="#section-8.6.2-1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-8.6.2-2.1">Let L and R be the left and right children of P, respectively<a href="#section-8.6.2-2.1" class="pilcrow">¶</a>
-</li>
-            <li class="normal" id="section-8.6.2-2.2">If L.parent_hash is equal to the Parent Hash of P with Co-Path Child R, the check passes<a href="#section-8.6.2-2.2" class="pilcrow">¶</a>
-</li>
-            <li class="normal" id="section-8.6.2-2.3">If R is blank, replace R with its left child until R is either non-blank or a leaf node<a href="#section-8.6.2-2.3" class="pilcrow">¶</a>
-</li>
-            <li class="normal" id="section-8.6.2-2.4">If R is a blank leaf node, the check fails<a href="#section-8.6.2-2.4" class="pilcrow">¶</a>
-</li>
-            <li class="normal" id="section-8.6.2-2.5">If R.parent_hash is equal to the Parent Hash of P with Co-Path Child L, the check passes<a href="#section-8.6.2-2.5" class="pilcrow">¶</a>
-</li>
-            <li class="normal" id="section-8.6.2-2.6">Otherwise, the check fails<a href="#section-8.6.2-2.6" class="pilcrow">¶</a>
-</li>
-          </ul>
-<p id="section-8.6.2-3">The left-child recursion under the right child of P is necessary because the expansion of
-the tree to the right due to Add proposals can cause blank nodes to be interposed
-between a parent node and its right child.<a href="#section-8.6.2-3" class="pilcrow">¶</a></p>
+node P is authenticated by checking that there exists a child V of P and a node U in the
+resolution of V such that V.<code>parent_hash</code> is equal to the Parent Hash of P with V's
+sibling as the co-path child.<a href="#section-8.6.2-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -3751,24 +3906,25 @@ between a parent node and its right child.<a href="#section-8.6.2-3" class="pilc
 <p id="section-8.7-1">As described in <a href="#commit" class="xref">Section 13.2</a>, each MLS Commit message may optionally
 transmit a LeafNode and parent node values along its direct path.
 The path contains a public key and encrypted secret value for all
-intermediate nodes in the path above the leaf.  The path is ordered
+intermediate nodes in the filtered direct path from the leaf to the
+root. The path is ordered
 from the closest node to the leaf to the root; each node MUST be the
 parent of its predecessor.<a href="#section-8.7-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.7-2">
 <pre>
 struct {
-    opaque kem_output&lt;0..2^16-1&gt;;
-    opaque ciphertext&lt;0..2^16-1&gt;;
+    opaque kem_output&lt;V&gt;;
+    opaque ciphertext&lt;V&gt;;
 } HPKECiphertext;
 
 struct {
     HPKEPublicKey public_key;
-    HPKECiphertext encrypted_path_secret&lt;0..2^32-1&gt;;
+    HPKECiphertext encrypted_path_secret&lt;V&gt;;
 } UpdatePathNode;
 
 struct {
     LeafNode leaf_node;
-    UpdatePathNode nodes&lt;0..2^32-1&gt;;
+    UpdatePathNode nodes&lt;V&gt;;
 } UpdatePath;
 </pre><a href="#section-8.7-2" class="pilcrow">¶</a>
 </div>
@@ -3810,8 +3966,8 @@ Where KDFLabel is specified as:
 
 struct {
     uint16 length = Length;
-    opaque label&lt;7..255&gt; = "MLS 1.0 " + Label;
-    opaque context&lt;0..2^32-1&gt; = Context;
+    opaque label&lt;V&gt; = "MLS 1.0 " + Label;
+    opaque context&lt;V&gt; = Context;
 } KDFLabel;
 
 DeriveSecret(Secret, Label) =
@@ -3879,9 +4035,9 @@ psk_secret (or 0) -&gt; KDF.Extract
 </div>
 <p id="section-9-9">A number of secrets are derived from the epoch secret for different purposes:<a href="#section-9-9" class="pilcrow">¶</a></p>
 <span id="name-epoch-derived-secrets"></span><div id="epoch-derived-secrets">
-<table class="center" id="table-2">
+<table class="center" id="table-3">
         <caption>
-<a href="#table-2" class="selfRef">Table 2</a>:
+<a href="#table-3" class="selfRef">Table 3</a>:
 <a href="#name-epoch-derived-secrets" class="selfRef">Epoch-derived secrets</a>
         </caption>
 <thead>
@@ -3961,11 +4117,11 @@ summarizes the state of the group:<a href="#section-9.1-1" class="pilcrow">¶</a
 <div class="alignLeft art-text artwork" id="section-9.1-2">
 <pre>
 struct {
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     uint64 epoch;
-    opaque tree_hash&lt;0..255&gt;;
-    opaque confirmed_transcript_hash&lt;0..255&gt;;
-    Extension extensions&lt;0..2^32-1&gt;;
+    opaque tree_hash&lt;V&gt;;
+    opaque confirmed_transcript_hash&lt;V&gt;;
+    Extension extensions&lt;V&gt;;
 } GroupContext;
 </pre><a href="#section-9.1-2" class="pilcrow">¶</a>
 </div>
@@ -4029,7 +4185,7 @@ MLSMessageAuth containing a Commit in two steps:<a href="#section-9.2-2" class="
 struct {
     WireFormat wire_format;
     MLSMessageContent content; //with content.content_type == commit
-    opaque signature&lt;0..2^16-1&gt;;
+    opaque signature&lt;V&gt;;
 } MLSMessageCommitContent;
 
 struct {
@@ -4139,18 +4295,18 @@ struct {
   PSKType psktype;
   select (PreSharedKeyID.psktype) {
     case external:
-      opaque psk_id&lt;0..255&gt;;
+      opaque psk_id&lt;V&gt;;
 
     case resumption:
       ResumptionPSKUsage usage;
-      opaque psk_group_id&lt;0..255&gt;;
+      opaque psk_group_id&lt;V&gt;;
       uint64 psk_epoch;
   }
-  opaque psk_nonce&lt;0..255&gt;;
+  opaque psk_nonce&lt;V&gt;;
 } PreSharedKeyID;
 
 struct {
-    PreSharedKeyID psks&lt;0..2^16-1&gt;;
+    PreSharedKeyID psks&lt;V&gt;;
 } PreSharedKeys;
 </pre><a href="#section-9.4-6" class="pilcrow">¶</a>
 </div>
@@ -4470,7 +4626,7 @@ uint16 ExtensionType;
 
 struct {
     ExtensionType extension_type;
-    opaque extension_data&lt;0..2^32-1&gt;;
+    opaque extension_data&lt;V&gt;;
 } Extension;
 
 struct {
@@ -4478,9 +4634,9 @@ struct {
     CipherSuite cipher_suite;
     HPKEPublicKey init_key;
     LeafNode leaf_node;
-    Extension extensions&lt;8..2^32-1&gt;;
+    Extension extensions&lt;V&gt;;
     // SignWithLabel(., "KeyPackageTBS", KeyPackageTBS)
-    opaque signature&lt;0..2^16-1&gt;;
+    opaque signature&lt;V&gt;;
 } KeyPackage;
 
 struct {
@@ -4488,7 +4644,7 @@ struct {
     CipherSuite cipher_suite;
     HPKEPublicKey init_key;
     LeafNode leaf_node;
-    Extension extensions&lt;8..2^32-1&gt;;
+    Extension extensions&lt;V&gt;;
 } KeyPackageTBS;
 </pre><a href="#section-11-6" class="pilcrow">¶</a>
 </div>
@@ -4496,6 +4652,8 @@ struct {
 establishment to be safe from downgrade attacks on the parameters described (as
 discussed in <a href="#group-creation" class="xref">Section 12</a>), while still only advertising one version /
 ciphersuite per KeyPackage.<a href="#section-11-7" class="pilcrow">¶</a></p>
+<p id="section-11-8">The <code>leaf_node_source</code> field of the LeafNode in a KeyPackage MUST be set to
+<code>key_package</code>.<a href="#section-11-8" class="pilcrow">¶</a></p>
 <div id="keypackage-validation">
 <section id="section-11.1">
         <h3 id="name-keypackage-validation">
@@ -4506,44 +4664,19 @@ ciphersuite per KeyPackage.<a href="#section-11-7" class="pilcrow">¶</a></p>
 <li class="normal" id="section-11.1-2.1">When a KeyPackage is downloaded by a group member, before it is used
 to add the client to the group<a href="#section-11.1-2.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-11.1-2.2">When a KeyPackage is received by a group member in an Add, Update, or Commit
-message<a href="#section-11.1-2.2" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-11.1-2.3">When a client joining a group receives KeyPackages for the other members of
-the group in the group's ratchet tree<a href="#section-11.1-2.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-11.1-2.2">When a KeyPackage is received by a group member in an Add message<a href="#section-11.1-2.2" class="pilcrow">¶</a>
 </li>
         </ul>
 <p id="section-11.1-3">The client verifies the validity of a KeyPackage using the following steps:<a href="#section-11.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.1-4.1">Verify that the credential in the KeyPackage is valid according to the
-authentication service and the client's local policy. These actions MUST be
-the same regardless of at what point in the protocol the KeyPackage is being
-verified with the following exception: If the KeyPackage is an update to
-another KeyPackage, the authentication service MUST additionally validate that
-the set of identities attested by the credential in the new KeyPackage is
-acceptable relative to the identities attested by the old credential.<a href="#section-11.1-4.1" class="pilcrow">¶</a>
+<li class="normal" id="section-11.1-4.1">Verify the LeafNode in the KeyPackage according to the process defined in
+<a href="#leaf-node-validation" class="xref">Section 8.1.1</a>.<a href="#section-11.1-4.1" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-11.1-4.2">Verify that the signature on the KeyPackage is valid using the public key
-in the KeyPackage's credential<a href="#section-11.1-4.2" class="pilcrow">¶</a>
+in the LeafNode's credential<a href="#section-11.1-4.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-11.1-4.3">Verify that the KeyPackage is compatible with the group's parameters.  The
-ciphersuite and protocol version of the KeyPackage must match those in
-use in the group.  If the GroupContext has a <code>required_capabilities</code>
-extension, then the required extensions and proposals MUST be listed in
-the KeyPackage's <code>capabilities</code> extension.<a href="#section-11.1-4.3" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-11.1-4.4">
-            <p id="section-11.1-4.4.1">Verify that the following fields in the KeyPackage are unique among the
-members of the group (including any other members added in the same
-Commit):<a href="#section-11.1-4.4.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-11.1-4.4.2.1">
-                <code>credential.signature_key</code><a href="#section-11.1-4.4.2.1" class="pilcrow">¶</a>
-</li>
-              <li class="normal" id="section-11.1-4.4.2.2">
-                <code>hpke_init_key</code><a href="#section-11.1-4.4.2.2" class="pilcrow">¶</a>
-</li>
-            </ul>
+          <li class="normal" id="section-11.1-4.3">Verify that the ciphersuite and protocol version of the LeafNode match
+those in use in the group.<a href="#section-11.1-4.3" class="pilcrow">¶</a>
 </li>
         </ul>
 </section>
@@ -4560,10 +4693,10 @@ not be listed.<a href="#section-11.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-11.2-2">
 <pre>
 struct {
-    ProtocolVersion versions&lt;0..255&gt;;
-    CipherSuite ciphersuites&lt;0..255&gt;;
-    ExtensionType extensions&lt;0..255&gt;;
-    ProposalType proposals&lt;0..255&gt;;
+    ProtocolVersion versions&lt;V&gt;;
+    CipherSuite ciphersuites&lt;V&gt;;
+    ExtensionType extensions&lt;V&gt;;
+    ProposalType proposals&lt;V&gt;;
 } Capabilities;
 </pre><a href="#section-11.2-2" class="pilcrow">¶</a>
 </div>
@@ -4604,7 +4737,7 @@ this duration.<a href="#section-11.3-3" class="pilcrow">¶</a></p>
 applications to add an explicit, application-defined identifier to a KeyPackage.<a href="#section-11.4-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-11.4-2">
 <pre>
-opaque external_key_id&lt;0..2^16-1&gt;;
+opaque external_key_id&lt;V&gt;;
 </pre><a href="#section-11.4-2" class="pilcrow">¶</a>
 </div>
 </section>
@@ -4686,8 +4819,8 @@ including a <code>required_capabilities</code> extension in the GroupContext.<a 
 <div class="alignLeft art-text artwork" id="section-12.1-2">
 <pre>
 struct {
-    ExtensionType extensions&lt;0..255&gt;;
-    ProposalType proposals&lt;0..255&gt;;
+    ExtensionType extensions&lt;V&gt;;
+    ProposalType proposals&lt;V&gt;;
 } RequiredCapabilities;
 </pre><a href="#section-12.1-2" class="pilcrow">¶</a>
 </div>
@@ -4849,7 +4982,8 @@ placed in the leftmost empty leaf in the tree, for the second Add, the next
 empty leaf to the right, etc. If no empty leaf exists, the tree is extended to
 the right.<a href="#section-13.1.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13.1.1-4.1">Validate the KeyPackage as specified in <a href="#keypackage-validation" class="xref">Section 11.1</a><a href="#section-13.1.1-4.1" class="pilcrow">¶</a>
+<li class="normal" id="section-13.1.1-4.1">Validate the KeyPackage as specified in <a href="#keypackage-validation" class="xref">Section 11.1</a>.  The
+<code>leaf_node_source</code> field in the LeafNode MUST be set to <code>key_package</code>.<a href="#section-13.1.1-4.1" class="pilcrow">¶</a>
 </li>
             <li class="normal" id="section-13.1.1-4.2">Identify the leaf L for the new member: if there are empty leaves in the tree,
 L is the leftmost empty leaf.  Otherwise, the tree is extended to the right
@@ -4881,10 +5015,11 @@ struct {
 </div>
 <p id="section-13.1.2-3">A member of the group applies an Update message by taking the following steps:<a href="#section-13.1.2-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13.1.2-4.1">Validate the LeafNode as specified in <a href="#keypackage-validation" class="xref">Section 11.1</a><a href="#section-13.1.2-4.1" class="pilcrow">¶</a>
+<li class="normal" id="section-13.1.2-4.1">Validate the LeafNode as specified in <a href="#leaf-node-validation" class="xref">Section 8.1.1</a>.  The
+<code>leaf_node_source</code> field MUST be set to <code>update</code>.<a href="#section-13.1.2-4.1" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-13.1.2-4.2">Verify that the <code>public_key</code> value is different from the corresponding
-field in the LeafNode being replaced.<a href="#section-13.1.2-4.2" class="pilcrow">¶</a>
+            <li class="normal" id="section-13.1.2-4.2">Verify that the <code>public_key</code> value in the LeafNode is different from the
+corresponding field in the LeafNode being replaced.<a href="#section-13.1.2-4.2" class="pilcrow">¶</a>
 </li>
             <li class="normal" id="section-13.1.2-4.3">Replace the sender's LeafNode with the one contained in the Update proposal<a href="#section-13.1.2-4.3" class="pilcrow">¶</a>
 </li>
@@ -4918,16 +5053,8 @@ LeafNode stored at a leaf.  Let L be this leaf node.<a href="#section-13.1.3-4.1
 </li>
             <li class="normal" id="section-13.1.3-4.3">Blank the intermediate nodes along the path from L to the root<a href="#section-13.1.3-4.3" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-13.1.3-4.4">
-              <p id="section-13.1.3-4.4.1">Truncate the tree by removing leaves from the right side of the tree as long
-as all of the following conditions hold (since non-blank intermediate nodes hold
-information that is necessary for verifying parent hashes):<a href="#section-13.1.3-4.4.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-13.1.3-4.4.2.1">The rightmost leaf is blank<a href="#section-13.1.3-4.4.2.1" class="pilcrow">¶</a>
-</li>
-                <li class="normal" id="section-13.1.3-4.4.2.2">The parent of the rightmost leaf is either blank or the root of the tree<a href="#section-13.1.3-4.4.2.2" class="pilcrow">¶</a>
-</li>
-              </ul>
+            <li class="normal" id="section-13.1.3-4.4">Truncate the tree by removing leaves from the right side of the tree until the
+rightmost leaf node is not blank.<a href="#section-13.1.3-4.4" class="pilcrow">¶</a>
 </li>
           </ul>
 </section>
@@ -4965,10 +5092,10 @@ and shutting down the old one.<a href="#section-13.1.5-1" class="pilcrow">¶</a>
 <div class="alignLeft art-text artwork" id="section-13.1.5-2">
 <pre>
 struct {
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     ProtocolVersion version;
     CipherSuite cipher_suite;
-    Extension extensions&lt;0..2^32-1&gt;;
+    Extension extensions&lt;V&gt;;
 } ReInit;
 </pre><a href="#section-13.1.5-2" class="pilcrow">¶</a>
 </div>
@@ -4992,7 +5119,7 @@ using an external commit. This proposal can only be used in that context.<a href
 <div class="alignLeft art-text artwork" id="section-13.1.6-2">
 <pre>
 struct {
-  opaque kem_output&lt;0..2^16-1&gt;;
+  opaque kem_output&lt;V&gt;;
 } ExternalInit;
 </pre><a href="#section-13.1.6-2" class="pilcrow">¶</a>
 </div>
@@ -5019,7 +5146,7 @@ struct {
 } MessageRange;
 
 struct {
-    MessageRange received_ranges&lt;0..2^32-1&gt;;
+    MessageRange received_ranges&lt;V&gt;;
 } AppAck;
 </pre><a href="#section-13.1.7-2" class="pilcrow">¶</a>
 </div>
@@ -5069,7 +5196,7 @@ at the expected time.<a href="#section-13.1.7-7" class="pilcrow">¶</a></p>
 the GroupContext for the group.<a href="#section-13.1.8-1" class="pilcrow">¶</a></p>
 <p id="section-13.1.8-2"><code>
 struct {
-  Extension extensions&lt;0..2^32-1&gt;;
+  Extension extensions&lt;V&gt;;
 } GroupContextExtensions;
 </code><a href="#section-13.1.8-2" class="pilcrow">¶</a></p>
 <p id="section-13.1.8-3">A member of the group applies a GroupContextExtensions proposal with the
@@ -5157,7 +5284,7 @@ struct {
 } ProposalOrRef;
 
 struct {
-    ProposalOrRef proposals&lt;0..2^32-1&gt;;
+    ProposalOrRef proposals&lt;V&gt;;
     optional&lt;UpdatePath&gt; path;
 } Commit;
 </pre><a href="#section-13.2-3" class="pilcrow">¶</a>
@@ -5201,40 +5328,70 @@ a Commit resets the sender's leaf and the nodes along its direct path, and
 provides forward secrecy and post-compromise security with regard to the sender
 of the Commit.  An Update proposal can be regarded as a "lazy" version of this
 operation, where only the leaf changes and intermediate nodes are blanked out.<a href="#section-13.2-8" class="pilcrow">¶</a></p>
-<p id="section-13.2-9">The <code>path</code> field of a Commit message MUST be populated if the Commit covers at
-least one Update or Remove proposal. The <code>path</code> field MUST also be populated
-if the Commit covers no proposals at all (i.e., if the proposals vector
-is empty). The <code>path</code> field MAY be omitted if the Commit covers only Add
-proposals.  In pseudocode, the logic for validating a Commit is as follows:<a href="#section-13.2-9" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-13.2-10">
+<p id="section-13.2-9">By default, the <code>path</code> field of a Commit MUST be populated.  The <code>path</code> field
+MAY be omitted if (a) it covers at least one proposal and (b) none proposals
+covered by the Commit are of "path required" types.  A proposal type requires a
+path if it cannot change the group membership in a way that requires the forward
+secrecy and post-compromise security guarantees that an UpdatePath provides.
+The only proposal types defined in this document that do not require a path are:<a href="#section-13.2-9" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-13.2-10.1">
+            <code>add</code><a href="#section-13.2-10.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-13.2-10.2">
+            <code>psk</code><a href="#section-13.2-10.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-13.2-10.3">
+            <code>app_ack</code><a href="#section-13.2-10.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-13.2-10.4">
+            <code>reinit</code><a href="#section-13.2-10.4" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-13.2-11">New proposal types MUST state whether they require a path. If any instance of a
+proposal type requires a path, then the proposal type requires a path. This
+attribute of a proposal type is reflected in the "Path Required" field of the
+proposal type registry defined in <a href="#mls-proposal-types" class="xref">Section 18.3</a>.<a href="#section-13.2-11" class="pilcrow">¶</a></p>
+<p id="section-13.2-12">Update and Remove proposals are the clearest examples of proposals that require
+a path.  An UpdatePath is required to evict the removed member or the old
+appearance of the updated member.<a href="#section-13.2-12" class="pilcrow">¶</a></p>
+<p id="section-13.2-13">In pseudocode, the logic for validating the <code>path</code> field of a Commit is as
+follows:<a href="#section-13.2-13" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-13.2-14">
 <pre>
-hasUpdates = false
-hasRemoves = false
+pathRequiredTypes = [
+    update,
+    remove,
+    external_init,
+    group_context_extensions
+]
+
+pathRequired = false
 
 for i, id in commit.proposals:
     proposal = proposalCache[id]
     assert(proposal != null)
 
-    hasUpdates = hasUpdates || proposal.msg_type == update
-    hasRemoves = hasRemoves || proposal.msg_type == remove
+    pathRequired = pathRequired ||
+                   (proposal.msg_type in pathRequiredTypes)
 
-if len(commit.proposals) == 0 || hasUpdates || hasRemoves:
-  assert(commit.path != null)
-</pre><a href="#section-13.2-10" class="pilcrow">¶</a>
+if len(commit.proposals) == 0 || pathRequired:
+    assert(commit.path != null)
+</pre><a href="#section-13.2-14" class="pilcrow">¶</a>
 </div>
-<p id="section-13.2-11">To summarize, a Commit can have three different configurations, with different
-uses:<a href="#section-13.2-11" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-13.2-12">
-<li id="section-13.2-12.1">An "empty" Commit that references no proposals, which updates the committer's
-contribution to the group and provides PCS with regard to the committer.<a href="#section-13.2-12.1" class="pilcrow">¶</a>
+<p id="section-13.2-15">To summarize, a Commit can have three different configurations, with different
+uses:<a href="#section-13.2-15" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-13.2-16">
+<li id="section-13.2-16.1">An "empty" Commit that references no proposals, which updates the committer's
+contribution to the group and provides PCS with regard to the committer.<a href="#section-13.2-16.1" class="pilcrow">¶</a>
 </li>
-          <li id="section-13.2-12.2">A "partial" Commit that references Add, PreSharedKey, or ReInit proposals but
+          <li id="section-13.2-16.2">A "partial" Commit that references proposals that do not require a path, and
 where the path is empty. Such a commit doesn't provide PCS with regard to the
-committer.<a href="#section-13.2-12.2" class="pilcrow">¶</a>
+committer.<a href="#section-13.2-16.2" class="pilcrow">¶</a>
 </li>
-          <li id="section-13.2-12.3">A "full" Commit that references proposals of any type, which provides FS with
+          <li id="section-13.2-16.3">A "full" Commit that references proposals of any type, which provides FS with
 regard to any removed members and PCS for the committer and any updated
-members.<a href="#section-13.2-12.3" class="pilcrow">¶</a>
+members.<a href="#section-13.2-16.3" class="pilcrow">¶</a>
 </li>
         </ol>
 <div id="creating-a-commit">
@@ -5295,10 +5452,10 @@ populated.  Otherwise, the sender MAY omit the <code>path</code> field at its di
               <p id="section-13.2.1-4.4.1">If populating the <code>path</code> field: Create an UpdatePath using the provisional
 ratchet tree and GroupContext. Any new member (from an add proposal) MUST be
 excluded from the resolution during the computation of the UpdatePath.  The
-<code>leaf_key_package</code> for this UpdatePath must have a <code>parent_hash</code> extension.
+<code>leaf_node</code> for this UpdatePath MUST have <code>leaf_node_source</code> set to <code>commit</code>.
 Note that the LeafNode in the <code>UpdatePath</code> effectively updates an existing
 LeafNode in the group and thus MUST adhere to the same restrictions as
-LeafNodess used in <code>Update</code> proposals.<a href="#section-13.2.1-4.4.1" class="pilcrow">¶</a></p>
+LeafNodes used in <code>Update</code> proposals (aside from <code>leaf_node_source</code>).<a href="#section-13.2.1-4.4.1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-13.2.1-4.4.2.1">Assign this UpdatePath to the <code>path</code> field in the Commit.<a href="#section-13.2.1-4.4.2.1" class="pilcrow">¶</a>
 </li>
@@ -5442,18 +5599,21 @@ MAY be omitted.<a href="#section-13.2.2-2.5" class="pilcrow">¶</a>
 provisional ratchet tree and GroupContext, to generate the new ratchet tree
 and the <code>commit_secret</code>:<a href="#section-13.2.2-2.6.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13.2.2-2.6.2.1">Verify that the LeafNode is acceptable according to the rules for Update
-(see <a href="#update" class="xref">Section 13.1.2</a>)<a href="#section-13.2.2-2.6.2.1" class="pilcrow">¶</a>
+<li class="normal" id="section-13.2.2-2.6.2.1">Validate the LeafNode as specified in <a href="#leaf-node-validation" class="xref">Section 8.1.1</a>.  The
+<code>leaf_node_source</code> field MUST be set to <code>commit</code>.<a href="#section-13.2.2-2.6.2.1" class="pilcrow">¶</a>
 </li>
-                <li class="normal" id="section-13.2.2-2.6.2.2">Apply the UpdatePath to the tree, as described in
-<a href="#synchronizing-views-of-the-tree" class="xref">Section 8.4</a>, and store <code>leaf_key_package</code> at the
-Committer's leaf.<a href="#section-13.2.2-2.6.2.2" class="pilcrow">¶</a>
+                <li class="normal" id="section-13.2.2-2.6.2.2">Verify that the <code>public_key</code> value in the LeafNode is different from the
+committer's current leaf node.<a href="#section-13.2.2-2.6.2.2" class="pilcrow">¶</a>
 </li>
-                <li class="normal" id="section-13.2.2-2.6.2.3">Verify that the LeafNode has a <code>parent_hash</code> field and that its value
-matches the new parent of the sender's leaf node.<a href="#section-13.2.2-2.6.2.3" class="pilcrow">¶</a>
+                <li class="normal" id="section-13.2.2-2.6.2.3">Apply the UpdatePath to the tree, as described in
+<a href="#synchronizing-views-of-the-tree" class="xref">Section 8.4</a>, and store <code>leaf_node</code> at the
+committer's leaf.<a href="#section-13.2.2-2.6.2.3" class="pilcrow">¶</a>
 </li>
-                <li class="normal" id="section-13.2.2-2.6.2.4">Define <code>commit_secret</code> as the value <code>path_secret[n+1]</code> derived from the
-<code>path_secret[n]</code> value assigned to the root node.<a href="#section-13.2.2-2.6.2.4" class="pilcrow">¶</a>
+                <li class="normal" id="section-13.2.2-2.6.2.4">Verify that the LeafNode has a <code>parent_hash</code> field and that its value
+matches the new parent of the sender's leaf node.<a href="#section-13.2.2-2.6.2.4" class="pilcrow">¶</a>
+</li>
+                <li class="normal" id="section-13.2.2-2.6.2.5">Define <code>commit_secret</code> as the value <code>path_secret[n+1]</code> derived from the
+<code>path_secret[n]</code> value assigned to the root node.<a href="#section-13.2.2-2.6.2.5" class="pilcrow">¶</a>
 </li>
               </ul>
 </li>
@@ -5499,16 +5659,16 @@ new members need information to bootstrap their local group state.<a href="#sect
 struct {
     ProtocolVersion version = mls10;
     CipherSuite cipher_suite;
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     uint64 epoch;
-    opaque tree_hash&lt;0..255&gt;;
-    opaque confirmed_transcript_hash&lt;0..255&gt;;
-    Extension group_context_extensions&lt;0..2^32-1&gt;;
-    Extension other_extensions&lt;0..2^32-1&gt;;
+    opaque tree_hash&lt;V&gt;;
+    opaque confirmed_transcript_hash&lt;V&gt;;
+    Extension group_context_extensions&lt;V&gt;;
+    Extension other_extensions&lt;V&gt;;
     MAC confirmation_tag;
     LeafNodeRef signer;
     // SignWithLabel(., "GroupInfoTBS", GroupInfoTBS)
-    opaque signature&lt;0..2^16-1&gt;;
+    opaque signature&lt;V&gt;;
 } GroupInfo;
 </pre><a href="#section-13.2.3-2" class="pilcrow">¶</a>
 </div>
@@ -5520,12 +5680,12 @@ GroupInfo above <code>signature</code>:<a href="#section-13.2.3-3" class="pilcro
 <pre>
 struct {
     CipherSuite cipher_suite;
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     uint64 epoch;
-    opaque tree_hash&lt;0..255&gt;;
-    opaque confirmed_transcript_hash&lt;0..255&gt;;
-    Extension group_context_extensions&lt;0..2^32-1&gt;;
-    Extension other_extensions&lt;0..2^32-1&gt;;
+    opaque tree_hash&lt;V&gt;;
+    opaque confirmed_transcript_hash&lt;V&gt;;
+    Extension group_context_extensions&lt;V&gt;;
+    Extension other_extensions&lt;V&gt;;
     MAC confirmation_tag;
     LeafNodeRef signer;
 } GroupInfoTBS;
@@ -5588,7 +5748,8 @@ thus be rejected.<a href="#section-13.2.3.1-9" class="pilcrow">¶</a></p>
 <p id="section-13.2.3.1-10">The information in a GroupInfo is not deemed public in general, but applications
 can choose to make it available to new members in order to allow External
 Commits.<a href="#section-13.2.3.1-10" class="pilcrow">¶</a></p>
-<p id="section-13.2.3.1-11">External Commits work like regular Commits, with a few differences:<a href="#section-13.2.3.1-11" class="pilcrow">¶</a></p>
+<p id="section-13.2.3.1-11">In principle, External Commits work like regular Commits. However, their content
+has to meet a specific set of requirements:<a href="#section-13.2.3.1-11" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-13.2.3.1-12.1">External Commits MUST contain a <code>path</code> field (and is therefore a "full"
 Commit).  The joiner is added at the leftmost free leaf node (just as if they
@@ -5602,21 +5763,23 @@ joiner cannot determine the validity of proposals sent within the group<a href="
                 <p id="section-13.2.3.1-12.3.1">The proposals included by value in an External Commit MUST meet the following
 conditions:<a href="#section-13.2.3.1-12.3.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13.2.3.1-12.3.2.1">There MUST be a single ExternalInit proposal<a href="#section-13.2.3.1-12.3.2.1" class="pilcrow">¶</a>
+<li class="normal" id="section-13.2.3.1-12.3.2.1">There MUST be a single ExternalInit proposal.<a href="#section-13.2.3.1-12.3.2.1" class="pilcrow">¶</a>
 </li>
-                  <li class="normal" id="section-13.2.3.1-12.3.2.2">There MUST NOT be any Update proposals<a href="#section-13.2.3.1-12.3.2.2" class="pilcrow">¶</a>
-</li>
-                  <li class="normal" id="section-13.2.3.1-12.3.2.3">If a Remove proposal is present, then the LeafNode in the <code>path</code>
+                  <li class="normal" id="section-13.2.3.1-12.3.2.2">There MAY be a single Remove proposal, where the LeafNode in the <code>path</code>
 field MUST meet the same criteria as the LeafNode in an Update for the
-removed leaf (see <a href="#update" class="xref">Section 13.1.2</a>).  In particular, the <code>credential</code> in the
+removed leaf (see <a href="#update" class="xref">Section 13.1.2</a>). In particular, the <code>credential</code> in the
 LeafNode MUST present a set of identifiers that is acceptable to the
-application for the removed participant.<a href="#section-13.2.3.1-12.3.2.3" class="pilcrow">¶</a>
+application for the removed participant.<a href="#section-13.2.3.1-12.3.2.2" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="section-13.2.3.1-12.3.2.3">There MAY be one or more PreSharedKey proposals.<a href="#section-13.2.3.1-12.3.2.3" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="section-13.2.3.1-12.3.2.4">There MUST NOT be any other proposals.<a href="#section-13.2.3.1-12.3.2.4" class="pilcrow">¶</a>
 </li>
                 </ul>
 </li>
               <li class="normal" id="section-13.2.3.1-12.4">External Commits MUST be signed by the new member.  In particular, the
 signature on the enclosing MLSPlaintext MUST verify using the public key for
-the credential in the <code>leaf_key_package</code> of the <code>path</code> field.<a href="#section-13.2.3.1-12.4" class="pilcrow">¶</a>
+the credential in the <code>leaf_node</code> of the <code>path</code> field.<a href="#section-13.2.3.1-12.4" class="pilcrow">¶</a>
 </li>
               <li class="normal" id="section-13.2.3.1-12.5">When processing a Commit, both existing and new members MUST use the external
 init secret as described in <a href="#external-initialization" class="xref">Section 9.3</a>.<a href="#section-13.2.3.1-12.5" class="pilcrow">¶</a>
@@ -5666,11 +5829,11 @@ indicating which PSK to use.<a href="#section-13.2.3.2-3" class="pilcrow">¶</a>
 <div class="alignLeft art-text artwork" id="section-13.2.3.2-4">
 <pre>
 struct {
-  opaque path_secret&lt;1..255&gt;;
+  opaque path_secret&lt;V&gt;;
 } PathSecret;
 
 struct {
-  opaque joiner_secret&lt;1..255&gt;;
+  opaque joiner_secret&lt;V&gt;;
   optional&lt;PathSecret&gt; path_secret;
   PreSharedKeys psks;
 } GroupSecrets;
@@ -5682,8 +5845,8 @@ struct {
 
 struct {
   CipherSuite cipher_suite;
-  EncryptedGroupSecrets secrets&lt;0..2^32-1&gt;;
-  opaque encrypted_group_info&lt;1..2^32-1&gt;;
+  EncryptedGroupSecrets secrets&lt;V&gt;;
+  opaque encrypted_group_info&lt;V&gt;;
 } Welcome;
 </pre><a href="#section-13.2.3.2-4" class="pilcrow">¶</a>
 </div>
@@ -5822,7 +5985,7 @@ struct {
     };
 } Node;
 
-optional&lt;Node&gt; ratchet_tree&lt;1..2^32-1&gt;;
+optional&lt;Node&gt; ratchet_tree&lt;V&gt;;
 </pre><a href="#section-13.3-3" class="pilcrow">¶</a>
 </div>
 <p id="section-13.3-4">The nodes are listed in the order specified by a left-to-right in-order
@@ -6368,8 +6531,8 @@ CipherSuite MLS_LVL_KEM_AEAD_HASH_SIG = VALUE;
 uint16 CipherSuite;
 </pre><a href="#section-18.1-5" class="pilcrow">¶</a>
 </div>
-<table class="center" id="table-3">
-          <caption><a href="#table-3" class="selfRef">Table 3</a></caption>
+<table class="center" id="table-4">
+          <caption><a href="#table-4" class="selfRef">Table 4</a></caption>
 <thead>
             <tr>
               <th class="text-left" rowspan="1" colspan="1">Component</th>
@@ -6415,8 +6578,8 @@ is REQUIRED for a Y-&gt;N transition.<a href="#section-18.1-8.3" class="pilcrow"
 </li>
         </ul>
 <p id="section-18.1-9">Initial contents:<a href="#section-18.1-9" class="pilcrow">¶</a></p>
-<table class="center" id="table-4">
-          <caption><a href="#table-4" class="selfRef">Table 4</a></caption>
+<table class="center" id="table-5">
+          <caption><a href="#table-5" class="selfRef">Table 5</a></caption>
 <thead>
             <tr>
               <th class="text-left" rowspan="1" colspan="1">Value</th>
@@ -6486,8 +6649,8 @@ is REQUIRED for a Y-&gt;N transition.<a href="#section-18.1-8.3" class="pilcrow"
 different hashes per ciphersuite.  The mapping of ciphersuites to HPKE
 primitives, HMAC hash functions, and TLS signature schemes is as follows
 <span>[<a href="#I-D.irtf-cfrg-hpke" class="xref">I-D.irtf-cfrg-hpke</a>]</span> <span>[<a href="#RFC8446" class="xref">RFC8446</a>]</span>:<a href="#section-18.1-11" class="pilcrow">¶</a></p>
-<table class="center" id="table-5">
-          <caption><a href="#table-5" class="selfRef">Table 5</a></caption>
+<table class="center" id="table-6">
+          <caption><a href="#table-6" class="selfRef">Table 6</a></caption>
 <thead>
             <tr>
               <th class="text-left" rowspan="1" colspan="1">Value</th>
@@ -6619,8 +6782,8 @@ is REQUIRED for a Y-&gt;N transition.<a href="#section-18.2-3.4" class="pilcrow"
 </li>
         </ul>
 <p id="section-18.2-4">Initial contents:<a href="#section-18.2-4" class="pilcrow">¶</a></p>
-<table class="center" id="table-6">
-          <caption><a href="#table-6" class="selfRef">Table 6</a></caption>
+<table class="center" id="table-7">
+          <caption><a href="#table-7" class="selfRef">Table 7</a></caption>
 <thead>
             <tr>
               <th class="text-left" rowspan="1" colspan="1">Value</th>
@@ -6701,13 +6864,14 @@ is REQUIRED for a Y-&gt;N transition.<a href="#section-18.3-3.3" class="pilcrow"
 </li>
         </ul>
 <p id="section-18.3-4">Initial contents:<a href="#section-18.3-4" class="pilcrow">¶</a></p>
-<table class="center" id="table-7">
-          <caption><a href="#table-7" class="selfRef">Table 7</a></caption>
+<table class="center" id="table-8">
+          <caption><a href="#table-8" class="selfRef">Table 8</a></caption>
 <thead>
             <tr>
               <th class="text-left" rowspan="1" colspan="1">Value</th>
               <th class="text-left" rowspan="1" colspan="1">Name</th>
               <th class="text-left" rowspan="1" colspan="1">Recommended</th>
+              <th class="text-left" rowspan="1" colspan="1">Path Required</th>
               <th class="text-left" rowspan="1" colspan="1">Reference</th>
             </tr>
           </thead>
@@ -6716,17 +6880,20 @@ is REQUIRED for a Y-&gt;N transition.<a href="#section-18.3-3.3" class="pilcrow"
               <td class="text-left" rowspan="1" colspan="1">0x0000</td>
               <td class="text-left" rowspan="1" colspan="1">RESERVED</td>
               <td class="text-left" rowspan="1" colspan="1">N/A</td>
+              <td class="text-left" rowspan="1" colspan="1">N/A</td>
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">0x0001</td>
               <td class="text-left" rowspan="1" colspan="1">add</td>
               <td class="text-left" rowspan="1" colspan="1">Y</td>
+              <td class="text-left" rowspan="1" colspan="1">N</td>
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">0x0002</td>
               <td class="text-left" rowspan="1" colspan="1">update</td>
+              <td class="text-left" rowspan="1" colspan="1">Y</td>
               <td class="text-left" rowspan="1" colspan="1">Y</td>
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>
@@ -6734,23 +6901,27 @@ is REQUIRED for a Y-&gt;N transition.<a href="#section-18.3-3.3" class="pilcrow"
               <td class="text-left" rowspan="1" colspan="1">0x0003</td>
               <td class="text-left" rowspan="1" colspan="1">remove</td>
               <td class="text-left" rowspan="1" colspan="1">Y</td>
+              <td class="text-left" rowspan="1" colspan="1">Y</td>
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">0x0004</td>
               <td class="text-left" rowspan="1" colspan="1">psk</td>
               <td class="text-left" rowspan="1" colspan="1">Y</td>
+              <td class="text-left" rowspan="1" colspan="1">N</td>
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">0x0005</td>
               <td class="text-left" rowspan="1" colspan="1">reinit</td>
               <td class="text-left" rowspan="1" colspan="1">Y</td>
+              <td class="text-left" rowspan="1" colspan="1">N</td>
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">0x0006</td>
               <td class="text-left" rowspan="1" colspan="1">external_init</td>
+              <td class="text-left" rowspan="1" colspan="1">Y</td>
               <td class="text-left" rowspan="1" colspan="1">Y</td>
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>
@@ -6758,17 +6929,20 @@ is REQUIRED for a Y-&gt;N transition.<a href="#section-18.3-3.3" class="pilcrow"
               <td class="text-left" rowspan="1" colspan="1">0x0007</td>
               <td class="text-left" rowspan="1" colspan="1">app_ack</td>
               <td class="text-left" rowspan="1" colspan="1">Y</td>
+              <td class="text-left" rowspan="1" colspan="1">N</td>
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">0x0008</td>
               <td class="text-left" rowspan="1" colspan="1">group_context_extensions</td>
               <td class="text-left" rowspan="1" colspan="1">Y</td>
+              <td class="text-left" rowspan="1" colspan="1">Y</td>
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">0xff00  - 0xffff</td>
               <td class="text-left" rowspan="1" colspan="1">Reserved for Private Use</td>
+              <td class="text-left" rowspan="1" colspan="1">N/A</td>
               <td class="text-left" rowspan="1" colspan="1">N/A</td>
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>
@@ -6800,8 +6974,8 @@ is REQUIRED for a Y-&gt;N transition.<a href="#section-18.4-3.3" class="pilcrow"
 </li>
         </ul>
 <p id="section-18.4-4">Initial contents:<a href="#section-18.4-4" class="pilcrow">¶</a></p>
-<table class="center" id="table-8">
-          <caption><a href="#table-8" class="selfRef">Table 8</a></caption>
+<table class="center" id="table-9">
+          <caption><a href="#table-9" class="selfRef">Table 9</a></caption>
 <thead>
             <tr>
               <th class="text-left" rowspan="1" colspan="1">Value</th>
@@ -7055,6 +7229,10 @@ thyla.van.der@merwe.tech<a href="#section-19-1.12" class="pilcrow">¶</a>
 <dt id="RFC8032">[RFC8032]</dt>
         <dd>
 <span class="refAuthor">Josefsson, S.</span> and <span class="refAuthor">I. Liusvaara</span>, <span class="refTitle">"Edwards-Curve Digital Signature Algorithm (EdDSA)"</span>, <span class="seriesInfo">RFC 8032</span>, <span class="seriesInfo">DOI 10.17487/RFC8032</span>, <time datetime="2017-01" class="refDate">January 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8032">https://www.rfc-editor.org/rfc/rfc8032</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9000">[RFC9000]</dt>
+        <dd>
+<span class="refAuthor">Iyengar, J., Ed.</span> and <span class="refAuthor">M. Thomson, Ed.</span>, <span class="refTitle">"QUIC: A UDP-Based Multiplexed and Secure Transport"</span>, <span class="seriesInfo">RFC 9000</span>, <span class="seriesInfo">DOI 10.17487/RFC9000</span>, <time datetime="2021-05" class="refDate">May 2021</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9000">https://www.rfc-editor.org/rfc/rfc9000</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="SECG">[SECG]</dt>
         <dd>
