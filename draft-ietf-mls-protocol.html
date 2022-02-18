@@ -1030,7 +1030,7 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 21 August 2022</td>
+<td class="center">Expires 22 August 2022</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1043,12 +1043,12 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 <dd class="internet-draft">draft-ietf-mls-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2022-02-17" class="published">17 February 2022</time>
+<time datetime="2022-02-18" class="published">18 February 2022</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2022-08-21">21 August 2022</time></dd>
+<dd class="expires"><time datetime="2022-08-22">22 August 2022</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1118,7 +1118,7 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 21 August 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 22 August 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1156,7 +1156,20 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
-            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="xref">2</a>.  <a href="#name-terminology" class="xref">Terminology</a></p>
+            <p id="section-toc.1-1.2.1"><a href="#section-2" class="xref">2</a>.  <a href="#name-terminology" class="xref">Terminology</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1">
+                <p id="section-toc.1-1.2.2.1.1"><a href="#section-2.1" class="xref">2.1</a>.  <a href="#name-presentation-langauge" class="xref">Presentation Langauge</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1.2.1">
+                    <p id="section-toc.1-1.2.2.1.2.1.1" class="keepWithNext"><a href="#section-2.1.1" class="xref">2.1.1</a>.  <a href="#name-optional-value" class="xref">Optional Value</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1.2.2">
+                    <p id="section-toc.1-1.2.2.1.2.2.1"><a href="#section-2.1.2" class="xref">2.1.2</a>.  <a href="#name-variable-size-vector-header" class="xref">Variable-size Vector Headers</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
             <p id="section-toc.1-1.3.1"><a href="#section-3" class="xref">3</a>.  <a href="#name-operating-context" class="xref">Operating Context</a></p>
@@ -1875,8 +1888,150 @@ Application Message:  </dt>
 </dl>
 <p id="section-2-3">Terminology specific to tree computations is described in
 <a href="#ratchet-tree-terminology" class="xref">Section 5.1</a>.<a href="#section-2-3" class="pilcrow">¶</a></p>
-<p id="section-2-4">We use the TLS presentation language <span>[<a href="#RFC8446" class="xref">RFC8446</a>]</span> to
-describe the structure of protocol messages.<a href="#section-2-4" class="pilcrow">¶</a></p>
+<div id="presentation-langauge">
+<section id="section-2.1">
+        <h3 id="name-presentation-langauge">
+<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-presentation-langauge" class="section-name selfRef">Presentation Langauge</a>
+        </h3>
+<p id="section-2.1-1">We use the TLS presentation language <span>[<a href="#RFC8446" class="xref">RFC8446</a>]</span> to describe the structure of
+protocol messages.  In addition to the base syntax, we add two additional
+features, the ability for fields to be optional and the ability for vectors to
+have variable-size length headers.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+<div id="optional-value">
+<section id="section-2.1.1">
+          <h4 id="name-optional-value">
+<a href="#section-2.1.1" class="section-number selfRef">2.1.1. </a><a href="#name-optional-value" class="section-name selfRef">Optional Value</a>
+          </h4>
+<p id="section-2.1.1-1">An optional value is encoded with a presence-signaling octet, followed by the
+value itself if present.  When decoding, a presence octet with a value other
+than 0 or 1 MUST be rejected as malformed.<a href="#section-2.1.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-2.1.1-2">
+<pre>
+struct {
+    uint8 present;
+    select (present) {
+        case 0: struct{};
+        case 1: T value;
+    }
+} optional&lt;T&gt;;
+</pre><a href="#section-2.1.1-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="variable-size-vector-headers">
+<section id="section-2.1.2">
+          <h4 id="name-variable-size-vector-header">
+<a href="#section-2.1.2" class="section-number selfRef">2.1.2. </a><a href="#name-variable-size-vector-header" class="section-name selfRef">Variable-size Vector Headers</a>
+          </h4>
+<p id="section-2.1.2-1">In the TLS presentation language, vectors are encoded as a sequence of encoded
+elements prefixed with a length.  The length field has a fixed size set by
+specifying the minimum and maximum lengths of the encoded sequence of elements.<a href="#section-2.1.2-1" class="pilcrow">¶</a></p>
+<p id="section-2.1.2-2">In MLS, there are several vectors whose sizes vary over significant ranges.  So
+instead of using a fixed-size length field, we use a variable-size length using
+a variable-length integer encoding based on the one in Section 16 of
+<span>[<a href="#RFC9000" class="xref">RFC9000</a>]</span>. (They differ only in that the one here requires a minimum-size
+encoding.) Instead of presenting min and max values, the vector description
+simply includes a <code>V</code>. For example:<a href="#section-2.1.2-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-2.1.2-3">
+<pre>
+struct {
+    uint32 fixed&lt;0..255&gt;;
+    opaque variable&lt;V&gt;;
+} StructWithVectors;
+</pre><a href="#section-2.1.2-3" class="pilcrow">¶</a>
+</div>
+<p id="section-2.1.2-4">Such a vector can represent values with length from 0 bytes to 2^62 bytes.
+The variable-length integer encoding reserves the two most significant bits
+of the first byte to encode the base 2 logarithm of the integer encoding length
+in bytes.  The integer value is encoded on the remaining bits, in network byte
+order.  The encoded value MUST use the smallest number of bits required to
+represent the value.  When decoding, values using more bits than necessary MUST
+be treated as malformed.<a href="#section-2.1.2-4" class="pilcrow">¶</a></p>
+<p id="section-2.1.2-5">This means that integers are encoded on 1, 2, 4, or 8 bytes and can encode 6-,
+14-, 30-, or 62-bit values respectively.<a href="#section-2.1.2-5" class="pilcrow">¶</a></p>
+<span id="name-summary-of-integer-encoding"></span><div id="integer-summary">
+<table class="center" id="table-1">
+            <caption>
+<a href="#table-1" class="selfRef">Table 1</a>:
+<a href="#name-summary-of-integer-encoding" class="selfRef">Summary of Integer Encodings</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">Prefix</th>
+                <th class="text-left" rowspan="1" colspan="1">Length</th>
+                <th class="text-left" rowspan="1" colspan="1">Usable Bits</th>
+                <th class="text-left" rowspan="1" colspan="1">Min</th>
+                <th class="text-left" rowspan="1" colspan="1">Max</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">00</td>
+                <td class="text-left" rowspan="1" colspan="1">1</td>
+                <td class="text-left" rowspan="1" colspan="1">6</td>
+                <td class="text-left" rowspan="1" colspan="1">0</td>
+                <td class="text-left" rowspan="1" colspan="1">63</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">01</td>
+                <td class="text-left" rowspan="1" colspan="1">2</td>
+                <td class="text-left" rowspan="1" colspan="1">14</td>
+                <td class="text-left" rowspan="1" colspan="1">64</td>
+                <td class="text-left" rowspan="1" colspan="1">16383</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">10</td>
+                <td class="text-left" rowspan="1" colspan="1">4</td>
+                <td class="text-left" rowspan="1" colspan="1">30</td>
+                <td class="text-left" rowspan="1" colspan="1">16384</td>
+                <td class="text-left" rowspan="1" colspan="1">1073741823</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">11</td>
+                <td class="text-left" rowspan="1" colspan="1">8</td>
+                <td class="text-left" rowspan="1" colspan="1">62</td>
+                <td class="text-left" rowspan="1" colspan="1">1073741824</td>
+                <td class="text-left" rowspan="1" colspan="1">4611686018427387903</td>
+              </tr>
+            </tbody>
+          </table>
+</div>
+<p id="section-2.1.2-7">For example, the eight-byte sequence c2 19 7c 5e ff 14 e8 8c (in hexadecimal)
+decodes to the decimal value 151288809941952652; the four byte sequence 9d 7f 3e
+7d decodes to 494878333; the two byte sequence 7b bd decodes to 15293; and the
+single byte 25 decodes to 37 (as does the two byte sequence 40 25).<a href="#section-2.1.2-7" class="pilcrow">¶</a></p>
+<p id="section-2.1.2-8">The following figure adapts the pseudocode provided in <span>[<a href="#RFC9000" class="xref">RFC9000</a>]</span> to add a
+check for minimum-length encoding:<a href="#section-2.1.2-8" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-2.1.2-9">
+<pre>
+ReadVarint(data):
+  // The length of variable-length integers is encoded in the
+  // first two bits of the first byte.
+  v = data.next_byte()
+  prefix = v &gt;&gt; 6
+  length = 1 &lt;&lt; prefix
+
+  // Once the length is known, remove these bits and read any
+  // remaining bytes.
+  v = v &amp; 0x3f
+  repeat length-1 times:
+    v = (v &lt;&lt; 8) + data.next_byte()
+  return v
+
+  // Check that the encoder used the minimum bits required
+  if length &gt; 1 &amp;&amp; v &lt; (1 &lt;&lt; (length - 1)):
+    raise an exception
+</pre><a href="#section-2.1.2-9" class="pilcrow">¶</a>
+</div>
+<p id="section-2.1.2-10">The use of variable-size integers for vector lengths allows vectors to grow
+very large, up to 2^62 bytes.  Implementations should take care not to allow
+vectors to overflow available storage.  To facilitate debugging of potential
+interoperatbility problems, implementations should provide a clear error when
+such an overflow condition occurs.<a href="#section-2.1.2-10" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
 </section>
 </div>
 <div id="operating-context">
@@ -1989,7 +2144,7 @@ subsets of the group.  Each epoch has a distinct ratchet tree. It seeds the
 </li>
           <li class="normal" id="section-4.1-3.2">A <em>key schedule</em> that describes the chain of key derivations used to progress from
 epoch to epoch (mainly using the <em>init_secret</em> and <em>epoch_secret</em>); and to derive
-a variety of other secrets (see <a href="#epoch-derived-secrets" class="xref">Table 2</a>) used during the current
+a variety of other secrets (see <a href="#epoch-derived-secrets" class="xref">Table 3</a>) used during the current
 epoch. One of these (the <em>encryption_secret</em>) is the root of <em>secret_tree</em>.<a href="#section-4.1-3.2" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-4.1-3.3">A <em>secret tree</em> derived from the key schedule that represents shared secrets
@@ -2568,7 +2723,7 @@ protocol (see the Cryptographic Dependencies section of the HPKE specification f
 information).<a href="#section-6.1-4" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-6.1-5">
 <pre>
-opaque HPKEPublicKey&lt;1..2^16-1&gt;;
+opaque HPKEPublicKey&lt;V&gt;;
 </pre><a href="#section-6.1-5" class="pilcrow">¶</a>
 </div>
 <p id="section-6.1-6">The signature algorithm specified in the ciphersuite is the mandatory algorithm
@@ -2589,8 +2744,8 @@ VerifyWithLabel(VerificationKey, Label, Content) =
 Where SignContent is specified as:
 
 struct {
-    opaque label&lt;9..255&gt; = "MLS 1.0 " + Label;
-    opaque content&lt;0..2^32-1&gt; = Content;
+    opaque label&lt;V&gt; = "MLS 1.0 " + Label;
+    opaque content&lt;V&gt; = Content;
 } SignContent;
 </pre><a href="#section-6.1-8" class="pilcrow">¶</a>
 </div>
@@ -2673,13 +2828,13 @@ uint16 SignatureScheme;
 uint16 CredentialType;
 
 struct {
-    opaque identity&lt;0..2^16-1&gt;;
+    opaque identity&lt;V&gt;;
     SignatureScheme signature_scheme;
-    opaque signature_key&lt;0..2^16-1&gt;;
+    opaque signature_key&lt;V&gt;;
 } BasicCredential;
 
 struct {
-    opaque cert_data&lt;0..2^16-1&gt;;
+    opaque cert_data&lt;V&gt;;
 } Certificate;
 
 struct {
@@ -2689,7 +2844,7 @@ struct {
             BasicCredential;
 
         case x509:
-            Certificate chain&lt;1..2^32-1&gt;;
+            Certificate chain&lt;V&gt;;
     };
 } Credential;
 </pre><a href="#section-6.3-6" class="pilcrow">¶</a>
@@ -2796,7 +2951,7 @@ struct {
     SenderType sender_type;
     switch (sender_type) {
         case member:        LeafNodeRef member;
-        case preconfigured: opaque external_key_id&lt;0..255&gt;;
+        case preconfigured: opaque external_key_id&lt;V&gt;;
         case new_member:    struct{};
     }
 } Sender;
@@ -2812,15 +2967,15 @@ enum {
 } WireFormat;
 
 struct {
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     uint64 epoch;
     Sender sender;
-    opaque authenticated_data&lt;0..2^32-1&gt;;
+    opaque authenticated_data&lt;V&gt;;
 
     ContentType content_type;
     select (MLSMessageContent.content_type) {
         case application:
-          opaque application_data&lt;0..2^32-1&gt;;
+          opaque application_data&lt;V&gt;;
 
         case proposal:
           Proposal proposal;
@@ -2869,12 +3024,12 @@ struct MLSMessageContentAuth {
 <div class="alignLeft art-text artwork" id="section-7.1-2">
 <pre>
 struct {
-    opaque mac_value&lt;0..255&gt;;
+    opaque mac_value&lt;V&gt;;
 } MAC;
 
 struct {
     // SignWithLabel(., "MLSMessageContentTBS", MLSMessageContentTBS)
-    opaque signature&lt;0..2^16-1&gt;;
+    opaque signature&lt;V&gt;;
     select (MLSMessageContent.content_type) {
         case commit:
             // MAC(confirmation_key, GroupContext.confirmed_transcript_hash)
@@ -2964,12 +3119,12 @@ MLSMessageAuth is valid.<a href="#section-7.2-5" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.3-2">
 <pre>
 struct {
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     uint64 epoch;
     ContentType content_type;
-    opaque authenticated_data&lt;0..2^32-1&gt;;
-    opaque encrypted_sender_data&lt;0..255&gt;;
-    opaque ciphertext&lt;0..2^32-1&gt;;
+    opaque authenticated_data&lt;V&gt;;
+    opaque encrypted_sender_data&lt;V&gt;;
+    opaque ciphertext&lt;V&gt;;
 } MLSCiphertext;
 </pre><a href="#section-7.3-2" class="pilcrow">¶</a>
 </div>
@@ -2987,7 +3142,7 @@ and MLSCiphertextContent.<a href="#section-7.3-3" class="pilcrow">¶</a></p>
 struct {
     select (MLSCiphertext.content_type) {
         case application:
-          opaque application_data&lt;0..2^32-1&gt;;
+          opaque application_data&lt;V&gt;;
 
         case proposal:
           Proposal proposal;
@@ -2997,7 +3152,7 @@ struct {
     }
 
     MLSMessageAuth auth;
-    opaque padding&lt;0..2^16-1&gt;;
+    opaque padding&lt;V&gt;;
 } MLSCiphertextContent;
 </pre><a href="#section-7.3.1-2" class="pilcrow">¶</a>
 </div>
@@ -3039,10 +3194,10 @@ identify the key and nonce:<a href="#section-7.3.1-7" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.3.1-8">
 <pre>
 struct {
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     uint64 epoch;
     ContentType content_type;
-    opaque authenticated_data&lt;0..2^32-1&gt;;
+    opaque authenticated_data&lt;V&gt;;
 } MLSCiphertextContentAAD;
 </pre><a href="#section-7.3.1-8" class="pilcrow">¶</a>
 </div>
@@ -3092,7 +3247,7 @@ fields of MLSCiphertext excluding <code>encrypted_sender_data</code>:<a href="#s
 <div class="alignLeft art-text artwork" id="section-7.3.2-8">
 <pre>
 struct {
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     uint64 epoch;
     ContentType content_type;
 } MLSSenderDataAAD;
@@ -3130,8 +3285,8 @@ subgroups of the group (for parent nodes).  Parent nodes are simpler:<a href="#s
 <pre>
 struct {
     HPKEPublicKey public_key;
-    opaque parent_hash&lt;0..255&gt;;
-    uint32 unmerged_leaves&lt;0..2^32-1&gt;;
+    opaque parent_hash&lt;V&gt;;
+    uint32 unmerged_leaves&lt;V&gt;;
 } ParentNode;
 </pre><a href="#section-8.1-2" class="pilcrow">¶</a>
 </div>
@@ -3153,10 +3308,10 @@ enum {
 } LeafNodeSource;
 
 struct {
-    ProtocolVersion versions&lt;0..255&gt;;
-    CipherSuite ciphersuites&lt;0..255&gt;;
-    ExtensionType extensions&lt;0..255&gt;;
-    ProposalType proposals&lt;0..255&gt;;
+    ProtocolVersion versions&lt;V&gt;;
+    CipherSuite ciphersuites&lt;V&gt;;
+    ExtensionType extensions&lt;V&gt;;
+    ProposalType proposals&lt;V&gt;;
 } Capabilities;
 
 struct {
@@ -3178,12 +3333,12 @@ struct {
             struct {}
 
         case commit:
-            opaque parent_hash&lt;0..255&gt;;
+            opaque parent_hash&lt;V&gt;;
     }
 
-    Extension extensions&lt;8..2^32-1&gt;;
+    Extension extensions&lt;V&gt;;
     // SignWithLabel(., "LeafNodeTBS", LeafNodeTBS)
-    opaque signature&lt;0..2^16-1&gt;;
+    opaque signature&lt;V&gt;;
 } LeafNode;
 
 struct {
@@ -3200,20 +3355,20 @@ struct {
             struct{};
 
         case commit:
-            opaque parent_hash&lt;0..255&gt;;
+            opaque parent_hash&lt;V&gt;;
     }
 
-    Extension extensions&lt;8..2^32-1&gt;;
+    Extension extensions&lt;V&gt;;
 
     select (leaf_node_source) {
         case add:
             struct{};
 
         case update:
-            opaque group_id&lt;0..255&gt;;
+            opaque group_id&lt;V&gt;;
 
         case commit:
-            opaque group_id&lt;0..255&gt;;
+            opaque group_id&lt;V&gt;;
     }
 } LeafNodeTBS;
 </pre><a href="#section-8.1-5" class="pilcrow">¶</a>
@@ -3546,8 +3701,8 @@ compute and store the node's updated private key.<a href="#section-8.4-6.2.2.2" 
 <p id="section-8.4-7">For example, in order to communicate the example update described in
 the previous section, the sender would transmit the following
 values:<a href="#section-8.4-7" class="pilcrow">¶</a></p>
-<table class="center" id="table-1">
-          <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
+<table class="center" id="table-2">
+          <caption><a href="#table-2" class="selfRef">Table 2</a></caption>
 <thead>
             <tr>
               <th class="text-left" rowspan="1" colspan="1">Public Key</th>
@@ -3590,43 +3745,30 @@ of the group, this section defines a scheme for generating a hash value (called
 the "tree hash") that represents the contents of the group's ratchet tree and the
 members' leaf nodes. The tree hash of a tree is the tree hash of its root node,
 which we define recursively, starting with the leaves.<a href="#section-8.5-1" class="pilcrow">¶</a></p>
-<p id="section-8.5-2">As some nodes may be blank while others contain data we use the following struct
-to include data if present.<a href="#section-8.5-2" class="pilcrow">¶</a></p>
+<p id="section-8.5-2">The tree hash of a leaf node is the hash of leaf's <code>LeafNodeHashInput</code> object which
+might include a <code>LeafNode</code> object depending on whether or not it is blank.<a href="#section-8.5-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.5-3">
-<pre>
-struct {
-    uint8 present;
-    select (present) {
-        case 0: struct{};
-        case 1: T value;
-    }
-} optional&lt;T&gt;;
-</pre><a href="#section-8.5-3" class="pilcrow">¶</a>
-</div>
-<p id="section-8.5-4">The tree hash of a leaf node is the hash of leaf's <code>LeafNodeHashInput</code> object which
-might include a <code>LeafNode</code> object depending on whether or not it is blank.<a href="#section-8.5-4" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-8.5-5">
 <pre>
 struct {
     uint32 leaf_index;
     optional&lt;LeafNode&gt; leaf_node;
 } LeafNodeHashInput;
-</pre><a href="#section-8.5-5" class="pilcrow">¶</a>
+</pre><a href="#section-8.5-3" class="pilcrow">¶</a>
 </div>
-<p id="section-8.5-6">Now the tree hash of any non-leaf node is recursively defined to be the hash of
+<p id="section-8.5-4">Now the tree hash of any non-leaf node is recursively defined to be the hash of
 its <code>ParentNodeHashInput</code>. This includes an optional <code>ParentNode</code>
-object depending on whether the node is blank or not.<a href="#section-8.5-6" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-8.5-7">
+object depending on whether the node is blank or not.<a href="#section-8.5-4" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.5-5">
 <pre>
 struct {
     optional&lt;ParentNode&gt; parent_node;
-    opaque left_hash&lt;0..255&gt;;
-    opaque right_hash&lt;0..255&gt;;
+    opaque left_hash&lt;V&gt;;
+    opaque right_hash&lt;V&gt;;
 } ParentNodeHashInput;
-</pre><a href="#section-8.5-7" class="pilcrow">¶</a>
+</pre><a href="#section-8.5-5" class="pilcrow">¶</a>
 </div>
-<p id="section-8.5-8">The <code>left_hash</code> and <code>right_hash</code> fields hold the tree hashes of the node's
-left and right children, respectively.<a href="#section-8.5-8" class="pilcrow">¶</a></p>
+<p id="section-8.5-6">The <code>left_hash</code> and <code>right_hash</code> fields hold the tree hashes of the node's
+left and right children, respectively.<a href="#section-8.5-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="parent-hash">
@@ -3638,7 +3780,7 @@ left and right children, respectively.<a href="#section-8.5-8" class="pilcrow">�
 the tree, as described below.<a href="#section-8.6-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.6-2">
 <pre>
-opaque parent_hash&lt;0..255&gt;;
+opaque parent_hash&lt;V&gt;;
 </pre><a href="#section-8.6-2" class="pilcrow">¶</a>
 </div>
 <p id="section-8.6-3">Consider a ratchet tree with a parent node P and children V and S. The parent hash
@@ -3654,8 +3796,8 @@ to which PK's secret key was encrypted in the Commit that contained the
 <pre>
 struct {
     HPKEPublicKey public_key;
-    opaque parent_hash&lt;0..255&gt;;
-    HPKEPublicKey original_child_resolution&lt;0..2^32-1&gt;;
+    opaque parent_hash&lt;V&gt;;
+    HPKEPublicKey original_child_resolution&lt;V&gt;;
 } ParentHashInput;
 </pre><a href="#section-8.6-4" class="pilcrow">¶</a>
 </div>
@@ -3737,18 +3879,18 @@ parent of its predecessor.<a href="#section-8.7-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.7-2">
 <pre>
 struct {
-    opaque kem_output&lt;0..2^16-1&gt;;
-    opaque ciphertext&lt;0..2^16-1&gt;;
+    opaque kem_output&lt;V&gt;;
+    opaque ciphertext&lt;V&gt;;
 } HPKECiphertext;
 
 struct {
     HPKEPublicKey public_key;
-    HPKECiphertext encrypted_path_secret&lt;0..2^32-1&gt;;
+    HPKECiphertext encrypted_path_secret&lt;V&gt;;
 } UpdatePathNode;
 
 struct {
     LeafNode leaf_node;
-    UpdatePathNode nodes&lt;0..2^32-1&gt;;
+    UpdatePathNode nodes&lt;V&gt;;
 } UpdatePath;
 </pre><a href="#section-8.7-2" class="pilcrow">¶</a>
 </div>
@@ -3790,8 +3932,8 @@ Where KDFLabel is specified as:
 
 struct {
     uint16 length = Length;
-    opaque label&lt;7..255&gt; = "MLS 1.0 " + Label;
-    opaque context&lt;0..2^32-1&gt; = Context;
+    opaque label&lt;V&gt; = "MLS 1.0 " + Label;
+    opaque context&lt;V&gt; = Context;
 } KDFLabel;
 
 DeriveSecret(Secret, Label) =
@@ -3859,9 +4001,9 @@ psk_secret (or 0) -&gt; KDF.Extract
 </div>
 <p id="section-9-9">A number of secrets are derived from the epoch secret for different purposes:<a href="#section-9-9" class="pilcrow">¶</a></p>
 <span id="name-epoch-derived-secrets"></span><div id="epoch-derived-secrets">
-<table class="center" id="table-2">
+<table class="center" id="table-3">
         <caption>
-<a href="#table-2" class="selfRef">Table 2</a>:
+<a href="#table-3" class="selfRef">Table 3</a>:
 <a href="#name-epoch-derived-secrets" class="selfRef">Epoch-derived secrets</a>
         </caption>
 <thead>
@@ -3941,11 +4083,11 @@ summarizes the state of the group:<a href="#section-9.1-1" class="pilcrow">¶</a
 <div class="alignLeft art-text artwork" id="section-9.1-2">
 <pre>
 struct {
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     uint64 epoch;
-    opaque tree_hash&lt;0..255&gt;;
-    opaque confirmed_transcript_hash&lt;0..255&gt;;
-    Extension extensions&lt;0..2^32-1&gt;;
+    opaque tree_hash&lt;V&gt;;
+    opaque confirmed_transcript_hash&lt;V&gt;;
+    Extension extensions&lt;V&gt;;
 } GroupContext;
 </pre><a href="#section-9.1-2" class="pilcrow">¶</a>
 </div>
@@ -4009,7 +4151,7 @@ MLSMessageAuth containing a Commit in two steps:<a href="#section-9.2-2" class="
 struct {
     WireFormat wire_format;
     MLSMessageContent content; //with content.content_type == commit
-    opaque signature&lt;0..2^16-1&gt;;
+    opaque signature&lt;V&gt;;
 } MLSMessageCommitContent;
 
 struct {
@@ -4119,18 +4261,18 @@ struct {
   PSKType psktype;
   select (PreSharedKeyID.psktype) {
     case external:
-      opaque psk_id&lt;0..255&gt;;
+      opaque psk_id&lt;V&gt;;
 
     case resumption:
       ResumptionPSKUsage usage;
-      opaque psk_group_id&lt;0..255&gt;;
+      opaque psk_group_id&lt;V&gt;;
       uint64 psk_epoch;
   }
-  opaque psk_nonce&lt;0..255&gt;;
+  opaque psk_nonce&lt;V&gt;;
 } PreSharedKeyID;
 
 struct {
-    PreSharedKeyID psks&lt;0..2^16-1&gt;;
+    PreSharedKeyID psks&lt;V&gt;;
 } PreSharedKeys;
 </pre><a href="#section-9.4-6" class="pilcrow">¶</a>
 </div>
@@ -4450,7 +4592,7 @@ uint16 ExtensionType;
 
 struct {
     ExtensionType extension_type;
-    opaque extension_data&lt;0..2^32-1&gt;;
+    opaque extension_data&lt;V&gt;;
 } Extension;
 
 struct {
@@ -4458,9 +4600,9 @@ struct {
     CipherSuite cipher_suite;
     HPKEPublicKey init_key;
     LeafNode leaf_node;
-    Extension extensions&lt;8..2^32-1&gt;;
+    Extension extensions&lt;V&gt;;
     // SignWithLabel(., "KeyPackageTBS", KeyPackageTBS)
-    opaque signature&lt;0..2^16-1&gt;;
+    opaque signature&lt;V&gt;;
 } KeyPackage;
 
 struct {
@@ -4468,7 +4610,7 @@ struct {
     CipherSuite cipher_suite;
     HPKEPublicKey init_key;
     LeafNode leaf_node;
-    Extension extensions&lt;8..2^32-1&gt;;
+    Extension extensions&lt;V&gt;;
 } KeyPackageTBS;
 </pre><a href="#section-11-6" class="pilcrow">¶</a>
 </div>
@@ -4540,10 +4682,10 @@ not be listed.<a href="#section-11.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-11.2-2">
 <pre>
 struct {
-    ProtocolVersion versions&lt;0..255&gt;;
-    CipherSuite ciphersuites&lt;0..255&gt;;
-    ExtensionType extensions&lt;0..255&gt;;
-    ProposalType proposals&lt;0..255&gt;;
+    ProtocolVersion versions&lt;V&gt;;
+    CipherSuite ciphersuites&lt;V&gt;;
+    ExtensionType extensions&lt;V&gt;;
+    ProposalType proposals&lt;V&gt;;
 } Capabilities;
 </pre><a href="#section-11.2-2" class="pilcrow">¶</a>
 </div>
@@ -4584,7 +4726,7 @@ this duration.<a href="#section-11.3-3" class="pilcrow">¶</a></p>
 applications to add an explicit, application-defined identifier to a KeyPackage.<a href="#section-11.4-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-11.4-2">
 <pre>
-opaque external_key_id&lt;0..2^16-1&gt;;
+opaque external_key_id&lt;V&gt;;
 </pre><a href="#section-11.4-2" class="pilcrow">¶</a>
 </div>
 </section>
@@ -4666,8 +4808,8 @@ including a <code>required_capabilities</code> extension in the GroupContext.<a 
 <div class="alignLeft art-text artwork" id="section-12.1-2">
 <pre>
 struct {
-    ExtensionType extensions&lt;0..255&gt;;
-    ProposalType proposals&lt;0..255&gt;;
+    ExtensionType extensions&lt;V&gt;;
+    ProposalType proposals&lt;V&gt;;
 } RequiredCapabilities;
 </pre><a href="#section-12.1-2" class="pilcrow">¶</a>
 </div>
@@ -4945,10 +5087,10 @@ and shutting down the old one.<a href="#section-13.1.5-1" class="pilcrow">¶</a>
 <div class="alignLeft art-text artwork" id="section-13.1.5-2">
 <pre>
 struct {
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     ProtocolVersion version;
     CipherSuite cipher_suite;
-    Extension extensions&lt;0..2^32-1&gt;;
+    Extension extensions&lt;V&gt;;
 } ReInit;
 </pre><a href="#section-13.1.5-2" class="pilcrow">¶</a>
 </div>
@@ -4972,7 +5114,7 @@ using an external commit. This proposal can only be used in that context.<a href
 <div class="alignLeft art-text artwork" id="section-13.1.6-2">
 <pre>
 struct {
-  opaque kem_output&lt;0..2^16-1&gt;;
+  opaque kem_output&lt;V&gt;;
 } ExternalInit;
 </pre><a href="#section-13.1.6-2" class="pilcrow">¶</a>
 </div>
@@ -4999,7 +5141,7 @@ struct {
 } MessageRange;
 
 struct {
-    MessageRange received_ranges&lt;0..2^32-1&gt;;
+    MessageRange received_ranges&lt;V&gt;;
 } AppAck;
 </pre><a href="#section-13.1.7-2" class="pilcrow">¶</a>
 </div>
@@ -5049,7 +5191,7 @@ at the expected time.<a href="#section-13.1.7-7" class="pilcrow">¶</a></p>
 the GroupContext for the group.<a href="#section-13.1.8-1" class="pilcrow">¶</a></p>
 <p id="section-13.1.8-2"><code>
 struct {
-  Extension extensions&lt;0..2^32-1&gt;;
+  Extension extensions&lt;V&gt;;
 } GroupContextExtensions;
 </code><a href="#section-13.1.8-2" class="pilcrow">¶</a></p>
 <p id="section-13.1.8-3">A member of the group applies a GroupContextExtensions proposal with the
@@ -5137,7 +5279,7 @@ struct {
 } ProposalOrRef;
 
 struct {
-    ProposalOrRef proposals&lt;0..2^32-1&gt;;
+    ProposalOrRef proposals&lt;V&gt;;
     optional&lt;UpdatePath&gt; path;
 } Commit;
 </pre><a href="#section-13.2-3" class="pilcrow">¶</a>
@@ -5479,16 +5621,16 @@ new members need information to bootstrap their local group state.<a href="#sect
 struct {
     ProtocolVersion version = mls10;
     CipherSuite cipher_suite;
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     uint64 epoch;
-    opaque tree_hash&lt;0..255&gt;;
-    opaque confirmed_transcript_hash&lt;0..255&gt;;
-    Extension group_context_extensions&lt;0..2^32-1&gt;;
-    Extension other_extensions&lt;0..2^32-1&gt;;
+    opaque tree_hash&lt;V&gt;;
+    opaque confirmed_transcript_hash&lt;V&gt;;
+    Extension group_context_extensions&lt;V&gt;;
+    Extension other_extensions&lt;V&gt;;
     MAC confirmation_tag;
     LeafNodeRef signer;
     // SignWithLabel(., "GroupInfoTBS", GroupInfoTBS)
-    opaque signature&lt;0..2^16-1&gt;;
+    opaque signature&lt;V&gt;;
 } GroupInfo;
 </pre><a href="#section-13.2.3-2" class="pilcrow">¶</a>
 </div>
@@ -5500,12 +5642,12 @@ GroupInfo above <code>signature</code>:<a href="#section-13.2.3-3" class="pilcro
 <pre>
 struct {
     CipherSuite cipher_suite;
-    opaque group_id&lt;0..255&gt;;
+    opaque group_id&lt;V&gt;;
     uint64 epoch;
-    opaque tree_hash&lt;0..255&gt;;
-    opaque confirmed_transcript_hash&lt;0..255&gt;;
-    Extension group_context_extensions&lt;0..2^32-1&gt;;
-    Extension other_extensions&lt;0..2^32-1&gt;;
+    opaque tree_hash&lt;V&gt;;
+    opaque confirmed_transcript_hash&lt;V&gt;;
+    Extension group_context_extensions&lt;V&gt;;
+    Extension other_extensions&lt;V&gt;;
     MAC confirmation_tag;
     LeafNodeRef signer;
 } GroupInfoTBS;
@@ -5649,11 +5791,11 @@ indicating which PSK to use.<a href="#section-13.2.3.2-3" class="pilcrow">¶</a>
 <div class="alignLeft art-text artwork" id="section-13.2.3.2-4">
 <pre>
 struct {
-  opaque path_secret&lt;1..255&gt;;
+  opaque path_secret&lt;V&gt;;
 } PathSecret;
 
 struct {
-  opaque joiner_secret&lt;1..255&gt;;
+  opaque joiner_secret&lt;V&gt;;
   optional&lt;PathSecret&gt; path_secret;
   PreSharedKeys psks;
 } GroupSecrets;
@@ -5665,8 +5807,8 @@ struct {
 
 struct {
   CipherSuite cipher_suite;
-  EncryptedGroupSecrets secrets&lt;0..2^32-1&gt;;
-  opaque encrypted_group_info&lt;1..2^32-1&gt;;
+  EncryptedGroupSecrets secrets&lt;V&gt;;
+  opaque encrypted_group_info&lt;V&gt;;
 } Welcome;
 </pre><a href="#section-13.2.3.2-4" class="pilcrow">¶</a>
 </div>
@@ -5805,7 +5947,7 @@ struct {
     };
 } Node;
 
-optional&lt;Node&gt; ratchet_tree&lt;1..2^32-1&gt;;
+optional&lt;Node&gt; ratchet_tree&lt;V&gt;;
 </pre><a href="#section-13.3-3" class="pilcrow">¶</a>
 </div>
 <p id="section-13.3-4">The nodes are listed in the order specified by a left-to-right in-order
@@ -6351,8 +6493,8 @@ CipherSuite MLS_LVL_KEM_AEAD_HASH_SIG = VALUE;
 uint16 CipherSuite;
 </pre><a href="#section-18.1-5" class="pilcrow">¶</a>
 </div>
-<table class="center" id="table-3">
-          <caption><a href="#table-3" class="selfRef">Table 3</a></caption>
+<table class="center" id="table-4">
+          <caption><a href="#table-4" class="selfRef">Table 4</a></caption>
 <thead>
             <tr>
               <th class="text-left" rowspan="1" colspan="1">Component</th>
@@ -6398,8 +6540,8 @@ is REQUIRED for a Y-&gt;N transition.<a href="#section-18.1-8.3" class="pilcrow"
 </li>
         </ul>
 <p id="section-18.1-9">Initial contents:<a href="#section-18.1-9" class="pilcrow">¶</a></p>
-<table class="center" id="table-4">
-          <caption><a href="#table-4" class="selfRef">Table 4</a></caption>
+<table class="center" id="table-5">
+          <caption><a href="#table-5" class="selfRef">Table 5</a></caption>
 <thead>
             <tr>
               <th class="text-left" rowspan="1" colspan="1">Value</th>
@@ -6469,8 +6611,8 @@ is REQUIRED for a Y-&gt;N transition.<a href="#section-18.1-8.3" class="pilcrow"
 different hashes per ciphersuite.  The mapping of ciphersuites to HPKE
 primitives, HMAC hash functions, and TLS signature schemes is as follows
 <span>[<a href="#I-D.irtf-cfrg-hpke" class="xref">I-D.irtf-cfrg-hpke</a>]</span> <span>[<a href="#RFC8446" class="xref">RFC8446</a>]</span>:<a href="#section-18.1-11" class="pilcrow">¶</a></p>
-<table class="center" id="table-5">
-          <caption><a href="#table-5" class="selfRef">Table 5</a></caption>
+<table class="center" id="table-6">
+          <caption><a href="#table-6" class="selfRef">Table 6</a></caption>
 <thead>
             <tr>
               <th class="text-left" rowspan="1" colspan="1">Value</th>
@@ -6602,8 +6744,8 @@ is REQUIRED for a Y-&gt;N transition.<a href="#section-18.2-3.4" class="pilcrow"
 </li>
         </ul>
 <p id="section-18.2-4">Initial contents:<a href="#section-18.2-4" class="pilcrow">¶</a></p>
-<table class="center" id="table-6">
-          <caption><a href="#table-6" class="selfRef">Table 6</a></caption>
+<table class="center" id="table-7">
+          <caption><a href="#table-7" class="selfRef">Table 7</a></caption>
 <thead>
             <tr>
               <th class="text-left" rowspan="1" colspan="1">Value</th>
@@ -6684,8 +6826,8 @@ is REQUIRED for a Y-&gt;N transition.<a href="#section-18.3-3.3" class="pilcrow"
 </li>
         </ul>
 <p id="section-18.3-4">Initial contents:<a href="#section-18.3-4" class="pilcrow">¶</a></p>
-<table class="center" id="table-7">
-          <caption><a href="#table-7" class="selfRef">Table 7</a></caption>
+<table class="center" id="table-8">
+          <caption><a href="#table-8" class="selfRef">Table 8</a></caption>
 <thead>
             <tr>
               <th class="text-left" rowspan="1" colspan="1">Value</th>
@@ -6783,8 +6925,8 @@ is REQUIRED for a Y-&gt;N transition.<a href="#section-18.4-3.3" class="pilcrow"
 </li>
         </ul>
 <p id="section-18.4-4">Initial contents:<a href="#section-18.4-4" class="pilcrow">¶</a></p>
-<table class="center" id="table-8">
-          <caption><a href="#table-8" class="selfRef">Table 8</a></caption>
+<table class="center" id="table-9">
+          <caption><a href="#table-9" class="selfRef">Table 9</a></caption>
 <thead>
             <tr>
               <th class="text-left" rowspan="1" colspan="1">Value</th>
@@ -7032,6 +7174,10 @@ thyla.van.der@merwe.tech<a href="#section-19-1.12" class="pilcrow">¶</a>
 <dt id="RFC8032">[RFC8032]</dt>
         <dd>
 <span class="refAuthor">Josefsson, S.</span> and <span class="refAuthor">I. Liusvaara</span>, <span class="refTitle">"Edwards-Curve Digital Signature Algorithm (EdDSA)"</span>, <span class="seriesInfo">RFC 8032</span>, <span class="seriesInfo">DOI 10.17487/RFC8032</span>, <time datetime="2017-01" class="refDate">January 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8032">https://www.rfc-editor.org/rfc/rfc8032</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9000">[RFC9000]</dt>
+        <dd>
+<span class="refAuthor">Iyengar, J., Ed.</span> and <span class="refAuthor">M. Thomson, Ed.</span>, <span class="refTitle">"QUIC: A UDP-Based Multiplexed and Secure Transport"</span>, <span class="seriesInfo">RFC 9000</span>, <span class="seriesInfo">DOI 10.17487/RFC9000</span>, <time datetime="2021-05" class="refDate">May 2021</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9000">https://www.rfc-editor.org/rfc/rfc9000</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="SECG">[SECG]</dt>
         <dd>
