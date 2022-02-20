@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-02-17T01:02:36.676562+00:00",
+  "timestamp": "2022-02-20T01:15:17.645700+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -5736,15 +5736,15 @@
       "id": "I_kwDOBoyH6c5Cjsun",
       "title": "Remove redundant nodes from the tree",
       "url": "https://github.com/mlswg/mls-protocol/issues/559",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Right now, the UpdatePath generation and processing algorithms populate \"redundant\" parent nodes in the tree, in the sense that they have only one child node.  These redundant nodes are harmless except that they make tree truncation less effective.  We should update the UpdatePath algorithms so that they do not add redundant nodes to the tree.",
       "createdAt": "2022-01-27T19:24:35Z",
-      "updatedAt": "2022-01-31T12:25:23Z",
-      "closedAt": null,
+      "updatedAt": "2022-02-18T19:44:00Z",
+      "closedAt": "2022-02-18T19:44:00Z",
       "comments": [
         {
           "author": "raphaelrobert",
@@ -5752,6 +5752,13 @@
           "body": "I think the definition of redundant is slightly different than what you propose. Redundant nodes are nodes with a resolution of only one leaf node, where all parent nodes are filtered out of the resolution. I think in the very early days we called that a \"shadow\".\r\n\r\nWith the definition you propose, I think it would become impossible to do the first-ever full commit in an otherwise empty tree.",
           "createdAt": "2022-01-31T12:25:22Z",
           "updatedAt": "2022-01-31T12:25:22Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Fixed by #587 ",
+          "createdAt": "2022-02-18T19:42:41Z",
+          "updatedAt": "2022-02-18T19:42:41Z"
         }
       ]
     },
@@ -5947,15 +5954,15 @@
       "id": "I_kwDOBoyH6c5DV5QB",
       "title": "external_key_id seems to have a double usage",
       "url": "https://github.com/mlswg/mls-protocol/issues/588",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "raphaelrobert",
       "authorAssociation": "MEMBER",
       "assignees": [],
       "labels": [],
       "body": "`external_key_id` is used both for:\r\n - pre-configured senders (aka senders that are explicitly not part of any group)\r\n - a `KeyPackage` extension (aka something used only by members of groups)\r\n \r\nI think this should be disambiguated.",
       "createdAt": "2022-02-10T10:43:54Z",
-      "updatedAt": "2022-02-16T11:25:22Z",
-      "closedAt": null,
+      "updatedAt": "2022-02-18T19:53:04Z",
+      "closedAt": "2022-02-18T19:53:04Z",
       "comments": [
         {
           "author": "bifurcation",
@@ -5970,6 +5977,13 @@
           "body": "I think that they are still fundamentally different concepts and it's just a name collision introduced by mistake. Pre-configured senders are there to allow for entities like servers to make proposals for a group. There is no overlap between these entities and (future) group members. We should just rename one of the instances.",
           "createdAt": "2022-02-16T11:25:22Z",
           "updatedAt": "2022-02-16T11:25:22Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Discussion:\r\n\r\n* TODO(@bifurcation) `Sender.external_key_id -> Sender.id` or something like that",
+          "createdAt": "2022-02-17T16:36:31Z",
+          "updatedAt": "2022-02-17T16:36:31Z"
         }
       ]
     },
@@ -5978,15 +5992,15 @@
       "id": "I_kwDOBoyH6c5DYCpB",
       "title": "Replace labeled signing with signing wire format?",
       "url": "https://github.com/mlswg/mls-protocol/issues/589",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "With #523, we now have a wire format for each signed thing.  Could we just use this instead of a string label to distinguish signatures?",
       "createdAt": "2022-02-10T16:02:27Z",
-      "updatedAt": "2022-02-11T15:10:06Z",
-      "closedAt": null,
+      "updatedAt": "2022-02-18T21:11:24Z",
+      "closedAt": "2022-02-18T21:11:24Z",
       "comments": [
         {
           "author": "TWal",
@@ -6001,6 +6015,20 @@
           "body": "Unless we convert the whole protocol to JSON, you're going to have to deal with binary stuff :)",
           "createdAt": "2022-02-11T15:10:06Z",
           "updatedAt": "2022-02-11T15:10:06Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Discussion on virtual interim:\r\n\r\n* What's important is to have a \"magic string\" that distinguishes this protocol from other protocols\r\n* Need to distinguish between\r\n    1. Different structures within MLS\r\n    2. Different versions of MLS\r\n    3. MLS vs. everything else\r\n* E.g., \"MLS 1.0 KeyPackageTBS\" ~> protocol / version /  type\r\n* In addition to already having it, having the protocol distinguisher in ASCII gives greater confidence\r\n    * \"Intra-protocol\" identifiers can be small\r\n    * \"Inter-protocol\" identifiers need to be larger to reduce collision probability\r\n    * Consider introducing some standard prefix to \"MLS\"\r\n* If we're going to have both ASCII distinguisher and `wire_format`, spec needs to enforce equivalence\r\n    * Could also omit wire_format from signature and rely on ASCII distinguisher alone\r\n    * TODO(@TWal) Check that this is clear in the spec, see if wire format should be omitted",
+          "createdAt": "2022-02-17T16:33:18Z",
+          "updatedAt": "2022-02-17T16:33:18Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "When we discussed this on the virtual interim, I forgot about #590, which provides a protocol-internal version.  That gives us small distinguisher for the version, so we're down to the inter-protocol distinguisher.\r\n",
+          "createdAt": "2022-02-18T21:11:24Z",
+          "updatedAt": "2022-02-18T21:11:24Z"
         }
       ]
     },
@@ -6025,15 +6053,15 @@
       "id": "I_kwDOBoyH6c5DZxEJ",
       "title": "Reinit logic clarification",
       "url": "https://github.com/mlswg/mls-protocol/issues/591",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "tomleavy",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "The goal of the reinit proposal is to trigger a tear down / restart of a group with the same members but different parameters such as a version upgrade, or a cipher suite change.\r\n \r\n1. Changing version - version is a field within key package, and this locks a key package to a specific version, even if capabilities allow for multiple versions. Should that field be removed, and instead you just look at capabilities? It seems that this would change with #575 since leaf nodes will not be pinned to a specific version, just a cipher suite. After 575 gets merged one could upgrade versions using a new tree that copies the current non-empty leaves so long as each leaf has the upgraded version in their capabilities set. That specific tree building process is not mentioned, it is just sort of assumed in context.\r\n \r\n2. Changing cipher suite - In the case you want to change cipher suite, complexity somewhat increases. You will need to create a new tree by grabbing new key packages for each participant, and because the cipher suite has changed, all of the credentials have also changed. It is mentioned that \"A group may be reinitialized by creating a new group with the same membership and different parameters\", but this does not have a statement that has a SHOULD or MUST associated with it. For example, in my 5000 member group 1 member does not support the cipher suite that we are migrating away from. As the committer, I'm assuming that I should keep everyone in the group as best effort, but have the option to filter out problematic members that are blocking a migration due to them being offline for long periods of time or having outdated software. Due to the credential change, enforcing a MUST might be difficult since equality between two x509 credentials is not straight forward for example.\r\n \r\nTo summarize, I propose some changes\r\n \r\n1. Remove version from key package, and rely on capabilities instead, this may now be irrelevant due to #575, but the version and capabilities.versions values seem duplicative\r\n \r\n2. Add some language in reinitialization that clarifies the flow for upgrading just version vs changing cipher suite, where changing cipher suite explicitly requires you acquire new key packages for each member.\r\n \r\n3. Clarify that a person issuing the welcome based on a reinit proposal SHOULD include all existing members",
       "createdAt": "2022-02-10T19:59:42Z",
-      "updatedAt": "2022-02-15T22:51:52Z",
-      "closedAt": null,
+      "updatedAt": "2022-02-18T19:20:11Z",
+      "closedAt": "2022-02-18T19:20:11Z",
       "comments": [
         {
           "author": "bifurcation",
@@ -6055,6 +6083,20 @@
           "body": "On (3) -- I would be OK with saying that the new members MUST be the same as the old members.  The notion of \"same\" is a little squishy, given ambiguities around identifiers, but it seems like it will probably be clear in practice.  W.r.t. removing people to make an upgrade possible, when the application decides to upgrade and how the application it meets the same-member criterion is up to the application.",
           "createdAt": "2022-02-15T22:51:52Z",
           "updatedAt": "2022-02-15T22:51:52Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Discussion on virtual interim:\r\n\r\n* Maybe put \"remove before upgrade\" in implementation considerations document.",
+          "createdAt": "2022-02-17T16:19:32Z",
+          "updatedAt": "2022-02-17T16:19:32Z"
+        },
+        {
+          "author": "tomleavy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "@bifurcation I meant to make this call to discuss, seem to not have the invite anymore, can you forward it to me? In terms of where this ticket is at, I was mostly raising the concerns to clarify for myself that what I _think_ is the process is actually the process. I am willing to just close this one out",
+          "createdAt": "2022-02-17T17:03:14Z",
+          "updatedAt": "2022-02-17T17:03:14Z"
         }
       ]
     },
@@ -6063,15 +6105,15 @@
       "id": "I_kwDOBoyH6c5D4v6E",
       "title": "Invert definition of \"partial\" commit",
       "url": "https://github.com/mlswg/mls-protocol/issues/596",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "kkohbrok",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "The authoritative definition (in Section [13.2](https://messaginglayersecurity.rocks/mls-protocol/draft-ietf-mls-protocol.html#section-13.2)) of when to include a `path` is not the same as the summary below. For example, if an implementation adds a custom proposal type, according to the summary, a path is required, whereas according to the definition above it, no path is required.\r\n\r\nUltimately, it depends on the nature of the proposal and the desired security guarantees if a path is required. However, I think the safer option is to require a path by default and maybe leave it to the definition of the respective custom proposal to explicitly specify if a path is _not_ required.",
       "createdAt": "2022-02-15T16:50:40Z",
-      "updatedAt": "2022-02-15T16:50:40Z",
-      "closedAt": null,
+      "updatedAt": "2022-02-18T19:18:51Z",
+      "closedAt": "2022-02-18T19:18:51Z",
       "comments": []
     }
   ],
@@ -40511,13 +40553,13 @@
       ],
       "body": "Our proposal\r\n============\r\n\r\nThe parent hash construction currently authenticates only the public keys in the ratchet tree and does not protect other tree contents, notably the credentials at the leaves.\r\nConsequently, a malicious member can tamper with the credentials before sending a Welcome package to a new member, even if it cannot tamper with the public keys.\r\n\r\nInstead of using the tree resolution in the parent hash computation, we propose to use the tree hash.\r\n\r\nThe last time this was discussed on the list, it was agreed that it would be better to use tree hashes from a security point of view, but it was felt that complexity-wise that the recipient of a Welcome message would have to do O(n^2) work.\r\nA more thorough analysis shows that processing a Welcome message can be done in O(n*log(log(n))).\r\nThe result is that each signature captures the full tree contents including leaf credentials, which provides better authentication guarantees for member identities.\r\n\r\nEfficient algorithm to process a Commit\r\n=======================================\r\n\r\nWhen processing Commits, the implementation can store the tree hashes of every subtree.\r\nThat way, with n being the number of leaves, you can process each proposal in O(log(n)) and each UpdatePath in O(log(n)).\r\nThen you can check the parent hash when processing a Commit in O(p*log(n)) where p is the number of proposals.\r\n\r\nEfficient (enough) algorithm to process a Welcome\r\n=================================================\r\n\r\nWhen processing a Welcome message, we need to do the parent hash verification procedure.\r\nTo do it with the new parent hash, we need to compute tree hashes of subtrees at the last time they were updated.\r\nThis can be done using the following modified tree hash:\r\n\r\n    OldTreeHash(leaf, excluded_leaves) = Hash(leaf) if leaf not in excluded_leaves\r\n    OldTreeHash(leaf, excluded_leaves) = Hash(blank leaf) if leaf in excluded_leaves\r\n    OldTreeHash(node, excluded_leaves) = Hash(node.content | OldTreeHash(node.left, left_excluded_leaves) | OldTreeHash(node.right, right_excluded_leaves))\r\n    where left_excluded_leaves = leaves that are in excluded_leaves and in node.left (same for right_excluded_leaves).\r\n    and `excluded_leaves` are removed from `node.content.unmerged_leaves`.\r\n\r\nThen we can compute the parent hash for a node `N` with child `C` and sibling `S` using `OldTreeHash(S, N.content.unmerged_leaves)`: this old tree hash don't change when Adds are applied to the tree.\r\n\r\nIn the next paragraph, we will see that we can compute the parent hash for every node in `O(n*log(n))`.\r\n\r\nLet `h` be the height of the tree (so `h = log(n)`). There are `O(2^{h-i})` nodes at height `i`, and computing the parent hash for a node at height `i` is done in `O(2^i)`.\r\nHence, the complexity for the parent hash verification procedure is:\r\n\r\n      \\sum_{i=1}^h O(2^i 2^{h-i})\r\n    = \\sum_{i=1}^h O(2^h)\r\n    = O(h 2^h)\r\nAnd since `h = log(n)`, the complexity is `O(n*log(n))`.\r\n\r\nEfficient algorithm to process a Welcome\r\n========================================\r\n\r\nImagine we have the following tree:\r\n\r\n                  W\r\n            ______|______\r\n           /             \\\r\n          U               Y [E, G]\r\n        __|__           __|__\r\n       /     \\         /     \\\r\n      T       V       X [E]   Z [G, H]\r\n     / \\     / \\     / \\     / \\\r\n    A   B   C   D   E   F   G   H\r\n\r\nFor each node `N`, `OldTreeHash(N, excluded_leaves)` will be called with different values for `excluded_leaves`.\r\n\r\nFor example, if the sibling is always the right child, then:\r\n- `OldTreeHash(H, .)` will be called with 1 time with `. = [H]` (when computing the parent hash of `Z`) and 2 times with `. = []` (when computing the parent hash of `Y` and `W`)\r\n- `OldTreeHash(Z, .)` will be called with 1 time with `. = [G]` (when computing the parent hash of `Y`) and 1 time with `. = []` (when computing the parent hash of `W`)\r\n\r\nIf the sibling is always the left child, then:\r\n- `OldTreeHash(A, .)` will be called 3 times with `. = []` (when computing the parent hash of `T`, `U`, `W`)\r\n- `OldTreeHash(T, .)` will be called 2 times with `. = []` (when computing the parent hash of `U`, `W`)\r\n\r\nWe can see that some values are computed several times, which means that the whole computation could be sped up using memoization.\r\n\r\nTo estimate the speedup, we will estimate with how many values for `excluded_leaves` is called `OldTreeHash(N, .)` for each node `N`. Summing up these values will give a complexity, which will be `O(n*log(log(n)))`.\r\n\r\nLet `node.parent[k]` be the `k`th parent of `node`, and `node.leaves` be the set of leaves in the subtree rooted at `node`.\r\nThen, each call of `OldTreeHash(node, excluded_leaves)` will have `excluded_leaves = Intersection(node.parent[k].unmerged_leaves, node.leaves)` for some `k`.\r\nLet's note this set `excluded_leaves_k`.\r\nThe tree has the invariant that if `i <= j` then `excluded_leaves_j` is a subset of `excluded_leaves_i` (i.e. the sets `excluded_leaves_k` are decreasing).\r\n\r\nLet d be the depth of `node` (with the root being at depth 1). Then, the set `excluded_leaves_set := {excluded_leaves_1, ..., excluded_leaves_{d-1}}` corresponds to the values for `excluded_leaves` in the calls to `OldTreeHash(N, .)`.\r\n\r\nFirst bound: `|excluded_leaves_set| <= d-1 <= d` because it is defined using `d-1` values.\r\nSecond bound: `|excluded_leaves_set| <= 2^{h-d}+1` because `|excluded_leaves_0| <= 2^{h-d}` and the sets `excluded_leaves_k` are decreasing.\r\nTherefore: for a node at depth d, `|excluded_leaves_set| <= min(d, 2^{h-d}+1)`\r\n\r\nThe complexity to do the parent hash verification procedure is therefore in `O(sum_{i=1}^h 2^i min(i, 2^{h-i}+1))`.\r\n\r\nLet's estimate this complexity more explicitly:\r\n\r\n       sum_{i=1}^h 2^i min(i, 2^{h-i}+1)\r\n    <= (sum_{i=1}^t i 2^i) + (sum_{i=t+1}^h 2^i (2^{h-i}+1)) [for all t]\r\n    =  (2 (t-1) 2^t + 2) + ((h-t) 2^h + 2^{h+1} - 2^{t+1}) [for all t]\r\n\r\nFor the first inequality, we split the sum in two parts and use `min(i, 2^{h-i}+1) <= i` in the left part and `min(i, 2^{h-i}+1) <= 2^{h-i}+1` in the right part.\r\nFor the second equality, it can be derived using the formula for geometric sum.\r\n\r\nIf we take `t = h - log(h)`, we can compute that the left part is `O(2^h)` and the right part is `O(log(h)*2^h)`.\r\n\r\nTherefore, the parent hash verification procedure complexity is `O(log(h)*2^h) = O(n*log(log(n)))`.\r\n\r\nOne might say that adding memoization has a cost and isn't in O(1), but here it is: using the fact that `excluded_leaves_k` are decreasing, if you process the tree in a bottom-up or top-down way, you only have to compare the length of the current `excluded_leaves` to the length of the previous one, and it tells you if you need to recompute the tree hash.\r\n\r\nThe current parent hash is not super fast\r\n=========================================\r\n\r\nIn the worst case, if most internal nodes are blank, then computing the parent hash for a node is in O(size of its subtree), which give an O(n*log(n)) complexity as we saw in the section about the naive algorithm.\r\n\r\nWhen processing a Commit, if most of the internal nodes are blank, then computing the new parent hashes is in O(n) which is quite slow.",
       "createdAt": "2021-12-16T12:54:02Z",
-      "updatedAt": "2022-02-10T16:24:29Z",
+      "updatedAt": "2022-02-19T08:54:14Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
-      "baseRefOid": "28489f2c85c9bee07b0d4aff3b81b5fb59572e8f",
+      "baseRefOid": "72e3b01e9c1c7adcef04ba58efec26151d1cd470",
       "headRepository": "TWal/mls-protocol",
       "headRefName": "twal_parent_hash",
-      "headRefOid": "9a8d5d3627cf26d74776538d22ffcf17500c0515",
+      "headRefOid": "47c206efddc0bae8778bca85cfdaa9d4f7643028",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -40662,9 +40704,37 @@
           "body": "I am trying to abstract a bit how the parent hash is constructed, and when it is correct (i.e. participants processing a Welcome will accept a non-tampered tree).\r\n\r\n# A proof framework for parent hash\r\n\r\nWe will consider separately the following operations on the tree:\r\n- Blanking internal nodes along a path (and optionally the leaf): Update and first phase of Remove\r\n- UpdatePath: full commit\r\n- Adding a leaf in a blank leaf (add-only commit, add the leaf in the unmerged_leaves list along a path): second phase of Add\r\n- Truncation: second phase of Remove\r\n- Extension: first part of Add\r\n\r\nThe last three operations (adding a leaf, truncation, extension) will be called non-updating operations (because they don't update the `parent_hash` values in the nodes of the tree).\r\n\r\nAll parent hash design we came up so far revolve around two functions:\r\n- a function `compute_sibling_data(sibling)` that is used when processing a Commit\r\n- a function `compute_original_sibling_data(parent.content, sibling)` that is used when processing a Welcome\r\nFor the result to be meaningful, to use these functions we require that `sibling` is a descendant of the node `parent`.\r\n(I'm using an abuse of notation, the function should be `compute_original_sibling_data(parent, sibling)` but I'm using `parent.content` instead of `parent` to say that only the content of the parent is inspected.)\r\n\r\nOn these two functions, if we have the following properties:\r\n1. after an UpdatePath goes through P with sibling S, `compute_sibling_data(S) == compute_original_sibling_data(P.content, S)` (with P and S corresponding the values after the UpdatePath)\r\n2. when a non-updating operation is applied to the tree, if P is modified then `compute_original_sibling_data(P_old.content, S_old) == compute_orginal_sibling_data(P_new.content, S_new)`\r\n\r\nWith these properties, we can prove the following theorem: if the parent hash verification procedure passes before applying an operation, then it passes after applying the operation.\r\n\r\nThe parent hash verification procedure works by computing an \"expected parent hash\" and \"computed parent hash\" for each node. The computed parent hash uses the `compute_original_sibling_data` function, and the expected parent hash is retrieved in a descendent of the node.\r\n\r\n## Blanking internal nodes along a path\r\n\r\n### Modification on the tree\r\n\r\nGiven a non-blank leaf L, every parent node on the path from L to the root becomes blank. L can either become blank (first phase of Remove) or get a new non-blank value (Update).\r\n\r\n### Correctness argument\r\n\r\nThe key property for this operation is: for all internal node N, if N's subtree changes then N.content becomes blank.\r\nFrom this we deduce that if the parent hash verification procedure validated the tree before the operation, it will validate the tree after the operation.\r\nThis is because for all non-blank nodes in the new tree, their subtree is not changed by this procedure.\r\n\r\n## UpdatePath\r\n\r\n### Modification on the tree\r\n\r\nGiven a non-blank leaf L, L get a new non-blank value, every node N on the path from L to the root are modified the following way:\r\n- `N.content.unmerged_leaves` becomes empty\r\n- `N.content.public_key` gets a new value\r\n- `N.content.parent_hash` is updated with its parent parent-hash using `compute_sibling_data(N.sibling)`\r\n\r\n### Correctness argument\r\n\r\nThe key property for this operation is: for all internal node N, if N's subtree changes then N is on the path (with child C and sibling S), N.content becomes non-blank, and C.parent_hash is computed using `compute_sibling_data(S)`.\r\nUsing this key property and property 1, we can deduce that for all node N, either N's subtree is unchanged, or N's expected parent hash and computed parent hash are identical.\r\nTherefore the parent hash verification procedure still verifies the new tree.\r\n\r\n## Adding an unmerged leaf in a blank leaf\r\n\r\n### Modification on the tree\r\n\r\nGiven a blank leaf L, L gets a new non-blank value, and L is added to `N.content.unmerged_leaves` for every parent node N in the path from L to the root.\r\n\r\n### Correctness argument\r\n\r\nFor all node N, the computed parent hash don't change using property 2. The expected parent hash is not changed by this operation.\r\n\r\n## Truncating the tree\r\n\r\n### Modification on the tree\r\n\r\nThe rightmost leaf and its parent are removed. As described in the section Remove, it happens only if the leaf is blank and its parent is either blank or is the root.\r\n\r\n### Correctness argument\r\n\r\nFor all node N, the computed parent hash don't change using property 2.\r\nWith the \"careful truncation\", we can prove that the expected parent hash value do not change.\r\nTwo nodes are removed: the rightmost leaf R and its parent P.\r\nThe removal of the rightmost leaf don't change any expected parent hash since it is blank.\r\nIf P is the root then removing P don't change any expected parent hash.\r\nOtherwise P is blank, therefore the only way for the removal of P to interfere with the computation of the expected parent hash for some node is if P is on the \"left-blank path\" in the \"right node\" case.\r\nRemoving P will simply shorten the \"left-blank path\" by one node and the expected parent hash will therefore stay the same.\r\n\r\n## Extending the tree\r\n\r\n### Modification on the tree\r\n\r\nAdd a blank leaf and a blank parent as described in the Adding and Removing Leaves section.\r\n\r\n### Correctness argument\r\n\r\nThis operation adds one blank leaf L and one blank internal node P.\r\nThe key property for this operation is: P is either the root or P is a right node.\r\nThis is deduced by the fact that we manipulate left-balanced trees.\r\n\r\nFrom this key property, we deduce that for each node, the expected parent hash value do not change:\r\n- if P is the root then this is obvious\r\n- if P in a right node, only the expected parent hash from P.parent can change, but actually it will stay the same thanks to the \"left-blank path\" procedure.\r\nUsing property 2, we deduce that for each node, the computed parent hash value do not change.\r\n\r\n# Complexity\r\n\r\nIf `compute_original_sibling_data(parent.content, sibling)` has complexity O(|sibling|) then processing a Welcome for a tree with n leaves can be done in O(n log n).\r\nLet P be a node, L and R be its children. If `compute_sibling_data(S)` can be computed in O(1) from `compute_sibling_data(L)`, `compute_sibling_data(R)` and `P.content` then processing a Commit can be done in O(log n).\r\nLet P be a node, L and R be its children. If `compute_original_sibling_data` only uses `parent.content.unmerged_leaves` and `compute_original_sibling_data(excluded_leaves, P)` can be computed in O(1) using `compute_original_sibling_data(intersection(excluded_leaves, L.leaves), L)` and `compute_original_sibling_data(intersection(excluded_leaves, R.leaves), R)`, then processing a Welcome for a tree with n leaves can be done in O(n log log n).\r\n\r\n# Actual procedures for `compute_original_sibling_data`\r\n\r\n## The resolution approach\r\n\r\n### Definition\r\nThe current implementation of parent hash uses:\r\n- `compute_sibling_data(sibling) = resolution(sibling)`\r\n- `compute_original_sibling_data(parent.content, sibling) = resolution(sibling) - hpke_keys(parent.content.unmerged_leaves)`\r\n\r\n### Proof\r\n\r\nWe can easily prove property 1 and 2, therefore making the current parent hash correct.\r\n\r\n### Complexity\r\n\r\nThe complexity to process a Welcome is O(n log n) and the complexity to process a Commit is in O(n).\r\n\r\n## The full-extension + tree hash approach\r\n\r\n### Definition\r\n\r\n```\r\nfunction full_extension(tree):\r\n    extend `tree` until its number of leaves is a power of 2\r\n\r\nfunction remove_leaves(tree, leaves):\r\n    change the leaves `leaves` to a blank leaves, and remove `leaves` in every internal node's unmerged_leaves list\r\n```\r\n\r\nWe define:\r\n- `compute_sibling_data(sibling) = tree_hash(full_extension(sibling))`\r\n- `compute_original_sibling_data(parent.content, sibling) = tree_hash(remove_leaves(full_extension(sibling), parent.content.unmerged_leaves))`\r\n\r\n### Proofs\r\n\r\nProperty 1 is given by the fact that `remove_leaves(tree, []) == tree`.\r\nFor property 2:\r\n- if a blank leaf is populated under `parent`, it is populated either in:\r\n  - its `child` node, therefore the only modification in the pair `(parent.content, sibling)` is a leaf from `child` being added to `parent.content.unmerged_leaves`, and this doesn't change the value computed by `remove_leaves`\r\n  - its `sibling` node, and in this case the addition of the leaf in `parent.content.unmerged_leaves` makes `remove_leaves` undo the changes done by the addition\r\n- if a truncation or extension changes `parent`, this doesn't change `full_extension(sibling)` so `compute_original_sibling_data(parent.content, sibling)` stays the same.\r\n\r\n### Complexity\r\n\r\nWe can use the fact that `remove_leaves(full_extension(tree), leaves) == full_extension(remove_leaves(tree, leaves))`.\r\nThe complexity to process a Welcome is in O(n log log n) and the complexity to process a Commit is in O(log n).\r\n\r\n",
           "createdAt": "2022-02-10T16:24:29Z",
           "updatedAt": "2022-02-10T16:24:29Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Discussion on virtual interim:\r\n\r\n* @TWal and @bifurcation to get to a merge-able state, then make decision on mailing list",
+          "createdAt": "2022-02-17T15:38:18Z",
+          "updatedAt": "2022-02-17T15:38:18Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c406lwf",
+          "commit": {
+            "abbreviatedOid": "337bbaa"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "I suggested some text to point people toward more efficient implementations.  Other than that, I think this is good to go.",
+          "createdAt": "2022-02-18T21:30:45Z",
+          "updatedAt": "2022-02-18T21:38:49Z",
+          "comments": [
+            {
+              "originalPosition": 28,
+              "body": "```suggestion\r\nNote that no recomputation is needed if the tree hash of S is unchanged since\r\nthe last time P was updated.  This is the case for computing or processing a\r\nCommit whose UpdatePath traverses P, since the Commit itself resets P.  (In\r\nother words, it is only necessary to recompute the original sibling tree hash\r\nwhen validating group's tree on joining.) More generally, if none of the entries\r\nin `P.unmerged_leaves` is in the subtree under S (and thus no nodes were truncated),\r\nthen the original tree hash at S is the tree hash of S in the current tree.\r\n\r\nIf it is necessary to recompute the original tree hash of a node, the efficiency\r\nof recomputation can be improved by caching intermediate tree hashes, to avoid\r\nrecomputing over the subtree when the subtree is included in multiple parent\r\nhashes.  A subtree hash can be reused as long as the intersection of the\r\nparent's unmerged leaves with the subtree is the same as in the earlier\r\ncomputation.\r\n```",
+              "createdAt": "2022-02-18T21:30:45Z",
+              "updatedAt": "2022-02-18T21:38:49Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 529,
@@ -43267,24 +43337,26 @@
       "id": "PR_kwDOBoyH6c4yQFBk",
       "title": "Stop generating redundant PKE key pairs.",
       "url": "https://github.com/mlswg/mls-protocol/pull/587",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "MartaMularczyk",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "This PR is motivated by an observation made independently by me and @bifurcation that MLS currently generates many \"redundant\" PKE keypairs which never have to be used. The proposal is to stop generating such key pairs, which greatly improves efficiency. In particular, in some scenarios the solution from this PR results in ~3 times smaller ratchet trees compared to the current MLS (we found such a scenario and @bifurcation illustrated it here [careful-truncate.pdf](https://github.com/mlswg/mls-protocol/files/8026064/careful-truncate.pdf)). This PR addresses the issue #559.\r\n\r\n### Problem\r\n\r\nTo give a better intuition, we explain the problem on an example. Take the following ratchet tree [trees.txt](https://github.com/mlswg/mls-protocol/files/8026207/trees.txt).\r\n\r\nCurrently, when E rekeys her path in a commit, she generates new PKE key pairs for all nodes on her direct path, i.e., Z, W, U and T. We notice that the key pairs for nodes Z and W are redundant -- since the subtrees of their children on the copath are all blank, E's leaf key pair can be used equivalently. Moreover, we notice that generating redundant key pairs is inefficient for 2 reasons:\r\n1. The redundant public keys have to be sent as part of E's commit and potentially welcome messages.\r\n2. The redundant public keys together with the parent hash mechanism prevent \"aggressive truncation\". Aggressive truncation was introduced in #461 in order to \"heal\" the ratchet tree (which decreases complexity). However, it broke the protocol due to incompatibility with the parent hash mechanism. For this reason, it was replaced in #524 by a far less efficient \"careful truncation\" mechanism. \r\n\r\n### Solution\r\n\r\nThis PR proposes to stop generating redundant key pairs, getting rid of both of the above inefficiencies. More precisely, we say that a node on E's path is _redundant_ if its copath child (or in general any child) has an empty resolution (which implies that its subtree is empty). Further, we say that E's _filtered direct path_ is her direct path with all redundant nodes removed. When E commits, she rekeys only her filtered direct path. The redundant nodes are blanked. In the example above, E's filtered direct path consists of Y and Z. After her, commit we get the following tree [trees_no_redundant.txt](https://github.com/mlswg/mls-protocol/files/8026218/trees_no_redundant.txt).\r\n\r\nThis way, E doesn't send redundant public keys for Z and W. Moreover, we can restore aggressive truncation -- the blank nodes above E can be truncated without destroying the parent hash. The following picture by @bifurcation shows how the above solution can result in ~3 times smaller trees than currently generated by MLS [careful-truncate.pdf](https://github.com/mlswg/mls-protocol/files/8026064/careful-truncate.pdf).\r\n\r\n### Parent Hash\r\n\r\nThe above solution requires modifying how the parent hash is verified by new members joining the group. Roughly, before the proposed change, the new member for each node U with children V and W performed the following check: either A) `V.parent_hash` is equal to the parent hash of U with copath child W or B) `W.parent_hash` is equal to the parent hash of U with copath child V. In the running example, B) would be true.\r\n\r\nAfter the proposed change, W is blank and the parent hash of U with copath child V is stored in the node E instead. Accordingly, the new member performs the following modified check: either A) there exists a node X in the resolution of V s.t. `X.parent_hash` is equal to the parent hash of U with copath child W or B) [modified analogous to A)].\r\n\r\nFrom the security perspective, the new check fulfils the same purpose as we meant for the original check: for every node U, the member who last rekeyed U attests to the publickey U.pk they generated and the public keys they told U.sk to.",
       "createdAt": "2022-02-08T17:40:32Z",
-      "updatedAt": "2022-02-14T16:53:56Z",
+      "updatedAt": "2022-02-18T19:43:55Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
-      "baseRefOid": "b40a1a65d0c491a5e456464c6cfc345d459b8db7",
+      "baseRefOid": "84f6874da9464dbbbfb4c7eff35cfc2c9113f27f",
       "headRepository": "MartaMularczyk/mls-protocol",
       "headRefName": "aggressive-truncate",
-      "headRefOid": "03917bf89db30f8964dd3dc244479c14651aa15a",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "7793b2f047927389286a0893f902cb8363327eef",
+      "closedAt": "2022-02-18T19:43:55Z",
+      "mergedAt": "2022-02-18T19:43:55Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "515a65a0f78976c3a5e608aa6b8ede939c192522"
+      },
       "comments": [
         {
           "author": "TWal",
@@ -43320,6 +43392,20 @@
           "body": "I'm noticing that I forgot to say that I was globally in favor of this PR!\r\n\r\nThe only itch for me really is the resolution part. The easiest fix for this would be to check that the original child resolution only contain one node and expected parent hash = this node's content.parent_hash.\r\n\r\nWhy is it true that the original child resolution only contain one node?\r\n- It's true when processing and UpdatePath (the child is non-blank since it's part of an UpdatePath so its resolution only contain itself)\r\n- It remains true when extending the tree or truncating the tree (since the resolution is not affected by adding or removing blank nodes)\r\n- It remains true when adding a leaf in an available blank leaf (thanks to the \"original\" in \"original child resolution\").",
           "createdAt": "2022-02-14T16:53:55Z",
           "updatedAt": "2022-02-14T16:53:55Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Discussion on virtual interim:\r\n\r\n* Ready to merge\r\n* Refactor parent hash validation in a follow-up",
+          "createdAt": "2022-02-17T15:37:50Z",
+          "updatedAt": "2022-02-17T15:37:50Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I resolved merge conflicts in the most obvious way possible.  Along the way I noticed that we reference the `parent_hash` extension, which is no longer relevant.  I will file a follow-up to clean this up.",
+          "createdAt": "2022-02-18T19:41:01Z",
+          "updatedAt": "2022-02-18T19:41:01Z"
         }
       ],
       "reviews": [
@@ -43413,6 +43499,26 @@
               "updatedAt": "2022-02-11T17:32:07Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c406RdI",
+          "commit": {
+            "abbreviatedOid": "a71407f"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-02-18T19:41:50Z",
+          "updatedAt": "2022-02-18T19:42:06Z",
+          "comments": [
+            {
+              "originalPosition": 121,
+              "body": "```suggestion\r\ndirect path of U. This way, P's Parent Hash fixes\r\n```\r\n\r\nBroken link.",
+              "createdAt": "2022-02-18T19:41:50Z",
+              "updatedAt": "2022-02-18T19:42:06Z"
+            }
+          ]
         }
       ]
     },
@@ -43428,13 +43534,13 @@
       "labels": [],
       "body": "- Adds an `extra_data` field to BasicCredential to hold application-specific data about a user (examples: link to avatar, information about device)\r\n- Adds a ProofCredential to cover a lot of the cases we're currently missing, particularly:\r\n  - credentials that are just BasicCredential signed with a fixed public key\r\n  - credentials that are authenticated by a system like Key Transparency\r\n  - credentials authenticated by secure hardware",
       "createdAt": "2022-02-10T20:01:06Z",
-      "updatedAt": "2022-02-16T07:27:54Z",
+      "updatedAt": "2022-02-18T23:46:50Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
-      "baseRefOid": "a281ec78289057a674756738d2e9b11c5d98666f",
+      "baseRefOid": "13955995bc4bb81f8f15f92014fad49494a4acf1",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "brendan/proof-credential",
-      "headRefOid": "914fa616e77d3eb130f793d39fcbc23a1f5bd5e4",
+      "headRefOid": "e165edd5c11f56a5cc8d1dc8839ae0083afea845",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -43467,6 +43573,27 @@
           "body": "I'm not opposed to this change specifically, but I'm generally wondering if we need concrete credentials in the spec beyond the basic credential, which is useful for interop. After we've pushed so much of the authentication logic into the AS and the implementation, the spec doesn't really care about what the credential looks like. I don't think we even strictly need it to provide a signature key, since message authentication just needs \"the signing private key corresponding to the public key, which was authenticated by the credential\". I'm still not sure why X509 needs to be in there.",
           "createdAt": "2022-02-16T07:27:54Z",
           "updatedAt": "2022-02-16T07:27:54Z"
+        },
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> A lot of the use cases described would work well in extensions. For example, just like a CT log inclusion proof can be sent in a TLS ServerHello extension, it seems like you could put a KT inclusion proof in a LeafNode extension.\r\n\r\nI would like us to have some way to support these cases already in the protocol so you don't have to immediately go out and build something new if you want to use anything besides X.509. So I can switch the ProofCredential to some kind of Proof extension but that seems like a worse abstraction? And it's not clear why Proof would be an extension when X.509 is a type of credential.\r\n\r\n> And if you want to stick within the basic framework, the identity field is entirely application defined, so you can just use it like you would extra_data.\r\n\r\nIt's more about the ease of having one field which contains just the unique identifier for the client and another field which may need to be parsed to be understood",
+          "createdAt": "2022-02-17T05:10:53Z",
+          "updatedAt": "2022-02-17T05:10:53Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Discussion on the virtual interim:\r\n\r\n* On the one hand, could implement this in a follow-on spec\r\n* On the other hand, could be nice to avoid the need for implementations to add stuff off the bat\r\n* TODO(@Bren2010): Flesh out use cases",
+          "createdAt": "2022-02-17T15:48:42Z",
+          "updatedAt": "2022-02-17T15:48:42Z"
+        },
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "So in terms of fleshing out use cases more explicitly:\r\n\r\n## 1. Signature from fixed public key\r\n\r\nIn this case, clients authenticate with the AS and provide it their signature key, and the AS provides back a fixed `ProofCredential` object, with the fields set as follows:\r\n\r\n- `authority_id`: This contains an arbitrary identifier of the public key that was used. For example, `company.com/keys/feb22`. The exact contents of the field and any semantics are up to the AS.\r\n- `credential`: A BasicCredential where `identity` is the client's unique identifier, `extra_data` contains extra structured data like when the credential is valid / other metadata about the client that's authenticated but might not be uniquely identifying, and `signature_key` contains the signature key provided by the client.\r\n- `proof`: Contains a signature over the serialized `credential` field from the AS.\r\n\r\nThis is probably the simplest (secure!) way for an organization to start using MLS, while also supporting important future tasks like key rotation (through `authority_id`) and extensibility (through `extra_data`).\r\n\r\n## 2. Key Transparency\r\n\r\nClients authenticate with the AS and provide it their signature key, and the AS incorporates their signature key in a Key Transparency tree along with some additional metadata. Clients can get a [proof object](https://github.com/google/keytransparency/blob/master/docs/verification.md) from the AS that authenticates the binding of their identity to their signature key and metadata. The client builds their own `ProofCredential` as follows:\r\n\r\n- `authority_id`: This contains an identifier of the KT tree used -- possibly a URL.\r\n- `credential`: A BasicCredential with the proper `identity`, `extra_data`, and `signature_key`.\r\n- `proof`: The serialized proof object from the KT tree.\r\n\r\n",
+          "createdAt": "2022-02-18T23:46:50Z",
+          "updatedAt": "2022-02-18T23:46:50Z"
         }
       ],
       "reviews": []
@@ -43476,24 +43603,26 @@
       "id": "PR_kwDOBoyH6c4yidzJ",
       "title": "Clean up the description of tree evolution.",
       "url": "https://github.com/mlswg/mls-protocol/pull/593",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "MartaMularczyk",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Changes (apart from editorial):\r\n* Remove the text about the key schedule. Reason: I found the text confusing, because updating paths provides FS and PCS for the HPKE keys in the ratchet tree, and not directly for the key schedule.\r\n* Generate the leaf key pair simply as a fresh HPKE key pair, and not from the leaf_secret. I couldn't see any benefit of using the leaf_secret. I wonder if there is a good reason?",
       "createdAt": "2022-02-11T17:30:46Z",
-      "updatedAt": "2022-02-16T19:59:05Z",
+      "updatedAt": "2022-02-18T19:18:59Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "a281ec78289057a674756738d2e9b11c5d98666f",
       "headRepository": "MartaMularczyk/mls-protocol",
       "headRefName": "cleanup-tree-evolution",
       "headRefOid": "57b86384275d2fa5fb087d3d38df5418e85428e0",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2022-02-18T19:18:59Z",
+      "mergedAt": "2022-02-18T19:18:59Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "84f6874da9464dbbbfb4c7eff35cfc2c9113f27f"
+      },
       "comments": [
         {
           "author": "rohan-wire",
@@ -43501,6 +43630,13 @@
           "body": "> * Generate the leaf key pair simply as a fresh HPKE key pair, and not from the leaf_secret. I couldn't see any benefit of using the leaf_secret. I wonder if there is a good reason?\r\n\r\nI am concerned that we are asking for a LOT of fresh entropy if (in addition to nonces) we need a crypto-random value every epoch for every group (a Wire client can easily a member of thousands of groups at a time). Do you have a concern about deriving it?\r\n",
           "createdAt": "2022-02-16T19:59:05Z",
           "updatedAt": "2022-02-16T19:59:05Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Discussion on the virtual interim:\r\n\r\n* To @rohan-wire's concern: This allows the base path secret to be derived, e.g., using a KDF, so this doesn't *necessarily* increase the amount of entropy needed\r\n* Clear to merge",
+          "createdAt": "2022-02-17T15:51:53Z",
+          "updatedAt": "2022-02-17T15:51:53Z"
         }
       ],
       "reviews": [
@@ -43549,6 +43685,19 @@
               "updatedAt": "2022-02-13T14:35:04Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c406Mu2",
+          "commit": {
+            "abbreviatedOid": "57b8638"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-02-18T19:18:41Z",
+          "updatedAt": "2022-02-18T19:18:41Z",
+          "comments": []
         }
       ]
     },
@@ -43557,24 +43706,26 @@
       "id": "PR_kwDOBoyH6c4ytyJs",
       "title": "TLS syntax updates",
       "url": "https://github.com/mlswg/mls-protocol/pull/594",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "There are two changes in this PR:\r\n\r\n* Pull the `optional<T>` extension to the TLS syntax up into the Terminology section\r\n* Add an extension that lets vectors have variable-length headers, allowing them to be efficient at small sizes while also accommodating large sizes\r\n\r\nAll vectors are converted to the variable-length header representation.  It seems like this should simplify implementation, since the encoder will no longer have to be told how many bytes of header to use for a given vector.  This has been the source of several annoying interop bugs.\r\n",
       "createdAt": "2022-02-13T15:23:14Z",
-      "updatedAt": "2022-02-16T08:04:31Z",
+      "updatedAt": "2022-02-18T19:07:32Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "a281ec78289057a674756738d2e9b11c5d98666f",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "tls-syntax-updates",
-      "headRefOid": "00f7acba6650b97a0a7502fe155e961f1e7cd85d",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "62e3ea963ac8bbd45892062f43391de1ebf215e0",
+      "closedAt": "2022-02-18T19:07:25Z",
+      "mergedAt": "2022-02-18T19:07:25Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "0934bfad155d76f97ba62130f3f8c7df61202849"
+      },
       "comments": [
         {
           "author": "TWal",
@@ -43596,6 +43747,13 @@
           "body": "I wasn't clear under which circumstances you would use a longer length with a number that would fit in a smaller range.  \r\n`| 00   | 1      | 6           | 0-63                  |`\r\n`| 01   | 2      | 14          | 0-16383               |`\r\n`| 10   | 4      | 30          | 0-1073741823          |`\r\n`| 11   | 8      | 62          | 0-4611686018427387903 |`\r\n\r\nIf never, then the table should be:\r\n`| prefix | length bits | usable bits | min | max |`\r\n`|-----|---|---|---|---|`  \r\n`| 00   | 1  | 6  | 0 | 63 |`\r\n`| 01   | 2  | 14 | 64 | 16383 |`\r\n`| 10   | 4  | 30 | 16384 | 1073741823 |`\r\n`| 11   | 8  | 62 | 1073741824 | 4611686018427387903 |`\r\n",
           "createdAt": "2022-02-15T00:01:40Z",
           "updatedAt": "2022-02-15T00:03:04Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "DIscussion on virtual interim\r\n\r\n* Some concern about being able to send gigantic stuff\r\n    * In adversarial cases, the 4-byte headers used for a lot of stuff might already be a problem\r\n    * Could also have length constraints decoupled from the syntax\r\n    * SIP experience shows that imposing arbitrary length limits isn't a good idea\r\n    * ... but applications should have a way to signal that things are too big\r\n    * TODO(@bifurcation): Advisory text \"Beware, things can get big; consider imposing limits and clear failure cases for this\"\r\n    * Consider streaming implementations, where you might not know that the whole message fits in memory\r\n* Modulo the above TODO, clear to merge  ",
+          "createdAt": "2022-02-17T16:03:53Z",
+          "updatedAt": "2022-02-17T16:03:53Z"
         }
       ],
       "reviews": [
@@ -43718,24 +43876,26 @@
       "id": "PR_kwDOBoyH6c4y2pNK",
       "title": "Allowlist approach for proposals in external commit",
       "url": "https://github.com/mlswg/mls-protocol/pull/595",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "kkohbrok",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "The current description of external commits still leaves room for the committer to include various other proposals such as arbitrary proposals that are not Update or Remove proposals (e.g., Adds, RequiredCapability, PSK, etc.). I think we should narrow that down to a specific set of proposals (i.e. an allow list style) to keep the implementation and general protocol complexity low for external commits, both for creation and processing.\r\n\r\nThe way I see it, the new joiner can always issue a follow-up commit for other proposals, but I might be missing important use-cases, so I'd be grateful for feedback on this.",
       "createdAt": "2022-02-15T12:04:11Z",
-      "updatedAt": "2022-02-16T19:51:30Z",
+      "updatedAt": "2022-02-17T16:13:26Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "a281ec78289057a674756738d2e9b11c5d98666f",
       "headRepository": "kkohbrok/mls-protocol",
       "headRefName": "external_commit_proposals",
       "headRefOid": "94881144f66f44bd11ca639340644d05e100b4f7",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2022-02-17T16:13:26Z",
+      "mergedAt": "2022-02-17T16:13:26Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "72e3b01e9c1c7adcef04ba58efec26151d1cd470"
+      },
       "comments": [
         {
           "author": "bifurcation",
@@ -43750,6 +43910,13 @@
           "body": "Would an External Commit adding yourself contain an Add or an Update Proposal?",
           "createdAt": "2022-02-16T19:51:30Z",
           "updatedAt": "2022-02-16T19:51:30Z"
+        },
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "It used to contain an `Add` proposal, but since that's pretty much redundant with the `path` the commiter has to include, it got optimized away. So an external commit should be handled as if it contained an Add proposal, where the KeyPackage in the Add is instead in the `path`.",
+          "createdAt": "2022-02-17T07:15:13Z",
+          "updatedAt": "2022-02-17T07:15:13Z"
         }
       ],
       "reviews": []
@@ -43759,24 +43926,26 @@
       "id": "PR_kwDOBoyH6c4y4751",
       "title": "Require Commit.path by default",
       "url": "https://github.com/mlswg/mls-protocol/pull/597",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Fixes #596 \r\n\r\nThis PR introduces a notion of a proposal type being \"path safe\", in the sense that it is safe for the path to be omitted.  (Better phrasing welcome!)  The `path` field is required default, and allowed to be omitted only if all the proposals in the Commit are path-safe.",
       "createdAt": "2022-02-15T23:19:47Z",
-      "updatedAt": "2022-02-16T07:37:06Z",
+      "updatedAt": "2022-02-18T19:18:56Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "a281ec78289057a674756738d2e9b11c5d98666f",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "path-by-default",
-      "headRefOid": "6a1080443eb9af84d20a93010be720d020ece574",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "d2b0af01063a688266bc22a7c0d720bdef9afc0d",
+      "closedAt": "2022-02-18T19:18:51Z",
+      "mergedAt": "2022-02-18T19:18:50Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "155e031a1d3bd3a9992c699fb1fcff6bfbcfa3a6"
+      },
       "comments": [
         {
           "author": "kkohbrok",
@@ -43784,9 +43953,284 @@
           "body": "Thanks for taking care of this fix! One suggestion: Instead of having a global list of which types are path safe and which ones aren't, we could make it a property of the proposal. Maybe something like this:\r\n\r\n```\r\nallPathSafe = true\r\n\r\nfor i, id in commit.proposals:\r\n    proposal = proposalCache[id]\r\n    assert(proposal != null)\r\n\r\n    allPathSafe = allPathSafe && proposal.is_path_safe\r\n\r\nif len(commit.proposals) == 0 || !allPathSafe:\r\n    assert(commit.path != null)\r\n```\r\nRegarding the name, the only thing I can think of is that we could invert the property and call it `requires_path`:\r\n\r\n```\r\npath_required = false\r\n\r\nfor i, id in commit.proposals:\r\n    proposal = proposalCache[id]\r\n    assert(proposal != null)\r\n\r\n    path_required = path_required || proposal.requires_path\r\n\r\nif len(commit.proposals) == 0 || requires_path:\r\n    assert(commit.path != null)\r\n```\r\nIn fact, I think I'd be slightly in favor of the latter proposal.",
           "createdAt": "2022-02-16T07:33:51Z",
           "updatedAt": "2022-02-16T07:37:06Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Discussion on virtual interim:\r\n\r\n* OK to keep using type\r\n* TODO(@bifurcation) \"path safe\" -> \"path required\"\r\n* Otherwise clear to merge",
+          "createdAt": "2022-02-17T16:17:25Z",
+          "updatedAt": "2022-02-17T16:17:25Z"
         }
       ],
       "reviews": []
+    },
+    {
+      "number": 598,
+      "id": "PR_kwDOBoyH6c4zHcde",
+      "title": "Better name for preconfigured sender ID",
+      "url": "https://github.com/mlswg/mls-protocol/pull/598",
+      "state": "MERGED",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes #588 ",
+      "createdAt": "2022-02-18T19:46:06Z",
+      "updatedAt": "2022-02-18T19:53:07Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "515a65a0f78976c3a5e608aa6b8ede939c192522",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "external-key-id",
+      "headRefOid": "cee7e88c052239c9652ac7fe57f3ba5c26f18791",
+      "closedAt": "2022-02-18T19:53:04Z",
+      "mergedAt": "2022-02-18T19:53:03Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "079e1bfbdeff8013b5ca7a7f49b03c4da7ae82bf"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 599,
+      "id": "PR_kwDOBoyH6c4zHnqv",
+      "title": "Clean up from KeyPackage/LeafNode split",
+      "url": "https://github.com/mlswg/mls-protocol/pull/599",
+      "state": "MERGED",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "While landing #587, I noticed that there were some dangling references left over from the KeyPackage/LeafNode split, e.g., to the \"`parent_hash` extension\" or `leaf_key_package`.  This PR cleans those up.",
+      "createdAt": "2022-02-18T20:21:53Z",
+      "updatedAt": "2022-02-18T21:11:41Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "079e1bfbdeff8013b5ca7a7f49b03c4da7ae82bf",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "leaf-node-cleanup",
+      "headRefOid": "d7bc6e153b28690276190f7256d88339e0671c1a",
+      "closedAt": "2022-02-18T21:11:40Z",
+      "mergedAt": "2022-02-18T21:11:40Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "13955995bc4bb81f8f15f92014fad49494a4acf1"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c406aJh",
+          "commit": {
+            "abbreviatedOid": "d7bc6e1"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-02-18T20:25:08Z",
+          "updatedAt": "2022-02-18T20:25:08Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 600,
+      "id": "PR_kwDOBoyH6c4zHpZQ",
+      "title": "Add version to MLSMessage",
+      "url": "https://github.com/mlswg/mls-protocol/pull/600",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes #590 ",
+      "createdAt": "2022-02-18T20:29:01Z",
+      "updatedAt": "2022-02-18T22:09:40Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "079e1bfbdeff8013b5ca7a7f49b03c4da7ae82bf",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "message-version",
+      "headRefOid": "bbe7d8def0533e91cb927801d78e6cff60167760",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Note that this is a little bit duplicative: There's already a `version` field in KeyPackage.  But removing that would require something like sending MLSMessage in Add, which seems unpleasant.  We should probably either require that `KeyPackage.version == MLSMessage.version`, or just not use MLSMessage for KeyPackage.\r\n\r\nLikewise, the version field in GroupInfo can probably be removed, since it will be on the outside MLSMessage regardless of whether the GroupInfo is sent bare or in Welcome.",
+          "createdAt": "2022-02-18T22:07:41Z",
+          "updatedAt": "2022-02-18T22:09:40Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 601,
+      "id": "PR_kwDOBoyH6c4zHqx2",
+      "title": "Remove dangling references to PublicGroupState",
+      "url": "https://github.com/mlswg/mls-protocol/pull/601",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "PublicGroupState was removed as an independent struct in #529.  This PR fixes some dangling references to it.",
+      "createdAt": "2022-02-18T20:34:01Z",
+      "updatedAt": "2022-02-18T20:34:22Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "079e1bfbdeff8013b5ca7a7f49b03c4da7ae82bf",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "no-pgs",
+      "headRefOid": "c55c63ef1bf0aea00ccc7556147bbfc3aacc823d",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "cc @kkohbrok",
+          "createdAt": "2022-02-18T20:34:22Z",
+          "updatedAt": "2022-02-18T20:34:22Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 602,
+      "id": "PR_kwDOBoyH6c4zIC9T",
+      "title": "Limit the new variable length encoding to 30-bit",
+      "url": "https://github.com/mlswg/mls-protocol/pull/602",
+      "state": "OPEN",
+      "author": "raphaelrobert",
+      "authorAssociation": "MEMBER",
+      "assignees": [],
+      "labels": [],
+      "body": "The recently introduced variable size encoding allows for very large message sizes that are not practical in any realistic scenario. Since decoders will most likely not allow such large messages anyway, this PR limits the maximum size to 30-bit.",
+      "createdAt": "2022-02-18T22:00:14Z",
+      "updatedAt": "2022-02-18T22:23:09Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "13955995bc4bb81f8f15f92014fad49494a4acf1",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "cap-large-encoding",
+      "headRefOid": "76e79876551886bcb17b2fce7d62a626372c2a00",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "cc @rohan-wire who had some thoughts about limits on the last virtual interim.",
+          "createdAt": "2022-02-18T22:18:51Z",
+          "updatedAt": "2022-02-18T22:18:51Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c406sKy",
+          "commit": {
+            "abbreviatedOid": "d32cdc0"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-02-18T22:13:17Z",
+          "updatedAt": "2022-02-18T22:13:18Z",
+          "comments": [
+            {
+              "originalPosition": 40,
+              "body": "```suggestion\r\nFor example, the four byte sequence 0x9d7f3e7d decodes to 494878333; \r\nthe two byte sequence 0x7bbd decodes to 15293; and the single byte 0x25 \r\ndecodes to 37.\r\n```\r\n\r\n* Added `0x` to disambiguate hex vs. decimal\r\n* Removed the final parenthetical because it doesn't obey minimum-length encoding.",
+              "createdAt": "2022-02-18T22:13:17Z",
+              "updatedAt": "2022-02-18T22:13:18Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c406s4h",
+          "commit": {
+            "abbreviatedOid": "d32cdc0"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-02-18T22:18:30Z",
+          "updatedAt": "2022-02-18T22:18:30Z",
+          "comments": [
+            {
+              "originalPosition": 36,
+              "body": "An alternative approach here would be to leave the `11` prefix, but forbid encoded values larger than some limit.  That way, if there were some case where reusing this encoding would be useful (cTLS, maybe) and larger sizes were allowed, then it could just be reused.  It also just seems a bit ugly to encode range limitations in the formatting.\r\n\r\nSuggest something like the following:\r\n\r\n\r\n> The `11` prefix is included for completeness.  To avoid compatibility issues for devices with limited storage, however, vectors in MLS MUST NOT have a length greater than 2^32.  A vector with an encoded length greater than this limit MUST be rejected as malformed.",
+              "createdAt": "2022-02-18T22:18:30Z",
+              "updatedAt": "2022-02-18T22:18:30Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 603,
+      "id": "PR_kwDOBoyH6c4zIEM0",
+      "title": "Update parent hash validation",
+      "url": "https://github.com/mlswg/mls-protocol/pull/603",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This PR revises the parent hash verification section to reflect more recent discussion.  Right now, the definition of validity according to the parent hash ties it to the \"top-down\" validation algorithm, when what really matters is that each parent node has a path to a leaf.  This PR changes the definition to that more general version, and mentions the \"top-down\" and \"bottom-up\" approaches to checking this property.",
+      "createdAt": "2022-02-18T22:03:54Z",
+      "updatedAt": "2022-02-19T10:05:08Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "13955995bc4bb81f8f15f92014fad49494a4acf1",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "revised-parent-hash",
+      "headRefOid": "63151b2051df042326c5bbfe99327a83353d77dd",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "cc @TWal @MartaMularczyk ",
+          "createdAt": "2022-02-18T22:04:08Z",
+          "updatedAt": "2022-02-18T22:04:08Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c407HD_",
+          "commit": {
+            "abbreviatedOid": "63151b2"
+          },
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "Note that this doesn't completely address the \"unease\" feeling mentioned in #587, but I can live it.\r\n\r\nOther than that, I think it makes the parent hash construct a lot more clear and this PR has a lot of pedagogical value. The section on parent hash in the current document is really difficult to grasp for a newcomer.",
+          "createdAt": "2022-02-19T10:04:45Z",
+          "updatedAt": "2022-02-19T10:05:08Z",
+          "comments": [
+            {
+              "originalPosition": 35,
+              "body": "Maybe add something to say the nodes on the path of the commit form a new parent-hash-chain?",
+              "createdAt": "2022-02-19T10:04:45Z",
+              "updatedAt": "2022-02-19T10:05:08Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
