@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-02-20T01:15:17.645700+00:00",
+  "timestamp": "2022-02-24T01:15:19.422096+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -6114,6 +6114,22 @@
       "createdAt": "2022-02-15T16:50:40Z",
       "updatedAt": "2022-02-18T19:18:51Z",
       "closedAt": "2022-02-18T19:18:51Z",
+      "comments": []
+    },
+    {
+      "number": 604,
+      "id": "I_kwDOBoyH6c5EZ06m",
+      "title": "Unify co-path style choice",
+      "url": "https://github.com/mlswg/mls-protocol/issues/604",
+      "state": "OPEN",
+      "author": "br-hale",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The co-path is written both as 'co-path' and 'copath'. As a formality check, this should be unified. ",
+      "createdAt": "2022-02-23T04:32:03Z",
+      "updatedAt": "2022-02-23T04:32:03Z",
+      "closedAt": null,
       "comments": []
     }
   ],
@@ -44046,7 +44062,7 @@
       "labels": [],
       "body": "Fixes #590 ",
       "createdAt": "2022-02-18T20:29:01Z",
-      "updatedAt": "2022-02-18T22:09:40Z",
+      "updatedAt": "2022-02-22T18:16:31Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "079e1bfbdeff8013b5ca7a7f49b03c4da7ae82bf",
@@ -44064,6 +44080,13 @@
           "body": "Note that this is a little bit duplicative: There's already a `version` field in KeyPackage.  But removing that would require something like sending MLSMessage in Add, which seems unpleasant.  We should probably either require that `KeyPackage.version == MLSMessage.version`, or just not use MLSMessage for KeyPackage.\r\n\r\nLikewise, the version field in GroupInfo can probably be removed, since it will be on the outside MLSMessage regardless of whether the GroupInfo is sent bare or in Welcome.",
           "createdAt": "2022-02-18T22:07:41Z",
           "updatedAt": "2022-02-18T22:09:40Z"
+        },
+        {
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> Note that this is a little bit duplicative: There's already a `version` field in KeyPackage. But removing that would require something like sending MLSMessage in Add, which seems unpleasant. We should probably either require that `KeyPackage.version == MLSMessage.version`, or just not use MLSMessage for KeyPackage.\r\n> \r\n> Likewise, the version field in GroupInfo can probably be removed, since it will be on the outside MLSMessage regardless of whether the GroupInfo is sent bare or in Welcome.\r\n\r\nFirst, we need to add ProtocolVersion to the beginning of MLSMessageContentTBS. \r\n\r\nRegarding KeyPackage and GroupInfo, the semantics here are subtle.\r\nExample: My MLS 1.1 client could send an MLSMessage with MLS version 1.1 to the DS/Directory, which contains a KeyPackage which only advertises MLS version 1.0. Another MLS client which only supports MLS 1.0 could read it with no problem. (I could publish both 1.0 and 1.1 KeyPackages).\r\n",
+          "createdAt": "2022-02-22T18:16:31Z",
+          "updatedAt": "2022-02-22T18:16:31Z"
         }
       ],
       "reviews": []
@@ -44080,7 +44103,7 @@
       "labels": [],
       "body": "PublicGroupState was removed as an independent struct in #529.  This PR fixes some dangling references to it.",
       "createdAt": "2022-02-18T20:34:01Z",
-      "updatedAt": "2022-02-18T20:34:22Z",
+      "updatedAt": "2022-02-22T22:55:34Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "079e1bfbdeff8013b5ca7a7f49b03c4da7ae82bf",
@@ -44100,7 +44123,21 @@
           "updatedAt": "2022-02-18T20:34:22Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c41E1iQ",
+          "commit": {
+            "abbreviatedOid": "c55c63e"
+          },
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "Also, update WireFormat:\r\n\r\ns/mls_public_group_state(4),/mls_group_info(4),/\r\n",
+          "createdAt": "2022-02-22T22:55:34Z",
+          "updatedAt": "2022-02-22T22:55:34Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 602,
@@ -44114,7 +44151,7 @@
       "labels": [],
       "body": "The recently introduced variable size encoding allows for very large message sizes that are not practical in any realistic scenario. Since decoders will most likely not allow such large messages anyway, this PR limits the maximum size to 30-bit.",
       "createdAt": "2022-02-18T22:00:14Z",
-      "updatedAt": "2022-02-18T22:23:09Z",
+      "updatedAt": "2022-02-22T21:32:06Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "13955995bc4bb81f8f15f92014fad49494a4acf1",
@@ -44132,6 +44169,13 @@
           "body": "cc @rohan-wire who had some thoughts about limits on the last virtual interim.",
           "createdAt": "2022-02-18T22:18:51Z",
           "updatedAt": "2022-02-18T22:18:51Z"
+        },
+        {
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> cc @rohan-wire who had some thoughts about limits on the last virtual interim.\r\nMy general points are:\r\n- Code defensively\r\n- Fail gracefully\r\n- Use the lower level protocol carrying MLS Messages to send a clear and relevant error message if something is too big.\r\n   Ex: HTTP/2.0 413 Commit.Proposals exceeds 2^16 bytes\r\n   ex: HTTP/2.0 413 Too many proposals referenced in Commit (>9999)",
+          "createdAt": "2022-02-22T18:45:29Z",
+          "updatedAt": "2022-02-22T21:32:06Z"
         }
       ],
       "reviews": [
@@ -44174,6 +44218,26 @@
               "updatedAt": "2022-02-18T22:18:30Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c41D0-7",
+          "commit": {
+            "abbreviatedOid": "76e7987"
+          },
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-02-22T18:22:54Z",
+          "updatedAt": "2022-02-22T18:22:55Z",
+          "comments": [
+            {
+              "originalPosition": 36,
+              "body": "I think Richard's text is overkill. How about:\r\n\u00abVectors that start with \"11\" prefix are invalid and MUST be rejected, as that prefix would represent vectors too large to be included in any practical message.\u00bb",
+              "createdAt": "2022-02-22T18:22:54Z",
+              "updatedAt": "2022-02-22T18:22:55Z"
+            }
+          ]
         }
       ]
     },
@@ -44189,7 +44253,7 @@
       "labels": [],
       "body": "This PR revises the parent hash verification section to reflect more recent discussion.  Right now, the definition of validity according to the parent hash ties it to the \"top-down\" validation algorithm, when what really matters is that each parent node has a path to a leaf.  This PR changes the definition to that more general version, and mentions the \"top-down\" and \"bottom-up\" approaches to checking this property.",
       "createdAt": "2022-02-18T22:03:54Z",
-      "updatedAt": "2022-02-19T10:05:08Z",
+      "updatedAt": "2022-02-22T12:14:31Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "13955995bc4bb81f8f15f92014fad49494a4acf1",
@@ -44207,6 +44271,13 @@
           "body": "cc @TWal @MartaMularczyk ",
           "createdAt": "2022-02-18T22:04:08Z",
           "updatedAt": "2022-02-18T22:04:08Z"
+        },
+        {
+          "author": "MartaMularczyk",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Great proposal! It achieves what we want much more directly.\r\n\r\nOne comment: in the description of the \"top down\" approach, the part \"there is _exactly_ one descendant\" isn't exactly consistent with being \"parent hash valid\", because the latter requires that P can be chained to _at least_ one leaf. The bottom up approach is consistent with being parent hash valid.\r\nAs a result, a malicious insider may be able to craft a tree that is accepted by the bottom up approach but not by the top down approach [1] which may hurt interoperability.\r\nI'd suggest either to change \"exactly one\" to \"at least one\" in the top down approach or to change \"can be chained back to a leaf\" to \"can be chained back to exactly one leaf\" in the definition of parent hash valid (and modify the bottom up approach accordingly). I don't have a strong opinion which is better.\r\n\r\n---------------------\r\n[1] An example such tree: the tree has 3 nodes: the root P and its children A and B. Assuming both A and B are malicious, A signs the parent hash of P with copath child B and B signs the parent hash of P with copath child A. (This is possible with the current resolution-hash for parent-hash.)\r\n\r\n",
+          "createdAt": "2022-02-22T12:14:30Z",
+          "updatedAt": "2022-02-22T12:14:30Z"
         }
       ],
       "reviews": [
