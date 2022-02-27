@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-02-24T01:15:19.422096+00:00",
+  "timestamp": "2022-02-27T01:14:13.622819+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -42967,7 +42967,7 @@
       "labels": [],
       "body": "This is a minimal section for MIME type registration of message/mls. \r\n\r\nIt assumes that PR #523 include wire_format in all MLS messages (making a format parameter unnecessary),\r\nand that all messages have the MLS version number encoded (making a version parameter unnecessary).\r\n\r\nThese parameters can be added if needed.",
       "createdAt": "2022-02-07T22:47:35Z",
-      "updatedAt": "2022-02-13T14:24:41Z",
+      "updatedAt": "2022-02-24T05:02:33Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "b40a1a65d0c491a5e456464c6cfc345d459b8db7",
@@ -44302,6 +44302,40 @@
           ]
         }
       ]
+    },
+    {
+      "number": 605,
+      "id": "PR_kwDOBoyH6c4zYkEA",
+      "title": "Add mime_type object before application_data",
+      "url": "https://github.com/mlswg/mls-protocol/pull/605",
+      "state": "OPEN",
+      "author": "rohan-wire",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This allows applications to express the MIME type of the application_data if desired.",
+      "createdAt": "2022-02-24T05:10:27Z",
+      "updatedAt": "2022-02-24T06:16:52Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "13955995bc4bb81f8f15f92014fad49494a4acf1",
+      "headRepository": "rohan-wire/mls-protocol",
+      "headRefName": "rohan/mime_app_data",
+      "headRefOid": "5589c90ecd6accc930d95394a9365bfc68b06127",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "In case you are wondering how you would negotiate mime types used by an MLS client, here is a WIP very rough preview:\r\nhttps://github.com/rohan-wire/ietf-drafts/blob/main/mahy-dispatch-immi-mls-mime/draft-mahy-dispatch-immi-mls-mime.md",
+          "createdAt": "2022-02-24T06:16:52Z",
+          "updatedAt": "2022-02-24T06:16:52Z"
+        }
+      ],
+      "reviews": []
     }
   ]
 }
