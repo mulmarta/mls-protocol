@@ -3807,7 +3807,7 @@ P). The new "Parent Hash of P (with Co-Path Child S)" is obtained by hashing P's
 struct {
     HPKEPublicKey public_key;
     opaque parent_hash&lt;V&gt;;
-    HPKEPublicKey original_child_resolution&lt;V&gt;;
+    opaque original_sibling_tree_hash&lt;V&gt;;
 } ParentHashInput;
 </pre><a href="#section-8.6-5" class="pilcrow">¶</a>
 </div>
@@ -3819,20 +3819,81 @@ the new HPKE public key of each node V on the path from P to the root. Note
 that the path from P to the root may contain some blank nodes that are not
 fixed by P's Parent Hash. However, for each node that has an HPKE key, this key
 is fixed by P's Parent Hash.<a href="#section-8.6-6" class="pilcrow">¶</a></p>
-<p id="section-8.6-7">Finally, <code>original_child_resolution</code> is the array of HPKE public keys of the
-nodes in the resolution of S but with the <code>unmerged_leaves</code> of P omitted. For
-example, in the ratchet tree depicted in <a href="#ratchet-tree-nodes" class="xref">Section 5.3</a> the
-<code>ParentHashInput</code> of node Z with co-path child C would contain an empty
-<code>original_child_resolution</code> since C's resolution includes only itself but C is also
-an unmerged leaf of Z. Meanwhile, the <code>ParentHashInput</code> of node Z with co-path child
-D has an array with one element in it: the HPKE public key of D.<a href="#section-8.6-7" class="pilcrow">¶</a></p>
-<p id="section-8.6-8">Observe that <code>original_child_resolution</code> is equal to the resolution of S at the
+<p id="section-8.6-7">Finally, <code>original_sibling_tree_hash</code> is the original tree hash of S. The
+original tree hash corresponds to the tree hash of S the last time P was
+updated. It can be computed as the tree hash of S in the ratchet tree modified
+the following way:<a href="#section-8.6-7" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-8.6-8.1">reset the leaves in P.unmerged_leaves to blanks<a href="#section-8.6-8.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-8.6-8.2">remove P.unmerged_leaves from all unmerged_leaves lists<a href="#section-8.6-8.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-8.6-8.3">truncate the ratchet tree as described in <a href="#remove" class="xref">Section 13.1.3</a><a href="#section-8.6-8.3" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-8.6-9">For example, in the following tree:<a href="#section-8.6-9" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.6-10">
+<pre>
+              W [D, H]
+        ______|_____
+       /             \
+      U [D]           Y [F, H]
+    __|__           __|__
+   /     \         /     \
+  T       _       X [F]   _
+ / \     / \     / \     / \
+A   B   C   D   E   F   G   H
+</pre><a href="#section-8.6-10" class="pilcrow">¶</a>
+</div>
+<p id="section-8.6-11">With P = W and S = Y, <code>original_sibling_tree_hash</code> is the tree hash of the
+following tree:<a href="#section-8.6-11" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.6-12">
+<pre>
+      Y [F]
+    __|__
+   /     \
+  X [F]  |
+ / \     |
+E   F    G
+</pre><a href="#section-8.6-12" class="pilcrow">¶</a>
+</div>
+<p id="section-8.6-13">Because <code>W.unmerged_leaves = [H]</code>, H is removed from <code>Y.unmerged_leaves</code>,
+then H is replaced with a blank leaf, then the tree is truncated removing the
+last two nodes.<a href="#section-8.6-13" class="pilcrow">¶</a></p>
+<p id="section-8.6-14">With P = W and S = U, <code>original_sibling_tree_hash</code> is the tree hash of the
+following tree:<a href="#section-8.6-14" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.6-15">
+<pre>
+      U
+    __|__
+   /     \
+  T       _
+ / \     / \
+A   B   C   _
+</pre><a href="#section-8.6-15" class="pilcrow">¶</a>
+</div>
+<p id="section-8.6-16">This time we have 4 leaf nodes because the truncation of the ratchet tree didn't
+remove the last leaf.<a href="#section-8.6-16" class="pilcrow">¶</a></p>
+<p id="section-8.6-17">Note that no recomputation is needed if the tree hash of S is unchanged since
+the last time P was updated.  This is the case for computing or processing a
+Commit whose UpdatePath traverses P, since the Commit itself resets P.  (In
+other words, it is only necessary to recompute the original sibling tree hash
+when validating group's tree on joining.) More generally, if none of the entries
+in <code>P.unmerged_leaves</code> is in the subtree under S (and thus no nodes were truncated),
+then the original tree hash at S is the tree hash of S in the current tree.<a href="#section-8.6-17" class="pilcrow">¶</a></p>
+<p id="section-8.6-18">If it is necessary to recompute the original tree hash of a node, the efficiency
+of recomputation can be improved by caching intermediate tree hashes, to avoid
+recomputing over the subtree when the subtree is included in multiple parent
+hashes.  A subtree hash can be reused as long as the intersection of the
+parent's unmerged leaves with the subtree is the same as in the earlier
+computation.<a href="#section-8.6-18" class="pilcrow">¶</a></p>
+<p id="section-8.6-19">Observe that <code>original_child_resolution</code> is equal to the resolution of S at the
 time the <code>UpdatePath</code> was generated, since at that point P's set of unmerged
 leaves was emptied. (Observe also that <code>original_child_resolution</code> contains all
 unmerged leaves of S.) Therefore, P's Parent Hash fixes, for each node V on the
 path from P to the root, not only the HPKE public key of V, but also the set of
 HPKE public keys to which the corresponding HPKE secret key of V was encrypted by
-the generator of the <code>UpdatePath</code>.<a href="#section-8.6-8" class="pilcrow">¶</a></p>
+the generator of the <code>UpdatePath</code>.<a href="#section-8.6-19" class="pilcrow">¶</a></p>
 <div id="using-parent-hashes">
 <section id="section-8.6.1">
           <h4 id="name-using-parent-hashes">
