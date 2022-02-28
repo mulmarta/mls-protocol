@@ -5,7 +5,7 @@
 Network Working Group                                          R. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                             B. Beurdouche
-Expires: 22 August 2022                                  Inria & Mozilla
+Expires: 1 September 2022                                Inria & Mozilla
                                                                R. Robert
                                                                         
                                                              J. Millican
@@ -14,7 +14,7 @@ Expires: 22 August 2022                                  Inria & Mozilla
                                                                   Google
                                                           K. Cohn-Gordon
                                                     University of Oxford
-                                                        18 February 2022
+                                                        28 February 2022
 
 
               The Messaging Layer Security (MLS) Protocol
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 22 August 2022.
+   This Internet-Draft will expire on 1 September 2022.
 
 Copyright Notice
 
@@ -1540,11 +1540,11 @@ Table of Contents
    The following structure is used to fully describe the data
    transmitted in plaintexts or ciphertexts.
 
-   struct MLSMessageContentAuth {
+   struct {
        WireFormat wire_format;
        MLSMessageContent content;
        MLSMessageAuth auth;
-   }
+   } MLSMessageContentAuth;
 
 7.1.  Content Authentication
 
@@ -1579,6 +1579,7 @@ struct {
    specific to a given group and epoch.
 
    struct {
+       ProtocolVersion version = mls10;
        WireFormat wire_format;
        MLSMessageContent content;
        select (MLSMessageContentTBS.content.sender.sender_type) {
@@ -2961,7 +2962,14 @@ struct {
        Extension extensions<V>;
    } KeyPackageTBS;
 
-   Note that the capabilties field in the leaf_node allows MLS session
+   If a client receives a KeyPackage carried within an MLSMessage
+   object, then it MUST verify that the version field of the KeyPackage
+   has the same value as the version field of the MLSMessage.  The
+   version field in the KeyPackage provides an explicit signal of the
+   intended version to the other members of group when they receive the
+   KeyPackage in an Add proposal.
+
+   The capabilities field in the leaf_node allows MLS session
    establishment to be safe from downgrade attacks on the parameters
    described (as discussed in Section 12), while still only advertising
    one version / ciphersuite per KeyPackage.
@@ -3898,7 +3906,6 @@ struct {
    local group state.
 
    struct {
-       ProtocolVersion version = mls10;
        CipherSuite cipher_suite;
        opaque group_id<V>;
        uint64 epoch;
