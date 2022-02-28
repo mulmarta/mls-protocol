@@ -2250,7 +2250,7 @@ struct {
 
    The parent hash of P changes whenever an UpdatePath object is applied
    to the ratchet tree along a path from a leaf U traversing node V (and
-   hence also P).  The new "Parent Hash of P (with Co-Path Child S)" is
+   hence also P).  The new "Parent hash of P (with copath child S)" is
    obtained by hashing P's ParentHashInput struct.
 
    struct {
@@ -2356,15 +2356,15 @@ struct {
 
    If, on the other hand, V is the leaf U and its LeafNode has
    leaf_node_source set to commit, then the Parent Hash of P (with V's
-   sibling as co-path child) is stored in the parent_hash field.  This
-   is true in particular of the LeafNode object sent in the leaf_node
-   field of an UpdatePath.  The signature of such a LeafNode thus also
-   attests to which keys the group member introduced into the ratchet
-   tree and to whom the corresponding secret keys were sent.  This helps
-   prevent malicious insiders from constructing artificial ratchet trees
-   with a node V whose HPKE secret key is known to the insider yet where
-   the insider isn't assigned a leaf in the subtree rooted at V.
-   Indeed, such a ratchet tree would violate the tree invariant.
+   sibling as copath child) is stored in the parent_hash field.  This is
+   true in particular of the LeafNode object sent in the leaf_node field
+   of an UpdatePath.  The signature of such a LeafNode thus also attests
+   to which keys the group member introduced into the ratchet tree and
+   to whom the corresponding secret keys were sent.  This helps prevent
+   malicious insiders from constructing artificial ratchet trees with a
+   node V whose HPKE secret key is known to the insider yet where the
+   insider isn't assigned a leaf in the subtree rooted at V.  Indeed,
+   such a ratchet tree would violate the tree invariant.
 
 8.6.2.  Verifying Parent Hashes
 

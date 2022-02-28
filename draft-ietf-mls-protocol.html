@@ -1990,8 +1990,8 @@ be treated as malformed.<a href="#section-2.1.2-4" class="pilcrow">¶</a></p>
           </table>
 </div>
 <p id="section-2.1.2-7">Vectors that start with "11" prefix are invalid and MUST be rejected.<a href="#section-2.1.2-7" class="pilcrow">¶</a></p>
-<p id="section-2.1.2-8">For example, the four byte sequence 0x9d7f3e7d decodes to 494878333; 
-the two byte sequence 0x7bbd decodes to 15293; and the single byte 0x25 
+<p id="section-2.1.2-8">For example, the four byte sequence 0x9d7f3e7d decodes to 494878333;
+the two byte sequence 0x7bbd decodes to 15293; and the single byte 0x25
 decodes to 37.<a href="#section-2.1.2-8" class="pilcrow">¶</a></p>
 <p id="section-2.1.2-9">The following figure adapts the pseudocode provided in <span>[<a href="#RFC9000" class="xref">RFC9000</a>]</span> to add a
 check for minimum-length encoding:<a href="#section-2.1.2-9" class="pilcrow">¶</a></p>
@@ -3800,7 +3800,7 @@ leaf node was last updated.<a href="#section-8.6-1" class="pilcrow">¶</a></p>
 </div>
 <p id="section-8.6-4">The parent hash of P changes whenever an <code>UpdatePath</code> object is applied to
 the ratchet tree along a path from a leaf U traversing node V (and hence also
-P). The new "Parent Hash of P (with Co-Path Child S)" is obtained by hashing P's
+P). The new "Parent hash of P (with copath child S)" is obtained by hashing P's
 <code>ParentHashInput</code> struct.<a href="#section-8.6-4" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.6-5">
 <pre>
@@ -3906,7 +3906,7 @@ path of U. (The <code>ParentNode</code> struct is used to encapsulate all public
 information about that node that must be conveyed to a new
 member joining the group as well as to define its Tree Hash.)<a href="#section-8.6.1-1" class="pilcrow">¶</a></p>
 <p id="section-8.6.1-2">If, on the other hand, V is the leaf U and its LeafNode has <code>leaf_node_source</code> set to <code>commit</code>,
-then the Parent Hash of P (with V's sibling as co-path child) is stored in
+then the Parent Hash of P (with V's sibling as copath child) is stored in
 the <code>parent_hash</code> field.  This is true in particular of the LeafNode object sent
 in the <code>leaf_node</code> field of an UpdatePath. The signature of such a LeafNode thus also
 attests to which keys the group member introduced into the ratchet tree and
