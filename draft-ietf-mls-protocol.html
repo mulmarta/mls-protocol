@@ -2954,7 +2954,7 @@ enum {
   mls_plaintext(1),
   mls_ciphertext(2),
   mls_welcome(3),
-  mls_public_group_state(4),
+  mls_group_info(4),
   mls_key_package(5),
   (255)
 } WireFormat;
@@ -2987,8 +2987,8 @@ struct {
             MLSCiphertext ciphertext;
         case mls_welcome:
             Welcome welcome;
-        case mls_public_group_state:
-            PublicGroupState public_group_state;
+        case mls_group_info:
+            GroupInfo group_info;
         case mls_key_package:
             KeyPackage key_package;
     }
@@ -4258,7 +4258,7 @@ the external key pair for the previous epoch.  This is done when an new member
 is joining via an external commit.<a href="#section-9.3-1" class="pilcrow">¶</a></p>
 <p id="section-9.3-2">In this process, the joiner sends a new <code>init_secret</code> value to the group using
 the HPKE export method.  The joiner then uses that <code>init_secret</code> with
-information provided in the PublicGroupState and an external Commit to initialize
+information provided in the GroupInfo and an external Commit to initialize
 their copy of the key schedule for the new epoch.<a href="#section-9.3-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-9.3-3">
 <pre>
@@ -4274,7 +4274,7 @@ context = SetupBaseR(kem_output, external_priv, "")
 init_secret = context.export("MLS 1.0 external init secret", KDF.Nh)
 </pre><a href="#section-9.3-5" class="pilcrow">¶</a>
 </div>
-<p id="section-9.3-6">In both cases, the <code>info</code> input to HPKE is set to the PublicGroupState for the
+<p id="section-9.3-6">In both cases, the <code>info</code> input to HPKE is set to the GroupInfo for the
 previous epoch, encoded using the TLS serialization.<a href="#section-9.3-6" class="pilcrow">¶</a></p>
 </section>
 </div>
