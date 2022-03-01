@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-02-27T01:14:13.622819+00:00",
+  "timestamp": "2022-03-01T01:23:05.305334+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -6121,15 +6121,15 @@
       "id": "I_kwDOBoyH6c5EZ06m",
       "title": "Unify co-path style choice",
       "url": "https://github.com/mlswg/mls-protocol/issues/604",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "br-hale",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "The co-path is written both as 'co-path' and 'copath'. As a formality check, this should be unified. ",
       "createdAt": "2022-02-23T04:32:03Z",
-      "updatedAt": "2022-02-23T04:32:03Z",
-      "closedAt": null,
+      "updatedAt": "2022-02-28T19:58:35Z",
+      "closedAt": "2022-02-28T19:58:35Z",
       "comments": []
     }
   ],
@@ -40560,7 +40560,7 @@
       "id": "PR_kwDOBoyH6c4v8na2",
       "title": "Stronger parent hashes for authenticated identities",
       "url": "https://github.com/mlswg/mls-protocol/pull/527",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "TWal",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
@@ -40569,17 +40569,19 @@
       ],
       "body": "Our proposal\r\n============\r\n\r\nThe parent hash construction currently authenticates only the public keys in the ratchet tree and does not protect other tree contents, notably the credentials at the leaves.\r\nConsequently, a malicious member can tamper with the credentials before sending a Welcome package to a new member, even if it cannot tamper with the public keys.\r\n\r\nInstead of using the tree resolution in the parent hash computation, we propose to use the tree hash.\r\n\r\nThe last time this was discussed on the list, it was agreed that it would be better to use tree hashes from a security point of view, but it was felt that complexity-wise that the recipient of a Welcome message would have to do O(n^2) work.\r\nA more thorough analysis shows that processing a Welcome message can be done in O(n*log(log(n))).\r\nThe result is that each signature captures the full tree contents including leaf credentials, which provides better authentication guarantees for member identities.\r\n\r\nEfficient algorithm to process a Commit\r\n=======================================\r\n\r\nWhen processing Commits, the implementation can store the tree hashes of every subtree.\r\nThat way, with n being the number of leaves, you can process each proposal in O(log(n)) and each UpdatePath in O(log(n)).\r\nThen you can check the parent hash when processing a Commit in O(p*log(n)) where p is the number of proposals.\r\n\r\nEfficient (enough) algorithm to process a Welcome\r\n=================================================\r\n\r\nWhen processing a Welcome message, we need to do the parent hash verification procedure.\r\nTo do it with the new parent hash, we need to compute tree hashes of subtrees at the last time they were updated.\r\nThis can be done using the following modified tree hash:\r\n\r\n    OldTreeHash(leaf, excluded_leaves) = Hash(leaf) if leaf not in excluded_leaves\r\n    OldTreeHash(leaf, excluded_leaves) = Hash(blank leaf) if leaf in excluded_leaves\r\n    OldTreeHash(node, excluded_leaves) = Hash(node.content | OldTreeHash(node.left, left_excluded_leaves) | OldTreeHash(node.right, right_excluded_leaves))\r\n    where left_excluded_leaves = leaves that are in excluded_leaves and in node.left (same for right_excluded_leaves).\r\n    and `excluded_leaves` are removed from `node.content.unmerged_leaves`.\r\n\r\nThen we can compute the parent hash for a node `N` with child `C` and sibling `S` using `OldTreeHash(S, N.content.unmerged_leaves)`: this old tree hash don't change when Adds are applied to the tree.\r\n\r\nIn the next paragraph, we will see that we can compute the parent hash for every node in `O(n*log(n))`.\r\n\r\nLet `h` be the height of the tree (so `h = log(n)`). There are `O(2^{h-i})` nodes at height `i`, and computing the parent hash for a node at height `i` is done in `O(2^i)`.\r\nHence, the complexity for the parent hash verification procedure is:\r\n\r\n      \\sum_{i=1}^h O(2^i 2^{h-i})\r\n    = \\sum_{i=1}^h O(2^h)\r\n    = O(h 2^h)\r\nAnd since `h = log(n)`, the complexity is `O(n*log(n))`.\r\n\r\nEfficient algorithm to process a Welcome\r\n========================================\r\n\r\nImagine we have the following tree:\r\n\r\n                  W\r\n            ______|______\r\n           /             \\\r\n          U               Y [E, G]\r\n        __|__           __|__\r\n       /     \\         /     \\\r\n      T       V       X [E]   Z [G, H]\r\n     / \\     / \\     / \\     / \\\r\n    A   B   C   D   E   F   G   H\r\n\r\nFor each node `N`, `OldTreeHash(N, excluded_leaves)` will be called with different values for `excluded_leaves`.\r\n\r\nFor example, if the sibling is always the right child, then:\r\n- `OldTreeHash(H, .)` will be called with 1 time with `. = [H]` (when computing the parent hash of `Z`) and 2 times with `. = []` (when computing the parent hash of `Y` and `W`)\r\n- `OldTreeHash(Z, .)` will be called with 1 time with `. = [G]` (when computing the parent hash of `Y`) and 1 time with `. = []` (when computing the parent hash of `W`)\r\n\r\nIf the sibling is always the left child, then:\r\n- `OldTreeHash(A, .)` will be called 3 times with `. = []` (when computing the parent hash of `T`, `U`, `W`)\r\n- `OldTreeHash(T, .)` will be called 2 times with `. = []` (when computing the parent hash of `U`, `W`)\r\n\r\nWe can see that some values are computed several times, which means that the whole computation could be sped up using memoization.\r\n\r\nTo estimate the speedup, we will estimate with how many values for `excluded_leaves` is called `OldTreeHash(N, .)` for each node `N`. Summing up these values will give a complexity, which will be `O(n*log(log(n)))`.\r\n\r\nLet `node.parent[k]` be the `k`th parent of `node`, and `node.leaves` be the set of leaves in the subtree rooted at `node`.\r\nThen, each call of `OldTreeHash(node, excluded_leaves)` will have `excluded_leaves = Intersection(node.parent[k].unmerged_leaves, node.leaves)` for some `k`.\r\nLet's note this set `excluded_leaves_k`.\r\nThe tree has the invariant that if `i <= j` then `excluded_leaves_j` is a subset of `excluded_leaves_i` (i.e. the sets `excluded_leaves_k` are decreasing).\r\n\r\nLet d be the depth of `node` (with the root being at depth 1). Then, the set `excluded_leaves_set := {excluded_leaves_1, ..., excluded_leaves_{d-1}}` corresponds to the values for `excluded_leaves` in the calls to `OldTreeHash(N, .)`.\r\n\r\nFirst bound: `|excluded_leaves_set| <= d-1 <= d` because it is defined using `d-1` values.\r\nSecond bound: `|excluded_leaves_set| <= 2^{h-d}+1` because `|excluded_leaves_0| <= 2^{h-d}` and the sets `excluded_leaves_k` are decreasing.\r\nTherefore: for a node at depth d, `|excluded_leaves_set| <= min(d, 2^{h-d}+1)`\r\n\r\nThe complexity to do the parent hash verification procedure is therefore in `O(sum_{i=1}^h 2^i min(i, 2^{h-i}+1))`.\r\n\r\nLet's estimate this complexity more explicitly:\r\n\r\n       sum_{i=1}^h 2^i min(i, 2^{h-i}+1)\r\n    <= (sum_{i=1}^t i 2^i) + (sum_{i=t+1}^h 2^i (2^{h-i}+1)) [for all t]\r\n    =  (2 (t-1) 2^t + 2) + ((h-t) 2^h + 2^{h+1} - 2^{t+1}) [for all t]\r\n\r\nFor the first inequality, we split the sum in two parts and use `min(i, 2^{h-i}+1) <= i` in the left part and `min(i, 2^{h-i}+1) <= 2^{h-i}+1` in the right part.\r\nFor the second equality, it can be derived using the formula for geometric sum.\r\n\r\nIf we take `t = h - log(h)`, we can compute that the left part is `O(2^h)` and the right part is `O(log(h)*2^h)`.\r\n\r\nTherefore, the parent hash verification procedure complexity is `O(log(h)*2^h) = O(n*log(log(n)))`.\r\n\r\nOne might say that adding memoization has a cost and isn't in O(1), but here it is: using the fact that `excluded_leaves_k` are decreasing, if you process the tree in a bottom-up or top-down way, you only have to compare the length of the current `excluded_leaves` to the length of the previous one, and it tells you if you need to recompute the tree hash.\r\n\r\nThe current parent hash is not super fast\r\n=========================================\r\n\r\nIn the worst case, if most internal nodes are blank, then computing the parent hash for a node is in O(size of its subtree), which give an O(n*log(n)) complexity as we saw in the section about the naive algorithm.\r\n\r\nWhen processing a Commit, if most of the internal nodes are blank, then computing the new parent hashes is in O(n) which is quite slow.",
       "createdAt": "2021-12-16T12:54:02Z",
-      "updatedAt": "2022-02-19T08:54:14Z",
+      "updatedAt": "2022-02-28T18:52:18Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
-      "baseRefOid": "72e3b01e9c1c7adcef04ba58efec26151d1cd470",
+      "baseRefOid": "866cbbc050e68901b8156fe8fef36da2f851dbf1",
       "headRepository": "TWal/mls-protocol",
       "headRefName": "twal_parent_hash",
-      "headRefOid": "47c206efddc0bae8778bca85cfdaa9d4f7643028",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "f7fab60ce87323e33e39617d2fab8be8047c0dda",
+      "closedAt": "2022-02-28T18:52:18Z",
+      "mergedAt": "2022-02-28T18:52:18Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "3e62ef9b0a7ebb4d810d293b4c955cc33a9e2b7b"
+      },
       "comments": [
         {
           "author": "raphaelrobert",
@@ -40749,6 +40751,19 @@
               "updatedAt": "2022-02-18T21:38:49Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c41Xfwh",
+          "commit": {
+            "abbreviatedOid": "f7fab60"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-02-28T16:58:06Z",
+          "updatedAt": "2022-02-28T16:58:06Z",
+          "comments": []
         }
       ]
     },
@@ -44062,13 +44077,13 @@
       "labels": [],
       "body": "Fixes #590 ",
       "createdAt": "2022-02-18T20:29:01Z",
-      "updatedAt": "2022-02-22T18:16:31Z",
+      "updatedAt": "2022-02-28T19:47:59Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "079e1bfbdeff8013b5ca7a7f49b03c4da7ae82bf",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "message-version",
-      "headRefOid": "bbe7d8def0533e91cb927801d78e6cff60167760",
+      "headRefOid": "bd67356ecbd4f68be4409ee6a4648fde02ced3b2",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -44087,6 +44102,13 @@
           "body": "> Note that this is a little bit duplicative: There's already a `version` field in KeyPackage. But removing that would require something like sending MLSMessage in Add, which seems unpleasant. We should probably either require that `KeyPackage.version == MLSMessage.version`, or just not use MLSMessage for KeyPackage.\r\n> \r\n> Likewise, the version field in GroupInfo can probably be removed, since it will be on the outside MLSMessage regardless of whether the GroupInfo is sent bare or in Welcome.\r\n\r\nFirst, we need to add ProtocolVersion to the beginning of MLSMessageContentTBS. \r\n\r\nRegarding KeyPackage and GroupInfo, the semantics here are subtle.\r\nExample: My MLS 1.1 client could send an MLSMessage with MLS version 1.1 to the DS/Directory, which contains a KeyPackage which only advertises MLS version 1.0. Another MLS client which only supports MLS 1.0 could read it with no problem. (I could publish both 1.0 and 1.1 KeyPackages).\r\n",
           "createdAt": "2022-02-22T18:16:31Z",
           "updatedAt": "2022-02-22T18:16:31Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The latest commits here address the initial comments about KeyPackage and GroupInfo, and fixes the problem @rohan-wire notes about MLSMessageContentTBS.\r\n\r\nFor GroupInfo: I have just removed the `version` field.  I don't think there's any ambiguity created by moving it out to the MLSMessage wrapper.\r\n\r\nFor KeyPackage: I have left the `version` field and required it to be the same as the MLSMessage `version` field.  The thinking here is that these are saying the same thing to different audiences (the adder and everything else), so they should be consistent.\r\n\r\nYou could allow them to differ if you said that `MLSMessage.version` is only to indicate the format/semantics of the inner KeyPackage; then `KeyPackage.version` would indicate the actual version in use.  So to @rohan-wire's point, if  MLS 1.1 used the same KeyPackage format/semantics as MLS 1.0 (but presumably differed some other way), then you could have `MLSMessage{version=1.0, KeyPackage{version=1.1, ...}}`.  But this seems harder to reason about than just saying \"If I don't support the outer version, I can't use this KeyPackage\".",
+          "createdAt": "2022-02-28T19:47:59Z",
+          "updatedAt": "2022-02-28T19:47:59Z"
         }
       ],
       "reviews": []
@@ -44096,24 +44118,26 @@
       "id": "PR_kwDOBoyH6c4zHqx2",
       "title": "Remove dangling references to PublicGroupState",
       "url": "https://github.com/mlswg/mls-protocol/pull/601",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "PublicGroupState was removed as an independent struct in #529.  This PR fixes some dangling references to it.",
       "createdAt": "2022-02-18T20:34:01Z",
-      "updatedAt": "2022-02-22T22:55:34Z",
+      "updatedAt": "2022-02-28T18:57:18Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "079e1bfbdeff8013b5ca7a7f49b03c4da7ae82bf",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "no-pgs",
-      "headRefOid": "c55c63ef1bf0aea00ccc7556147bbfc3aacc823d",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "ef3341f0160725ef8136f4c7b70d181560d344de",
+      "closedAt": "2022-02-28T18:57:18Z",
+      "mergedAt": "2022-02-28T18:57:18Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "3c5882cc9f6311cbbe95e3308f8397a8852e7b9d"
+      },
       "comments": [
         {
           "author": "bifurcation",
@@ -44144,24 +44168,26 @@
       "id": "PR_kwDOBoyH6c4zIC9T",
       "title": "Limit the new variable length encoding to 30-bit",
       "url": "https://github.com/mlswg/mls-protocol/pull/602",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "raphaelrobert",
       "authorAssociation": "MEMBER",
       "assignees": [],
       "labels": [],
       "body": "The recently introduced variable size encoding allows for very large message sizes that are not practical in any realistic scenario. Since decoders will most likely not allow such large messages anyway, this PR limits the maximum size to 30-bit.",
       "createdAt": "2022-02-18T22:00:14Z",
-      "updatedAt": "2022-02-22T21:32:06Z",
+      "updatedAt": "2022-02-28T16:56:03Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "13955995bc4bb81f8f15f92014fad49494a4acf1",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "cap-large-encoding",
       "headRefOid": "76e79876551886bcb17b2fce7d62a626372c2a00",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2022-02-28T16:56:03Z",
+      "mergedAt": "2022-02-28T16:56:03Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "866cbbc050e68901b8156fe8fef36da2f851dbf1"
+      },
       "comments": [
         {
           "author": "bifurcation",
@@ -44238,6 +44264,19 @@
               "updatedAt": "2022-02-22T18:22:55Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c41XfHL",
+          "commit": {
+            "abbreviatedOid": "76e7987"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-02-28T16:55:57Z",
+          "updatedAt": "2022-02-28T16:55:57Z",
+          "comments": []
         }
       ]
     },
@@ -44246,24 +44285,26 @@
       "id": "PR_kwDOBoyH6c4zIEM0",
       "title": "Update parent hash validation",
       "url": "https://github.com/mlswg/mls-protocol/pull/603",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "This PR revises the parent hash verification section to reflect more recent discussion.  Right now, the definition of validity according to the parent hash ties it to the \"top-down\" validation algorithm, when what really matters is that each parent node has a path to a leaf.  This PR changes the definition to that more general version, and mentions the \"top-down\" and \"bottom-up\" approaches to checking this property.",
       "createdAt": "2022-02-18T22:03:54Z",
-      "updatedAt": "2022-02-22T12:14:31Z",
+      "updatedAt": "2022-02-28T19:06:38Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "13955995bc4bb81f8f15f92014fad49494a4acf1",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "revised-parent-hash",
-      "headRefOid": "63151b2051df042326c5bbfe99327a83353d77dd",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "9316effb2c692322569669c672d0aa8796d2181e",
+      "closedAt": "2022-02-28T19:06:38Z",
+      "mergedAt": "2022-02-28T19:06:38Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "e2afa1903e3a42d8a4ca661d329087b0d80365f9"
+      },
       "comments": [
         {
           "author": "bifurcation",
@@ -44278,6 +44319,20 @@
           "body": "Great proposal! It achieves what we want much more directly.\r\n\r\nOne comment: in the description of the \"top down\" approach, the part \"there is _exactly_ one descendant\" isn't exactly consistent with being \"parent hash valid\", because the latter requires that P can be chained to _at least_ one leaf. The bottom up approach is consistent with being parent hash valid.\r\nAs a result, a malicious insider may be able to craft a tree that is accepted by the bottom up approach but not by the top down approach [1] which may hurt interoperability.\r\nI'd suggest either to change \"exactly one\" to \"at least one\" in the top down approach or to change \"can be chained back to a leaf\" to \"can be chained back to exactly one leaf\" in the definition of parent hash valid (and modify the bottom up approach accordingly). I don't have a strong opinion which is better.\r\n\r\n---------------------\r\n[1] An example such tree: the tree has 3 nodes: the root P and its children A and B. Assuming both A and B are malicious, A signs the parent hash of P with copath child B and B signs the parent hash of P with copath child A. (This is possible with the current resolution-hash for parent-hash.)\r\n\r\n",
           "createdAt": "2022-02-22T12:14:30Z",
           "updatedAt": "2022-02-22T12:14:30Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@MartaMularczyk - I am keen on the \"exactly one\" framing precisely because you shouldn't have these collisions in a real tree.  At least I haven't been able to think up a case; maybe you have a non-malicious case?  Given that, I'm inclined to tighten the \"bottom-up\" so that it fails if there are multiple valid paths to a node. ",
+          "createdAt": "2022-02-28T16:35:09Z",
+          "updatedAt": "2022-02-28T16:35:09Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Just to close the loop here:\r\n\r\n* @TWal - thanks for the suggestion, added a sentence\r\n* @MartaMularczyk - Updated the \"bottom up\" description to say that each node should be covered by exactly one chain, which is the parallel requirement to exactly one child.",
+          "createdAt": "2022-02-28T19:06:27Z",
+          "updatedAt": "2022-02-28T19:06:27Z"
         }
       ],
       "reviews": [
@@ -44315,7 +44370,7 @@
       "labels": [],
       "body": "This allows applications to express the MIME type of the application_data if desired.",
       "createdAt": "2022-02-24T05:10:27Z",
-      "updatedAt": "2022-02-24T06:16:52Z",
+      "updatedAt": "2022-02-28T20:15:17Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "13955995bc4bb81f8f15f92014fad49494a4acf1",
@@ -44333,8 +44388,43 @@
           "body": "In case you are wondering how you would negotiate mime types used by an MLS client, here is a WIP very rough preview:\r\nhttps://github.com/rohan-wire/ietf-drafts/blob/main/mahy-dispatch-immi-mls-mime/draft-mahy-dispatch-immi-mls-mime.md",
           "createdAt": "2022-02-24T06:16:52Z",
           "updatedAt": "2022-02-24T06:16:52Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@rohan-wire why should this not just go inside of `application_data`?  HTTPS doesn't specify Content-Type at the TLS layer.  I realize there's probably a closer match between MLS messages and objects than with TLS frames, but still, it seems simpler to keep this layer as a transport for bytes, and do content negotiation within the byte stream.",
+          "createdAt": "2022-02-28T20:15:16Z",
+          "updatedAt": "2022-02-28T20:15:16Z"
         }
       ],
+      "reviews": []
+    },
+    {
+      "number": 606,
+      "id": "PR_kwDOBoyH6c4zr2sV",
+      "title": "Normalize on 'copath'",
+      "url": "https://github.com/mlswg/mls-protocol/pull/606",
+      "state": "MERGED",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes #604 ",
+      "createdAt": "2022-02-28T19:57:22Z",
+      "updatedAt": "2022-02-28T19:58:35Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "e2afa1903e3a42d8a4ca661d329087b0d80365f9",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "copath",
+      "headRefOid": "99f4d95e9868234980e144605e6a654bcd941a2a",
+      "closedAt": "2022-02-28T19:58:35Z",
+      "mergedAt": "2022-02-28T19:58:35Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "fac538f3e705e2224ff69547a0d339f49a21273a"
+      },
+      "comments": [],
       "reviews": []
     }
   ]
