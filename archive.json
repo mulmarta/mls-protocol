@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-03-01T01:23:05.305334+00:00",
+  "timestamp": "2022-03-03T01:19:06.356295+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -44077,7 +44077,7 @@
       "labels": [],
       "body": "Fixes #590 ",
       "createdAt": "2022-02-18T20:29:01Z",
-      "updatedAt": "2022-02-28T19:47:59Z",
+      "updatedAt": "2022-03-02T07:47:13Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "079e1bfbdeff8013b5ca7a7f49b03c4da7ae82bf",
@@ -44109,6 +44109,34 @@
           "body": "The latest commits here address the initial comments about KeyPackage and GroupInfo, and fixes the problem @rohan-wire notes about MLSMessageContentTBS.\r\n\r\nFor GroupInfo: I have just removed the `version` field.  I don't think there's any ambiguity created by moving it out to the MLSMessage wrapper.\r\n\r\nFor KeyPackage: I have left the `version` field and required it to be the same as the MLSMessage `version` field.  The thinking here is that these are saying the same thing to different audiences (the adder and everything else), so they should be consistent.\r\n\r\nYou could allow them to differ if you said that `MLSMessage.version` is only to indicate the format/semantics of the inner KeyPackage; then `KeyPackage.version` would indicate the actual version in use.  So to @rohan-wire's point, if  MLS 1.1 used the same KeyPackage format/semantics as MLS 1.0 (but presumably differed some other way), then you could have `MLSMessage{version=1.0, KeyPackage{version=1.1, ...}}`.  But this seems harder to reason about than just saying \"If I don't support the outer version, I can't use this KeyPackage\".",
           "createdAt": "2022-02-28T19:47:59Z",
           "updatedAt": "2022-02-28T19:47:59Z"
+        },
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I'm confused about what we're trying to do here. The way I understand it is that MLS messages are always sent in the context of a group. That group has a version associated with it via the group context. I see how it would make sense to add the version field to MLS messages, but I don't see how that version has anything to do with a potential KeyPackage that might or might not be a part of that message. I think the spec already has enough requirements about versions: If the version indicated by an MLSMessage differs from that of the group indicated by the group id, it's invalid. Similarly, if the version of the KeyPackage contained in a given Add proposal doesn't match that of the group in which it's meant to be used, it's invalid. Where exactly do we run into trouble if we don't explicitly relate the version in the framing and that of it's contents? The versions should already be the same, since they have to be the same as that of the group.\r\n\r\nRegarding the example with the DS: I don't quite understand the setting. As far as I'm aware, uploading or downloading of KeyPackages is not specified in the spec, so even if it happens within an MLS group (maybe the DS and the client are in a group) the KeyPackage would be part of an application message and thus the version of the KeyPackage would be irrelevant as far as the spec is concerned. Please correct me if I'm wrong or if I misunderstand the problem at hand.",
+          "createdAt": "2022-03-01T07:58:37Z",
+          "updatedAt": "2022-03-01T07:58:37Z"
+        },
+        {
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Hi Konrad,\r\n> The way I understand it is that MLS messages are always sent in the context of a group.\r\nNot all MLS _objects_ are sent in the context of a group. KeyPackage objects are not. The version number applies to the _protocol_ which specifies the _objects_, some of which are messages.\r\n\r\nWhen some lower level protocol sends an MLSCiphertext or MLSPlaintext message, the MLS client and/or DS could support multiple versions of MLS. The DS can't tell which group is being referenced until it can parse the message. It can't do that until it knows the protocol version, so the protocol and version are typically the first fields. \r\n\r\nI agree that for MLSCiphertext and MLSPlaintext objects if the version of the message doesn't correspond to the version of the group, that sounds like an invalid message to me.\r\n\r\n(I don't see when you would put a KeyPackage inside an MLS application message.)\r\n\r\nEven though uploading and downloading KeyPackage objects is not included in the spec, we need to allow another protocol to do so and give that protocol a reasonable migration path. If my directory supports KeyPackages in v1.0 and v1.1 format, we should be able to publish both versions until all the v1.0 potential peers have migrated. The format of the KeyPackage objects may be different. Being able to distinguish these so they can be parsed without external help is a basic data-hygiene function.",
+          "createdAt": "2022-03-02T00:07:12Z",
+          "updatedAt": "2022-03-02T00:07:12Z"
+        },
+        {
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": ">So to @rohan-wire's point, if MLS 1.1 used the same KeyPackage format/semantics as MLS 1.0 (but presumably differed some other way), then you could have `MLSMessage{version=1.0, KeyPackage{version=1.1, ...}}`. But this seems harder to reason about than just saying \"If I don't support the outer version, I can't use this KeyPackage\".\r\n\r\nMLSMessage{version=1.1, KeyPackage{version=1.0,...}} is the case I am envisioning. My client supports both MLS version 1.1 and 1.0. My DS supports v1.1 so I always communicate with v1.1, but I publish keypackages in both 1.0 and 1.1 formats.\r\n\r\n",
+          "createdAt": "2022-03-02T00:10:31Z",
+          "updatedAt": "2022-03-02T00:10:31Z"
+        },
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Thanks for the explanation, that makes the intent a bit clearer to me. However, I still don't see the scenario where something like `MLSMessage{version=1.1, KeyPackage{version=1.0,...}}` is a valid message in the context of the MLS spec. I agree that you should be able to publish KeyPackages of multiple versions and that version agility is important. \r\n\r\nDo I understand correctly, that in the scenario you describe (`MLSMessage{version=1.1, KeyPackage{version=1.0,...}}`) you're uploading a KeyPackage to the DS? I guess I don't understand why that would be an MLSMessage and not some message in the proprietary protocol you use to upload KeyPackages.",
+          "createdAt": "2022-03-02T07:47:12Z",
+          "updatedAt": "2022-03-02T07:47:12Z"
         }
       ],
       "reviews": []
@@ -44370,7 +44398,7 @@
       "labels": [],
       "body": "This allows applications to express the MIME type of the application_data if desired.",
       "createdAt": "2022-02-24T05:10:27Z",
-      "updatedAt": "2022-02-28T20:15:17Z",
+      "updatedAt": "2022-03-01T23:41:57Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "13955995bc4bb81f8f15f92014fad49494a4acf1",
@@ -44395,6 +44423,13 @@
           "body": "@rohan-wire why should this not just go inside of `application_data`?  HTTPS doesn't specify Content-Type at the TLS layer.  I realize there's probably a closer match between MLS messages and objects than with TLS frames, but still, it seems simpler to keep this layer as a transport for bytes, and do content negotiation within the byte stream.",
           "createdAt": "2022-02-28T20:15:16Z",
           "updatedAt": "2022-02-28T20:15:16Z"
+        },
+        {
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "\r\n> @rohan-wire why should this not just go inside of `application_data`? HTTPS doesn't specify Content-Type at the TLS layer. \r\n\r\nTLS is usually running directly on IPv4 or IPv6 and was reached by a specific port or started inside an Application protocol with STARTTLS. The format of the thing inside TLS is known from the port number or the outer protocol. Most of the protocols running inside TLS (SMTP, HTTP, IMAP, SIP) have their own way of advertising content, most of them using MIME headers. All of them are 1:1 and most are client-to-server. None of the protocols running inside TLS are 1:N protocols.\r\n\r\nNow take the case of MLS. MLS does not know how to run on top of IP. You could write a profile to do that, but it would be a lot of work to make a standardized protocol that covers all the corner cases. It would be useful for some applications but almost certainly not for the basic messaging applications which motivate it. It needs to run on some other protocol. See my map below. So, what goes inside an MLS message? \r\n\r\nA: content goes here\r\nP: MLS   <- You are here\r\nS: HTTP\r\nT: TLS  <- not here\r\nN: IPv4 or v6\r\nD: 802.3\r\nP: 1000BASE-T\r\n\r\nIn a proprietary application you can just have all the MLS clients agree, but what about if you want to support an interoperable IM system, or an interoperable Pub/Sub messaging bus for IoT devices? What are you going to use to communicate the content of the message?  HTTP won't work for 1:N messages. Do you really want to require an ASCII Content-Type header at the top of each message just so you know what is inside it? That's a pretty fundamental thing to know. \r\n\r\nFor me this is a no-brainer. If you don't need it, you lose 1 octet to carry a zero-length MIME type. If you need it, you have it built-in. You don't need messy content-encodings, line folding, optional whitespace, header capitalization arguments, etc which have dogged IETF text-based protocols for decades. If the MIME type of your MLS application message is application/vnd.foo-pubsub, application/cbor, text/html, application/geo+json, message/cpim, or message/vnd.bar-protocol you don't have to guess. You can easily migrate from one format to another. You can even use multipart/alternative to send a vendor-proprietary version usable to some clients in a group and a standardized interoperable version to others.\r\n",
+          "createdAt": "2022-03-01T23:41:57Z",
+          "updatedAt": "2022-03-01T23:41:57Z"
         }
       ],
       "reviews": []
