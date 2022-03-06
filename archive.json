@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-03-03T01:19:06.356295+00:00",
+  "timestamp": "2022-03-06T01:14:54.859551+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -6130,6 +6130,38 @@
       "createdAt": "2022-02-23T04:32:03Z",
       "updatedAt": "2022-02-28T19:58:35Z",
       "closedAt": "2022-02-28T19:58:35Z",
+      "comments": []
+    },
+    {
+      "number": 607,
+      "id": "I_kwDOBoyH6c5FDYSX",
+      "title": "Should `GroupInfoTBS` contain the protocol version?",
+      "url": "https://github.com/mlswg/mls-protocol/issues/607",
+      "state": "OPEN",
+      "author": "stefunctional",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "[The section about adding members to a group](https://messaginglayersecurity.rocks/mls-protocol/draft-ietf-mls-protocol.html#name-adding-members-to-the-group) defines `GroupInfo` and ` GroupInfoTBS` and states the following:\r\n> The signature covers the following structure, comprising all the fields in the GroupInfo above signature\r\n\r\nAll the fields above `signature` in `GroupInfo` includes `version`, but `version` is not in `GroupInfoTBS`. Should it be or should the wording about which fields are included be amended?\r\n\r\nThank you.",
+      "createdAt": "2022-03-03T14:59:54Z",
+      "updatedAt": "2022-03-03T14:59:54Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 608,
+      "id": "I_kwDOBoyH6c5FJAX4",
+      "title": "Completely remove leaf_index (or keep it)",
+      "url": "https://github.com/mlswg/mls-protocol/issues/608",
+      "state": "OPEN",
+      "author": "rohan-wire",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Under the list of changes, one of these says that leaf_index is removed. However a search for index and indeces still shows several references to the leaf_index. These should be removed/replaced as well, or explain why we need Leaf Node Reference and leaf_index and when one gets used.",
+      "createdAt": "2022-03-04T19:43:38Z",
+      "updatedAt": "2022-03-04T19:43:38Z",
+      "closedAt": null,
       "comments": []
     }
   ],
@@ -43565,7 +43597,7 @@
       "labels": [],
       "body": "- Adds an `extra_data` field to BasicCredential to hold application-specific data about a user (examples: link to avatar, information about device)\r\n- Adds a ProofCredential to cover a lot of the cases we're currently missing, particularly:\r\n  - credentials that are just BasicCredential signed with a fixed public key\r\n  - credentials that are authenticated by a system like Key Transparency\r\n  - credentials authenticated by secure hardware",
       "createdAt": "2022-02-10T20:01:06Z",
-      "updatedAt": "2022-02-18T23:46:50Z",
+      "updatedAt": "2022-03-03T18:53:56Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "13955995bc4bb81f8f15f92014fad49494a4acf1",
@@ -43625,6 +43657,20 @@
           "body": "So in terms of fleshing out use cases more explicitly:\r\n\r\n## 1. Signature from fixed public key\r\n\r\nIn this case, clients authenticate with the AS and provide it their signature key, and the AS provides back a fixed `ProofCredential` object, with the fields set as follows:\r\n\r\n- `authority_id`: This contains an arbitrary identifier of the public key that was used. For example, `company.com/keys/feb22`. The exact contents of the field and any semantics are up to the AS.\r\n- `credential`: A BasicCredential where `identity` is the client's unique identifier, `extra_data` contains extra structured data like when the credential is valid / other metadata about the client that's authenticated but might not be uniquely identifying, and `signature_key` contains the signature key provided by the client.\r\n- `proof`: Contains a signature over the serialized `credential` field from the AS.\r\n\r\nThis is probably the simplest (secure!) way for an organization to start using MLS, while also supporting important future tasks like key rotation (through `authority_id`) and extensibility (through `extra_data`).\r\n\r\n## 2. Key Transparency\r\n\r\nClients authenticate with the AS and provide it their signature key, and the AS incorporates their signature key in a Key Transparency tree along with some additional metadata. Clients can get a [proof object](https://github.com/google/keytransparency/blob/master/docs/verification.md) from the AS that authenticates the binding of their identity to their signature key and metadata. The client builds their own `ProofCredential` as follows:\r\n\r\n- `authority_id`: This contains an identifier of the KT tree used -- possibly a URL.\r\n- `credential`: A BasicCredential with the proper `identity`, `extra_data`, and `signature_key`.\r\n- `proof`: The serialized proof object from the KT tree.\r\n\r\n",
           "createdAt": "2022-02-18T23:46:50Z",
           "updatedAt": "2022-02-18T23:46:50Z"
+        },
+        {
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Thanks @Bren2010 for writing up these use cases. My concern is that if the authority _id is under-specified we could end up with a mess where different implementations assume a different syntax/semantic/context. This definitely happened with the Subject in X.509 certificates and it took almost a decade before we had reasonable semantics defined for SubjectAltName (URI, DNS, RID, IP, dirName, or otherName) and implementations still get confused sometimes when expecting DNS but a URI is present or vice versa.\r\n",
+          "createdAt": "2022-03-03T18:27:42Z",
+          "updatedAt": "2022-03-03T18:27:42Z"
+        },
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "There's no structure prescribed to `authority_id`, much like `group_id` it's an opaque identifier. An implementation that relies on it having a certain structure wouldn't be compliant with the specification.",
+          "createdAt": "2022-03-03T18:53:56Z",
+          "updatedAt": "2022-03-03T18:53:56Z"
         }
       ],
       "reviews": []
