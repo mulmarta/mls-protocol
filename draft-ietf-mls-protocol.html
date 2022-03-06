@@ -1027,11 +1027,11 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">MLS</td>
-<td class="right">February 2022</td>
+<td class="right">March 2022</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 1 September 2022</td>
+<td class="center">Expires 7 September 2022</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1044,12 +1044,12 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 <dd class="internet-draft">draft-ietf-mls-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2022-02-28" class="published">28 February 2022</time>
+<time datetime="2022-03-06" class="published">6 March 2022</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2022-09-01">1 September 2022</time></dd>
+<dd class="expires"><time datetime="2022-09-07">7 September 2022</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1119,7 +1119,7 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 1 September 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 7 September 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -2926,6 +2926,12 @@ Delivery Service to examine such messages.<a href="#section-7-3" class="pilcrow"
 <pre>
 enum {
     reserved(0),
+    mls10(1),
+    (255)
+} ProtocolVersion;
+
+enum {
+    reserved(0),
     application(1),
     proposal(2),
     commit(3),
@@ -2979,6 +2985,7 @@ struct {
 } MLSMessageContent;
 
 struct {
+    ProtocolVersion version = mls10;
     WireFormat wire_format;
     select (MLSMessage.wire_format) {
         case mls_plaintext:
@@ -3001,11 +3008,11 @@ for their use.<a href="#section-7-5" class="pilcrow">¶</a></p>
 plaintexts or ciphertexts.<a href="#section-7-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7-7">
 <pre>
-struct MLSMessageContentAuth {
+struct {
     WireFormat wire_format;
     MLSMessageContent content;
     MLSMessageAuth auth;
-}
+} MLSMessageContentAuth;
 </pre><a href="#section-7-7" class="pilcrow">¶</a>
 </div>
 <div id="content-authentication">
@@ -3045,6 +3052,7 @@ group and epoch.<a href="#section-7.1-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.1-4">
 <pre>
 struct {
+    ProtocolVersion version = mls10;
     WireFormat wire_format;
     MLSMessageContent content;
     select (MLSMessageContentTBS.content.sender.sender_type) {
@@ -4671,12 +4679,6 @@ KeyPackage object with an invalid signature field MUST be considered malformed.<
 signature field.<a href="#section-11-5" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-11-6">
 <pre>
-enum {
-    reserved(0),
-    mls10(1),
-    (255)
-} ProtocolVersion;
-
 // See IANA registry for registered values
 uint16 ExtensionType;
 
@@ -4704,12 +4706,17 @@ struct {
 } KeyPackageTBS;
 </pre><a href="#section-11-6" class="pilcrow">¶</a>
 </div>
-<p id="section-11-7">Note that the <code>capabilties</code> field in the <code>leaf_node</code> allows MLS session
+<p id="section-11-7">If a client receives a KeyPackage carried within an MLSMessage object, then it
+MUST verify that the <code>version</code> field of the KeyPackage has the same value as the
+<code>version</code> field of the MLSMessage.  The <code>version</code> field in the KeyPackage
+provides an explicit signal of the intended version to the other members of
+group when they receive the KeyPackage in an Add proposal.<a href="#section-11-7" class="pilcrow">¶</a></p>
+<p id="section-11-8">The <code>capabilities</code> field in the <code>leaf_node</code> allows MLS session
 establishment to be safe from downgrade attacks on the parameters described (as
 discussed in <a href="#group-creation" class="xref">Section 12</a>), while still only advertising one version /
-ciphersuite per KeyPackage.<a href="#section-11-7" class="pilcrow">¶</a></p>
-<p id="section-11-8">The <code>leaf_node_source</code> field of the LeafNode in a KeyPackage MUST be set to
-<code>key_package</code>.<a href="#section-11-8" class="pilcrow">¶</a></p>
+ciphersuite per KeyPackage.<a href="#section-11-8" class="pilcrow">¶</a></p>
+<p id="section-11-9">The <code>leaf_node_source</code> field of the LeafNode in a KeyPackage MUST be set to
+<code>key_package</code>.<a href="#section-11-9" class="pilcrow">¶</a></p>
 <div id="keypackage-validation">
 <section id="section-11.1">
         <h3 id="name-keypackage-validation">
@@ -5713,7 +5720,6 @@ new members need information to bootstrap their local group state.<a href="#sect
 <div class="alignLeft art-text artwork" id="section-13.2.3-2">
 <pre>
 struct {
-    ProtocolVersion version = mls10;
     CipherSuite cipher_suite;
     opaque group_id&lt;V&gt;;
     uint64 epoch;
