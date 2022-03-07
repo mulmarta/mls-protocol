@@ -5,7 +5,7 @@
 Network Working Group                                          R. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                             B. Beurdouche
-Expires: 7 September 2022                                Inria & Mozilla
+Expires: 8 September 2022                                Inria & Mozilla
                                                                R. Robert
                                                                         
                                                              J. Millican
@@ -14,7 +14,7 @@ Expires: 7 September 2022                                Inria & Mozilla
                                                                   Google
                                                           K. Cohn-Gordon
                                                     University of Oxford
-                                                            6 March 2022
+                                                            7 March 2022
 
 
               The Messaging Layer Security (MLS) Protocol
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 7 September 2022.
+   This Internet-Draft will expire on 8 September 2022.
 
 Copyright Notice
 
@@ -124,9 +124,7 @@ Table of Contents
      10.2.  Deletion Schedule
    11. Key Packages
      11.1.  KeyPackage Validation
-     11.2.  Client Capabilities
-     11.3.  Lifetime
-     11.4.  KeyPackage Identifiers
+     11.2.  KeyPackage Identifiers
    12. Group Creation
      12.1.  Required Capabilities
      12.2.  Reinitialization
@@ -1818,6 +1816,14 @@ struct {
        uint64 not_after;
    } Lifetime;
 
+   // See IANA registry for registered values
+   uint16 ExtensionType;
+
+   struct {
+       ExtensionType extension_type;
+       opaque extension_data<V>;
+   } Extension;
+
    struct {
        HPKEPublicKey public_key;
        Credential credential;
@@ -1872,9 +1878,10 @@ struct {
    } LeafNodeTBS;
 
    The public_key field conains an HPKE public key whose private key is
-   held only by the member occupying this leaf.  The credential contains
-   authentication information for this member, as described in
-   Section 6.3.
+   held only by the member occupying this leaf (or in the case of a
+   LeafNode in a KeyPackage object, the issuer of the KeyPackage).  The
+   credential contains authentication information for this member, as
+   described in Section 6.3.
 
    The capabilities field indicates what protocol versions,
    ciphersuites, protocol extensions, and non-default proposal types are
@@ -1884,7 +1891,13 @@ struct {
    extensions field of the capabilities field.
 
    The leaf_node_source field indicates how this LeafNode came to be
-   added to the tree.
+   added to the tree.  This signal tells other members of the group
+   whether the leaf node is required to have a lifetime or parent_hash,
+   and whether the group_id is added as context to the signature.
+   Whether these fields can be computed by the client represented by the
+   LeafNode depends on when the LeafNode was created.  For example, a
+   KeyPackage is created before the client knows which group it will be
+   used with, so its signature can't bind to a group_id.
 
    In the case where the leaf was added to the tree based on a pre-
    published KeyPackage, the lifetime field represents the times between
@@ -1926,13 +1939,13 @@ struct {
    The client verifies the validity of a LeafNode using the following
    steps:
 
-   *  Verify that the credential in the KeyPackage is valid according to
+   *  Verify that the credential in the LeafNode is valid according to
       the authentication service and the client's local policy.  These
       actions MUST be the same regardless of at what point in the
-      protocol the KeyPackage is being verified with the following
-      exception: If the KeyPackage is an update to another KeyPackage,
-      the authentication service MUST additionally validate that the set
-      of identities attested by the credential in the new KeyPackage is
+      protocol the LeafNode is being verified with the following
+      exception: If the LeafNode is an update to another LeafNode, the
+      authentication service MUST additionally validate that the set of
+      identities attested by the credential in the new LeafNode is
       acceptable relative to the identities attested by the old
       credential.
 
@@ -1946,8 +1959,9 @@ struct {
 
    *  Verify the lifetime field:
 
-      -  When validating a downloaded KeyPackage, the current time MUST
-         be within the lifetime range.  A KeyPackage that is expired or
+      -  When validating a LeafNode in a KeyPackage before sending an
+         Add proposal, the current time MUST be within the lifetime
+         range.  A KeyPackage containing a LeafNode that is expired or
          not yet valid MUST NOT be sent in an Add proposal.
 
       -  When receiving an Add or validating a tree, checking the
@@ -1961,13 +1975,17 @@ struct {
       for the context in which the LeafNode is being validated (as
       defined in Section 8.1).
 
-   *  Verify that the following fields in the KeyPackage are unique
-      among the members of the group (including any other members added
-      in the same Commit):
+   *  Verify that the following fields in the LeafNode are unique among
+      the members of the group (including any other members added in the
+      same Commit):
 
       -  public_key
 
       -  credential.signature_key
+
+   *  Verify that the extensions in the leaf node are supported.  The ID
+      for each extension in the extensions field MUST be listed in the
+      field capabilities.extensions of the LeafNode.
 
 8.2.  Ratchet Tree Evolution
 
@@ -3008,7 +3026,7 @@ struct {
    1.  A protocol version and ciphersuite that the client supports,
 
    2.  a public key that others can use to encrypt a Welcome message to
-       this client, and
+       this client, (an "init key") and
 
    3.  the content of the leaf node that should be added to the tree to
        represent this client.
@@ -3022,21 +3040,13 @@ struct {
    encryption scheme defined by cipher_suite, and it MUST be unique
    among the set of KeyPackages created by this client.  Likewise, the
    leaf_node field MUST be valid for the ciphersuite, including both the
-   hpke_key and credential fields.  The whole structure is signed using
-   the client's signature key.  A KeyPackage object with an invalid
-   signature field MUST be considered malformed.
+   public_key and credential fields.  The whole structure is signed
+   using the client's signature key.  A KeyPackage object with an
+   invalid signature field MUST be considered malformed.
 
    The signature is computed by the function SignWithLabel with a label
    KeyPackage and a content comprising of all of the fields except for
    the signature field.
-
-   // See IANA registry for registered values
-   uint16 ExtensionType;
-
-   struct {
-       ExtensionType extension_type;
-       opaque extension_data<V>;
-   } Extension;
 
    struct {
        ProtocolVersion version;
@@ -3063,13 +3073,19 @@ struct {
    intended version to the other members of group when they receive the
    KeyPackage in an Add proposal.
 
-   The capabilities field in the leaf_node allows MLS session
-   establishment to be safe from downgrade attacks on the parameters
-   described (as discussed in Section 12), while still only advertising
-   one version / ciphersuite per KeyPackage.
+   The field leaf_node.capabilities indicates what protocol versions,
+   ciphersuites, protocol extensions, and non-default proposal types are
+   supported by the client.  (Proposal types defined in this document
+   are considered "default" and not listed.)  This information allows
+   MLS session establishment to be safe from downgrade attacks on the
+   parameters described (as discussed in Section 12), while still only
+   advertising one version / ciphersuite per KeyPackage.
 
-   The leaf_node_source field of the LeafNode in a KeyPackage MUST be
-   set to key_package.
+   The field leaf_node.leaf_node_source of the LeafNode in a KeyPackage
+   MUST be set to key_package.
+
+   Extension included in the extensions or leaf_node.extensions fields
+   MUST be included in the leaf_node.capabilities field.
 
 11.1.  KeyPackage Validation
 
@@ -3083,52 +3099,16 @@ struct {
    The client verifies the validity of a KeyPackage using the following
    steps:
 
-   *  Verify the LeafNode in the KeyPackage according to the process
-      defined in Section 8.1.1.
-
-   *  Verify that the signature on the KeyPackage is valid using the
-      public key in the LeafNode's credential
-
-   *  Verify that the ciphersuite and protocol version of the LeafNode
+   *  Verify that the ciphersuite and protocol version of the KeyPackage
       match those in use in the group.
 
-11.2.  Client Capabilities
+   *  Verify the leaf_node field of the KeyPackage according to the
+      process defined in Section 8.1.1.
 
-   The capabilities extension indicates what protocol versions,
-   ciphersuites, protocol extensions, and non-default proposal types are
-   supported by a client.  Proposal types defined in this document are
-   considered "default" and thus need not be listed.
+   *  Verify that the signature on the KeyPackage is valid using the
+      public key in leaf_node.credential.
 
-   struct {
-       ProtocolVersion versions<V>;
-       CipherSuite ciphersuites<V>;
-       ExtensionType extensions<V>;
-       ProposalType proposals<V>;
-   } Capabilities;
-
-   This extension MUST be always present in a KeyPackage.  Extensions
-   that appear in the extensions field of a KeyPackage MUST be included
-   in the extensions field of the capabilities extension.
-
-11.3.  Lifetime
-
-   The lifetime extension represents the times between which clients
-   will consider a KeyPackage valid.  This time is represented as an
-   absolute time, measured in seconds since the Unix epoch
-   (1970-01-01T00:00:00Z).  A client MUST NOT use the data in a
-   KeyPackage for any processing before the not_before date, or after
-   the not_after date.
-
-   uint64 not_before;
-   uint64 not_after;
-
-   Applications MUST define a maximum total lifetime that is acceptable
-   for a KeyPackage, and reject any KeyPackage where the total lifetime
-   is longer than this duration.
-
-   This extension MUST always be present in a KeyPackage.
-
-11.4.  KeyPackage Identifiers
+11.2.  KeyPackage Identifiers
 
    Within MLS, a KeyPackage is identified by its hash (see, e.g.,
    Section 13.2.3.2).  The external_key_id extension allows applications

@@ -1031,7 +1031,7 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 7 September 2022</td>
+<td class="center">Expires 8 September 2022</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1044,12 +1044,12 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 <dd class="internet-draft">draft-ietf-mls-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2022-03-06" class="published">6 March 2022</time>
+<time datetime="2022-03-07" class="published">7 March 2022</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2022-09-07">7 September 2022</time></dd>
+<dd class="expires"><time datetime="2022-09-08">8 September 2022</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1119,7 +1119,7 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 7 September 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 8 September 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1327,13 +1327,7 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
                 <p id="section-toc.1-1.11.2.1.1"><a href="#section-11.1" class="xref">11.1</a>.  <a href="#name-keypackage-validation" class="xref">KeyPackage Validation</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.2">
-                <p id="section-toc.1-1.11.2.2.1"><a href="#section-11.2" class="xref">11.2</a>.  <a href="#name-client-capabilities" class="xref">Client Capabilities</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.3">
-                <p id="section-toc.1-1.11.2.3.1"><a href="#section-11.3" class="xref">11.3</a>.  <a href="#name-lifetime" class="xref">Lifetime</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.4">
-                <p id="section-toc.1-1.11.2.4.1"><a href="#section-11.4" class="xref">11.4</a>.  <a href="#name-keypackage-identifiers" class="xref">KeyPackage Identifiers</a></p>
+                <p id="section-toc.1-1.11.2.2.1"><a href="#section-11.2" class="xref">11.2</a>.  <a href="#name-keypackage-identifiers" class="xref">KeyPackage Identifiers</a></p>
 </li>
             </ul>
 </li>
@@ -3320,6 +3314,14 @@ struct {
     uint64 not_after;
 } Lifetime;
 
+// See IANA registry for registered values
+uint16 ExtensionType;
+
+struct {
+    ExtensionType extension_type;
+    opaque extension_data&lt;V&gt;;
+} Extension;
+
 struct {
     HPKEPublicKey public_key;
     Credential credential;
@@ -3375,7 +3377,8 @@ struct {
 </pre><a href="#section-8.1-5" class="pilcrow">¶</a>
 </div>
 <p id="section-8.1-6">The <code>public_key</code> field conains an HPKE public key whose private key is held only
-by the member occupying this leaf.  The <code>credential</code> contains authentication
+by the member occupying this leaf (or in the case of a LeafNode in a KeyPackage
+object, the issuer of the KeyPackage).  The <code>credential</code> contains authentication
 information for this member, as described in <a href="#credentials" class="xref">Section 6.3</a>.<a href="#section-8.1-6" class="pilcrow">¶</a></p>
 <p id="section-8.1-7">The <code>capabilities</code> field indicates what protocol versions, ciphersuites,
 protocol extensions, and non-default proposal types are supported by a client.
@@ -3383,7 +3386,12 @@ Proposal types defined in this document are considered "default" and thus need
 not be listed.  Extensions that appear in the <code>extensions</code> field of a LeafNode
 MUST be included in the <code>extensions</code> field of the <code>capabilities</code> field.<a href="#section-8.1-7" class="pilcrow">¶</a></p>
 <p id="section-8.1-8">The <code>leaf_node_source</code> field indicates how this LeafNode came to be added to the
-tree.<a href="#section-8.1-8" class="pilcrow">¶</a></p>
+tree.  This signal tells other members of the group whether the leaf node is
+required to have a <code>lifetime</code> or <code>parent_hash</code>, and whether the <code>group_id</code> is
+added as context to the signature.  Whether these fields can be computed by the
+client represented by the LeafNode depends on when the LeafNode was created.
+For example, a KeyPackage is created before the client knows which group it will
+be used with, so its signature can't bind to a <code>group_id</code>.<a href="#section-8.1-8" class="pilcrow">¶</a></p>
 <p id="section-8.1-9">In the case where the leaf was added to the tree based on a pre-published
 KeyPackage, the <code>lifetime</code> field represents the times between which clients will
 consider a LeafNode valid.  These times are represented as absolute times,
@@ -3421,12 +3429,12 @@ of the group in the group's ratchet tree<a href="#section-8.1.1-2.3" class="pilc
           </ul>
 <p id="section-8.1.1-3">The client verifies the validity of a LeafNode using the following steps:<a href="#section-8.1.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-8.1.1-4.1">Verify that the credential in the KeyPackage is valid according to the
+<li class="normal" id="section-8.1.1-4.1">Verify that the credential in the LeafNode is valid according to the
 authentication service and the client's local policy. These actions MUST be
-the same regardless of at what point in the protocol the KeyPackage is being
-verified with the following exception: If the KeyPackage is an update to
-another KeyPackage, the authentication service MUST additionally validate that
-the set of identities attested by the credential in the new KeyPackage is
+the same regardless of at what point in the protocol the LeafNode is being
+verified with the following exception: If the LeafNode is an update to
+another LeafNode, the authentication service MUST additionally validate that
+the set of identities attested by the credential in the new LeafNode is
 acceptable relative to the identities attested by the old credential.<a href="#section-8.1.1-4.1" class="pilcrow">¶</a>
 </li>
             <li class="normal" id="section-8.1.1-4.2">Verify that the signature on the LeafNode is valid using the public key
@@ -3440,9 +3448,10 @@ field.<a href="#section-8.1.1-4.3" class="pilcrow">¶</a>
             <li class="normal" id="section-8.1.1-4.4">
               <p id="section-8.1.1-4.4.1">Verify the <code>lifetime</code> field:<a href="#section-8.1.1-4.4.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-8.1.1-4.4.2.1">When validating a downloaded KeyPackage, the current time MUST be within the
-<code>lifetime</code> range.  A KeyPackage that is expired or not yet valid MUST NOT be
-sent in an Add proposal.<a href="#section-8.1.1-4.4.2.1" class="pilcrow">¶</a>
+<li class="normal" id="section-8.1.1-4.4.2.1">When validating a LeafNode in a KeyPackage before sending an Add proposal,
+the current time MUST be within the <code>lifetime</code> range.  A KeyPackage
+containing a LeafNode that is expired or not yet valid MUST NOT be sent in
+an Add proposal.<a href="#section-8.1.1-4.4.2.1" class="pilcrow">¶</a>
 </li>
                 <li class="normal" id="section-8.1.1-4.4.2.2">When receiving an Add or validating a tree, checking the <code>lifetime</code> is
 RECOMMENDED, if it is feasible in a given application context.  Because of
@@ -3457,7 +3466,7 @@ context in which the LeafNode is being validated (as defined in
 <a href="#ratchet-tree-node-contents" class="xref">Section 8.1</a>).<a href="#section-8.1.1-4.5" class="pilcrow">¶</a>
 </li>
             <li class="normal" id="section-8.1.1-4.6">
-              <p id="section-8.1.1-4.6.1">Verify that the following fields in the KeyPackage are unique among the
+              <p id="section-8.1.1-4.6.1">Verify that the following fields in the LeafNode are unique among the
 members of the group (including any other members added in the same
 Commit):<a href="#section-8.1.1-4.6.1" class="pilcrow">¶</a></p>
 <ul class="normal">
@@ -3468,6 +3477,10 @@ Commit):<a href="#section-8.1.1-4.6.1" class="pilcrow">¶</a></p>
                   <code>credential.signature_key</code><a href="#section-8.1.1-4.6.2.2" class="pilcrow">¶</a>
 </li>
               </ul>
+</li>
+            <li class="normal" id="section-8.1.1-4.7">Verify that the extensions in the leaf node are supported.  The ID for each
+extension in the <code>extensions</code> field MUST be listed in the field
+<code>capabilities.extensions</code> of the LeafNode.<a href="#section-8.1.1-4.7" class="pilcrow">¶</a>
 </li>
           </ul>
 </section>
@@ -4658,7 +4671,7 @@ provide some public information about a user. A KeyPackage object specifies:<a h
 <li id="section-11-2.1">A protocol version and ciphersuite that the client supports,<a href="#section-11-2.1" class="pilcrow">¶</a>
 </li>
         <li id="section-11-2.2">a public key that others can use to encrypt a Welcome message to this client,
-and<a href="#section-11-2.2" class="pilcrow">¶</a>
+(an "init key") and<a href="#section-11-2.2" class="pilcrow">¶</a>
 </li>
         <li id="section-11-2.3">the content of the leaf node that should be added to the tree to represent
 this client.<a href="#section-11-2.3" class="pilcrow">¶</a>
@@ -4669,9 +4682,9 @@ be reused except in case of last resort. (See <a href="#keypackage-reuse" class=
 Clients MAY generate and publish multiple KeyPackages to
 support multiple ciphersuites.<a href="#section-11-3" class="pilcrow">¶</a></p>
 <p id="section-11-4">The value for <code>init_key</code> MUST be a public key for the asymmetric encryption
-scheme defined by cipher_suite, and it MUST be unique among the set of
+scheme defined by <code>cipher_suite</code>, and it MUST be unique among the set of
 KeyPackages created by this client.  Likewise, the <code>leaf_node</code> field MUST be
-valid for the ciphersuite, including both the <code>hpke_key</code> and <code>credential</code>
+valid for the ciphersuite, including both the <code>public_key</code> and <code>credential</code>
 fields.  The whole structure is signed using the client's signature key. A
 KeyPackage object with an invalid signature field MUST be considered malformed.<a href="#section-11-4" class="pilcrow">¶</a></p>
 <p id="section-11-5">The signature is computed by the function <code>SignWithLabel</code> with a label
@@ -4679,14 +4692,6 @@ KeyPackage object with an invalid signature field MUST be considered malformed.<
 signature field.<a href="#section-11-5" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-11-6">
 <pre>
-// See IANA registry for registered values
-uint16 ExtensionType;
-
-struct {
-    ExtensionType extension_type;
-    opaque extension_data&lt;V&gt;;
-} Extension;
-
 struct {
     ProtocolVersion version;
     CipherSuite cipher_suite;
@@ -4711,12 +4716,17 @@ MUST verify that the <code>version</code> field of the KeyPackage has the same v
 <code>version</code> field of the MLSMessage.  The <code>version</code> field in the KeyPackage
 provides an explicit signal of the intended version to the other members of
 group when they receive the KeyPackage in an Add proposal.<a href="#section-11-7" class="pilcrow">¶</a></p>
-<p id="section-11-8">The <code>capabilities</code> field in the <code>leaf_node</code> allows MLS session
+<p id="section-11-8">The field <code>leaf_node.capabilities</code> indicates what protocol versions,
+ciphersuites, protocol extensions, and non-default proposal types are supported
+by the client.  (Proposal types defined in this document are considered
+"default" and not listed.)  This information allows MLS session
 establishment to be safe from downgrade attacks on the parameters described (as
 discussed in <a href="#group-creation" class="xref">Section 12</a>), while still only advertising one version /
 ciphersuite per KeyPackage.<a href="#section-11-8" class="pilcrow">¶</a></p>
-<p id="section-11-9">The <code>leaf_node_source</code> field of the LeafNode in a KeyPackage MUST be set to
-<code>key_package</code>.<a href="#section-11-9" class="pilcrow">¶</a></p>
+<p id="section-11-9">The field <code>leaf_node.leaf_node_source</code> of the LeafNode in a KeyPackage MUST be
+set to <code>key_package</code>.<a href="#section-11-9" class="pilcrow">¶</a></p>
+<p id="section-11-10">Extension included in the <code>extensions</code> or <code>leaf_node.extensions</code> fields MUST be
+included in the <code>leaf_node.capabilities</code> field.<a href="#section-11-10" class="pilcrow">¶</a></p>
 <div id="keypackage-validation">
 <section id="section-11.1">
         <h3 id="name-keypackage-validation">
@@ -4732,76 +4742,30 @@ to add the client to the group<a href="#section-11.1-2.1" class="pilcrow">¶</a>
         </ul>
 <p id="section-11.1-3">The client verifies the validity of a KeyPackage using the following steps:<a href="#section-11.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.1-4.1">Verify the LeafNode in the KeyPackage according to the process defined in
-<a href="#leaf-node-validation" class="xref">Section 8.1.1</a>.<a href="#section-11.1-4.1" class="pilcrow">¶</a>
+<li class="normal" id="section-11.1-4.1">Verify that the ciphersuite and protocol version of the KeyPackage match
+those in use in the group.<a href="#section-11.1-4.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-11.1-4.2">Verify that the signature on the KeyPackage is valid using the public key
-in the LeafNode's credential<a href="#section-11.1-4.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-11.1-4.2">Verify the <code>leaf_node</code> field of the KeyPackage according to the process
+defined in <a href="#leaf-node-validation" class="xref">Section 8.1.1</a>.<a href="#section-11.1-4.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-11.1-4.3">Verify that the ciphersuite and protocol version of the LeafNode match
-those in use in the group.<a href="#section-11.1-4.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-11.1-4.3">Verify that the signature on the KeyPackage is valid using the public key
+in <code>leaf_node.credential</code>.<a href="#section-11.1-4.3" class="pilcrow">¶</a>
 </li>
         </ul>
 </section>
 </div>
-<div id="client-capabilities">
+<div id="keypackage-identifiers">
 <section id="section-11.2">
-        <h3 id="name-client-capabilities">
-<a href="#section-11.2" class="section-number selfRef">11.2. </a><a href="#name-client-capabilities" class="section-name selfRef">Client Capabilities</a>
+        <h3 id="name-keypackage-identifiers">
+<a href="#section-11.2" class="section-number selfRef">11.2. </a><a href="#name-keypackage-identifiers" class="section-name selfRef">KeyPackage Identifiers</a>
         </h3>
-<p id="section-11.2-1">The <code>capabilities</code> extension indicates what protocol versions, ciphersuites,
-protocol extensions, and non-default proposal types are supported by a client.
-Proposal types defined in this document are considered "default" and thus need
-not be listed.<a href="#section-11.2-1" class="pilcrow">¶</a></p>
+<p id="section-11.2-1">Within MLS, a KeyPackage is identified by its hash (see, e.g.,
+<a href="#joining-via-welcome-message" class="xref">Section 13.2.3.2</a>).  The <code>external_key_id</code> extension allows
+applications to add an explicit, application-defined identifier to a KeyPackage.<a href="#section-11.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-11.2-2">
 <pre>
-struct {
-    ProtocolVersion versions&lt;V&gt;;
-    CipherSuite ciphersuites&lt;V&gt;;
-    ExtensionType extensions&lt;V&gt;;
-    ProposalType proposals&lt;V&gt;;
-} Capabilities;
-</pre><a href="#section-11.2-2" class="pilcrow">¶</a>
-</div>
-<p id="section-11.2-3">This extension MUST be always present in a KeyPackage.  Extensions that appear
-in the <code>extensions</code> field of a KeyPackage MUST be included in the <code>extensions</code>
-field of the <code>capabilities</code> extension.<a href="#section-11.2-3" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="lifetime">
-<section id="section-11.3">
-        <h3 id="name-lifetime">
-<a href="#section-11.3" class="section-number selfRef">11.3. </a><a href="#name-lifetime" class="section-name selfRef">Lifetime</a>
-        </h3>
-<p id="section-11.3-1">The <code>lifetime</code> extension represents the times between which clients will
-consider a KeyPackage valid.  This time is represented as an absolute time,
-measured in seconds since the Unix epoch (1970-01-01T00:00:00Z). A client MUST
-NOT use the data in a KeyPackage for any processing before the <code>not_before</code>
-date, or after the <code>not_after</code> date.<a href="#section-11.3-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-11.3-2">
-<pre>
-uint64 not_before;
-uint64 not_after;
-</pre><a href="#section-11.3-2" class="pilcrow">¶</a>
-</div>
-<p id="section-11.3-3">Applications MUST define a maximum total lifetime that is acceptable for a
-KeyPackage, and reject any KeyPackage where the total lifetime is longer than
-this duration.<a href="#section-11.3-3" class="pilcrow">¶</a></p>
-<p id="section-11.3-4">This extension MUST always be present in a KeyPackage.<a href="#section-11.3-4" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="keypackage-identifiers">
-<section id="section-11.4">
-        <h3 id="name-keypackage-identifiers">
-<a href="#section-11.4" class="section-number selfRef">11.4. </a><a href="#name-keypackage-identifiers" class="section-name selfRef">KeyPackage Identifiers</a>
-        </h3>
-<p id="section-11.4-1">Within MLS, a KeyPackage is identified by its hash (see, e.g.,
-<a href="#joining-via-welcome-message" class="xref">Section 13.2.3.2</a>).  The <code>external_key_id</code> extension allows
-applications to add an explicit, application-defined identifier to a KeyPackage.<a href="#section-11.4-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-11.4-2">
-<pre>
 opaque external_key_id&lt;V&gt;;
-</pre><a href="#section-11.4-2" class="pilcrow">¶</a>
+</pre><a href="#section-11.2-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
