@@ -1851,7 +1851,7 @@ has access to the group's secrets.<a href="#section-2-2.8.1" class="pilcrow">¶<
 <dt id="section-2-2.9">Key Package:</dt>
         <dd style="margin-left: 1.5em" id="section-2-2.10">
           <p id="section-2-2.10.1">A signed object describing a client's identity and capabilities, and including
-a hybrid public-key encryption (HPKE <span>[<a href="#I-D.irtf-cfrg-hpke" class="xref">I-D.irtf-cfrg-hpke</a>]</span>) public key that
+a hybrid public-key encryption (HPKE <span>[<a href="#RFC9180" class="xref">RFC9180</a>]</span>) public key that
 can be used to encrypt to that client, and which other clients can use to
 introduce the client to a new group.<a href="#section-2-2.10.1" class="pilcrow">¶</a></p>
 </dd>
@@ -2143,14 +2143,14 @@ secrecy for MLS messages.  Each epoch has a distinct secret tree.<a href="#secti
 state.  MLS messages are used to initialize these views and keep them in sync as
 the group transitions between epochs.<a href="#section-4.1-4" class="pilcrow">¶</a></p>
 <p id="section-4.1-5">Each new epoch is initiated with a Commit message.  The Commit instructs
-existing members of the group to update their views of ratchet tree by applying
+existing members of the group to update their views of the ratchet tree by applying
 a set of Proposals, and uses the updated ratchet tree to distribute fresh
 entropy to the group.  This fresh entropy is provided only to members in the new
 epoch, not to members who have been removed, so it maintains the confidentiality
 of the epoch secret (in other words, it provides post-compromise security with
 respect to those members).<a href="#section-4.1-5" class="pilcrow">¶</a></p>
-<p id="section-4.1-6">For each Commit that adds member(s) to the group, there is a corresponding
-Welcome message.  The Welcome message provides new members with the information
+<p id="section-4.1-6">For each Commit that adds member(s) to the group, there is a single corresponding
+Welcome message.  The Welcome message provides all the new members with the information
 they need to initialize their views of the key schedule and ratchet tree, so
 that these views are equivalent to the views held by other members of the group
 in this epoch.<a href="#section-4.1-6" class="pilcrow">¶</a></p>
@@ -2336,12 +2336,12 @@ A              B     ...      Z          Directory       Channel
         <h3 id="name-relationships-between-epoch">
 <a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-relationships-between-epoch" class="section-name selfRef">Relationships Between Epochs</a>
         </h3>
-<p id="section-4.3-1">A group comprises a single linear sequence of epochs and groups are generally
+<p id="section-4.3-1">A group has a single linear sequence of epochs. Groups and epochs are generally
 independent of one-another. However, it can sometimes be useful to link epochs
 cryptographically, either within a group or across groups. MLS derives a
 resumption pre-shared key (PSK) from each epoch to allow entropy extracted from
 one epoch to be injected into a future epoch. This link guarantees that members
-entering the new epoch agree on a key if and only if were members of the group
+entering the new epoch agree on a key if and only if they were members of the group
 during the epoch from which the resumption key was extracted.<a href="#section-4.3-1" class="pilcrow">¶</a></p>
 <p id="section-4.3-2">MLS supports two ways to tie a new group to an existing group. Re-initialization
 closes one group and creates a new group comprising the same members with
@@ -2592,7 +2592,7 @@ the private key AB is known only to A and B.<a href="#section-5.2-9" class="pilc
         <h3 id="name-ratchet-tree-nodes">
 <a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-ratchet-tree-nodes" class="section-name selfRef">Ratchet Tree Nodes</a>
         </h3>
-<p id="section-5.3-1">A particular instance of a ratchet tree is defined by the same parameters that
+<p id="section-5.3-1">A particular instance of a ratchet tree includes the same parameters that
 define an instance of HPKE, namely:<a href="#section-5.3-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.3-2.1">A Key Encapsulation Mechanism (KEM), including a <code>DeriveKeyPair</code> function that
@@ -2603,43 +2603,40 @@ creates a key pair for the KEM from a symmetric secret<a href="#section-5.3-2.1"
           <li class="normal" id="section-5.3-2.3">An AEAD encryption scheme<a href="#section-5.3-2.3" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-5.3-3">Each node in a ratchet tree contains up to five values:<a href="#section-5.3-3" class="pilcrow">¶</a></p>
+<p id="section-5.3-3">Each non-blank node in a ratchet tree contains up to five values:<a href="#section-5.3-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.3-4.1">A private key (only within the member's direct path, see below)<a href="#section-5.3-4.1" class="pilcrow">¶</a>
+<li class="normal" id="section-5.3-4.1">A public key<a href="#section-5.3-4.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-5.3-4.2">A public key<a href="#section-5.3-4.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-5.3-4.2">A private key (only within the member's direct path, see below)<a href="#section-5.3-4.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-5.3-4.3">An ordered list of leaf indices for "unmerged" leaves (see
-<a href="#views" class="xref">Section 5.2</a>)<a href="#section-5.3-4.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-5.3-4.3">A credential (only for leaf nodes)<a href="#section-5.3-4.3" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-5.3-4.4">A credential (only for leaf nodes)<a href="#section-5.3-4.4" class="pilcrow">¶</a>
+          <li class="normal" id="section-5.3-4.4">An ordered list of "unmerged" leaves (see <a href="#views" class="xref">Section 5.2</a>)<a href="#section-5.3-4.4" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-5.3-4.5">A hash of certain information about the node's parent, as of the last time the
 node was changed (see <a href="#parent-hash" class="xref">Section 8.6</a>).<a href="#section-5.3-4.5" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-5.3-5">The conditions under which each of these values must or must not be
-present are laid out in <a href="#views" class="xref">Section 5.2</a>.<a href="#section-5.3-5" class="pilcrow">¶</a></p>
-<p id="section-5.3-6">The <em>resolution</em> of a node is an ordered list of non-blank nodes
+<p id="section-5.3-5">The <em>resolution</em> of a node is an ordered list of non-blank nodes
 that collectively cover all non-blank descendants of the node.  The resolution
 of a non-blank node with no unmerged leaves is just the node itself. More generally, the resolution
 of a node is effectively a depth-first, left-first enumeration of the nearest
-non-blank nodes below the node:<a href="#section-5.3-6" class="pilcrow">¶</a></p>
+non-blank nodes below the node:<a href="#section-5.3-5" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.3-7.1">The resolution of a non-blank node comprises the node itself,
-followed by its list of unmerged leaves, if any<a href="#section-5.3-7.1" class="pilcrow">¶</a>
+<li class="normal" id="section-5.3-6.1">The resolution of a non-blank node comprises the node itself,
+followed by its list of unmerged leaves, if any<a href="#section-5.3-6.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-5.3-7.2">The resolution of a blank leaf node is the empty list<a href="#section-5.3-7.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-5.3-6.2">The resolution of a blank leaf node is the empty list<a href="#section-5.3-6.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-5.3-7.3">The resolution of a blank intermediate node is the result of
+          <li class="normal" id="section-5.3-6.3">The resolution of a blank intermediate node is the result of
 concatenating the resolution of its left child with the resolution
-of its right child, in that order<a href="#section-5.3-7.3" class="pilcrow">¶</a>
+of its right child, in that order<a href="#section-5.3-6.3" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-5.3-8">For example, consider the following tree, where the "_" character
+<p id="section-5.3-7">For example, consider the following tree, where the "_" character
 represents a blank node and unmerged leaves are indicated in square
-brackets:<a href="#section-5.3-8" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.3-9">
+brackets:<a href="#section-5.3-7" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.3-8">
 <pre>
       _
     __|__
@@ -2649,21 +2646,21 @@ brackets:<a href="#section-5.3-8" class="pilcrow">¶</a></p>
 A   _   C   D
 
 0   1   2   3
-</pre><a href="#section-5.3-9" class="pilcrow">¶</a>
+</pre><a href="#section-5.3-8" class="pilcrow">¶</a>
 </div>
-<p id="section-5.3-10">In this tree, we can see all of the above rules in play:<a href="#section-5.3-10" class="pilcrow">¶</a></p>
+<p id="section-5.3-9">In this tree, we can see all of the above rules in play:<a href="#section-5.3-9" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.3-11.1">The resolution of node Z is the list [Z, C]<a href="#section-5.3-11.1" class="pilcrow">¶</a>
+<li class="normal" id="section-5.3-10.1">The resolution of node Z is the list [Z, C]<a href="#section-5.3-10.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-5.3-11.2">The resolution of leaf 1 is the empty list []<a href="#section-5.3-11.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-5.3-10.2">The resolution of leaf 1 is the empty list []<a href="#section-5.3-10.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-5.3-11.3">The resolution of root node is the list [A, Z, C]<a href="#section-5.3-11.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-5.3-10.3">The resolution of root node is the list [A, Z, C]<a href="#section-5.3-10.3" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-5.3-12">Every node, regardless of whether the node is blank or populated, has
+<p id="section-5.3-11">Every node, regardless of whether the node is blank or populated, has
 a corresponding <em>hash</em> that summarizes the contents of the subtree
 below that node.  The rules for computing these hashes are described
-in <a href="#tree-hashes" class="xref">Section 8.5</a>.<a href="#section-5.3-12" class="pilcrow">¶</a></p>
+in <a href="#tree-hashes" class="xref">Section 8.5</a>.<a href="#section-5.3-11" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2699,7 +2696,7 @@ following primitives to be used in group key computations:<a href="#section-6.1-
           <li class="normal" id="section-6.1-2.4">A signature algorithm<a href="#section-6.1-2.4" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-6.1-3">MLS uses HPKE for public-key encryption <span>[<a href="#I-D.irtf-cfrg-hpke" class="xref">I-D.irtf-cfrg-hpke</a>]</span>.  The
+<p id="section-6.1-3">MLS uses HPKE for public-key encryption <span>[<a href="#RFC9180" class="xref">RFC9180</a>]</span>.  The
 <code>DeriveKeyPair</code> function associated to the KEM for the ciphersuite maps octet
 strings to HPKE key pairs.  As in HPKE, MLS assumes that an AEAD algorithm
 produces a single ciphertext output from AEAD encryption (aligning with
@@ -2841,7 +2838,7 @@ binding. The format of the key in the <code>public_key</code> field is defined b
 relevant ciphersuite: the group ciphersuite for a credential in a leaf node of a
 ratchet tree or the KeyPackage ciphersuite for a credential in a KeyPackage
 object.  For ciphersuites using Ed25519 or Ed448 signature schemes, the public
-key is in the format specified <span>[<a href="#RFC8032" class="xref">RFC8032</a>]</span>.  For ciphersuites using ECDSA with
+key is in the format specified in <span>[<a href="#RFC8032" class="xref">RFC8032</a>]</span>.  For ciphersuites using ECDSA with
 the NIST curves P-256 or P-521, the public key is the output of the uncompressed
 Elliptic-Curve-Point-to-Octet-String conversion according to <span>[<a href="#SECG" class="xref">SECG</a>]</span>.<a href="#section-6.3-7" class="pilcrow">¶</a></p>
 <p id="section-6.3-8">For an X.509 credential, each entry in the chain represents a single DER-encoded
@@ -2873,9 +2870,9 @@ clients have a few types of identifiers, with different operational properties.<
 <p id="section-6.3.1-2">The Credentials presented by the clients in a group authenticate
 application-level identifiers for the clients.  These identifiers may not
 uniquely identify clients.  For example, if a user has multiple devices that are
-all present in an MLS group, then those devices' clients will all present the
+all present in an MLS group, then those devices' clients could all present the
 user's application-layer identifiers.<a href="#section-6.3.1-2" class="pilcrow">¶</a></p>
-<p id="section-6.3.1-3">Internally to the the protocol, group members are uniquely identified by their
+<p id="section-6.3.1-3">Internally to the protocol, group members are uniquely identified by their
 leaves, expressed as LeafNodeRef objects.  These identifiers are unstable:
 They change whenever the member sends a Commit, or whenever an Update
 proposal from the member is committed.<a href="#section-6.3.1-3" class="pilcrow">¶</a></p>
@@ -2943,9 +2940,12 @@ enum {
 struct {
     SenderType sender_type;
     switch (sender_type) {
-        case member:        LeafNodeRef member;
-        case preconfigured: opaque sender_id&lt;V&gt;;
-        case new_member:    struct{};
+        case member:
+            LeafNodeRef member_ref;
+        case preconfigured:
+            opaque sender_id&lt;V&gt;;
+        case new_member:
+            struct{};
     }
 } Sender;
 
@@ -2969,10 +2969,8 @@ struct {
     select (MLSMessageContent.content_type) {
         case application:
           opaque application_data&lt;V&gt;;
-
         case proposal:
           Proposal proposal;
-
         case commit:
           Commit commit;
     }
@@ -3036,7 +3034,7 @@ struct {
 </pre><a href="#section-7.1-2" class="pilcrow">¶</a>
 </div>
 <p id="section-7.1-3">The <code>signature</code> field in an MLSMessageAuth object is computed using the signing
-private key corresponding to the public key, which was authenticated by the
+private key corresponding to the public key, which was authenticated by the 
 credential at the leaf of the tree indicated by the sender field. The signature
 is computed using <code>SignWithLabel</code> with label <code>"MLSMessageContentTBS"</code> and with a content
 that covers the message content and the wire format that will be used for this message.
@@ -3237,8 +3235,8 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce",
                       ciphertext_sample, AEAD.Nn)
 </pre><a href="#section-7.3.2-6" class="pilcrow">¶</a>
 </div>
-<p id="section-7.3.2-7">The Additional Authenticated Data (AAD) for the SenderData ciphertext is all the
-fields of MLSCiphertext excluding <code>encrypted_sender_data</code>:<a href="#section-7.3.2-7" class="pilcrow">¶</a></p>
+<p id="section-7.3.2-7">The Additional Authenticated Data (AAD) for the SenderData ciphertext is the
+first three fields of MLSCiphertext:<a href="#section-7.3.2-7" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.3.2-8">
 <pre>
 struct {
@@ -4020,7 +4018,7 @@ ciphertext = context.Seal("", path_secret)
 <p id="section-8.7-6">where <code>node_public_key</code> is the public key of the node that the path
 secret is being encrypted for, group_context is the current GroupContext object
 for the group, and the functions <code>SetupBaseS</code> and
-<code>Seal</code> are defined according to <span>[<a href="#I-D.irtf-cfrg-hpke" class="xref">I-D.irtf-cfrg-hpke</a>]</span>.<a href="#section-8.7-6" class="pilcrow">¶</a></p>
+<code>Seal</code> are defined according to <span>[<a href="#RFC9180" class="xref">RFC9180</a>]</span>.<a href="#section-8.7-6" class="pilcrow">¶</a></p>
 <p id="section-8.7-7">Decryption is performed in the corresponding way, using the private
 key of the resolution node.<a href="#section-8.7-7" class="pilcrow">¶</a></p>
 </section>
@@ -6674,7 +6672,7 @@ is REQUIRED for a Y-&gt;N transition.<a href="#section-18.1-8.3" class="pilcrow"
 <p id="section-18.1-11">All of these ciphersuites use HMAC <span>[<a href="#RFC2104" class="xref">RFC2104</a>]</span> as their MAC function, with
 different hashes per ciphersuite.  The mapping of ciphersuites to HPKE
 primitives, HMAC hash functions, and TLS signature schemes is as follows
-<span>[<a href="#I-D.irtf-cfrg-hpke" class="xref">I-D.irtf-cfrg-hpke</a>]</span> <span>[<a href="#RFC8446" class="xref">RFC8446</a>]</span>:<a href="#section-18.1-11" class="pilcrow">¶</a></p>
+<span>[<a href="#RFC9180" class="xref">RFC9180</a>]</span> <span>[<a href="#RFC8446" class="xref">RFC8446</a>]</span>:<a href="#section-18.1-11" class="pilcrow">¶</a></p>
 <table class="center" id="table-6">
           <caption><a href="#table-6" class="selfRef">Table 6</a></caption>
 <thead>
@@ -7100,9 +7098,9 @@ protocols (ex: HTTP <span>[<a href="#RFC7540" class="xref">RFC7540</a>]</span>) 
      presentation language [RFC8446]. Therefore MLS messages need to be
      treated as binary data.
 
-  Security considerations: MLS is an encrypted messaging layer designed to
-     be transmitted over arbitrary lower layer protocols. The security
-     considerations in this document (the MLS protocol) also apply.
+  Security considerations: MLS is an encrypted messaging layer designed
+     to be transmitted over arbitrary lower layer protocols. The
+     security considerations in this document (RFC XXXX) also apply.
 </pre><a href="#section-18.6-2" class="pilcrow">¶</a>
 </div>
 </section>
@@ -7175,10 +7173,6 @@ thyla.van.der@merwe.tech<a href="#section-19-1.12" class="pilcrow">¶</a>
 <a href="#section-20.1" class="section-number selfRef">20.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
         </h3>
 <dl class="references">
-<dt id="I-D.irtf-cfrg-hpke">[I-D.irtf-cfrg-hpke]</dt>
-        <dd>
-<span class="refAuthor">Barnes, R. L.</span>, <span class="refAuthor">Bhargavan, K.</span>, <span class="refAuthor">Lipp, B.</span>, and <span class="refAuthor">C. A. Wood</span>, <span class="refTitle">"Hybrid Public Key Encryption"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-irtf-cfrg-hpke-12</span>, <time datetime="2021-09-02" class="refDate">2 September 2021</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hpke-12">https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hpke-12</a>&gt;</span>. </dd>
-<dd class="break"></dd>
 <dt id="RFC2104">[RFC2104]</dt>
         <dd>
 <span class="refAuthor">Krawczyk, H.</span>, <span class="refAuthor">Bellare, M.</span>, and <span class="refAuthor">R. Canetti</span>, <span class="refTitle">"HMAC: Keyed-Hashing for Message Authentication"</span>, <span class="seriesInfo">RFC 2104</span>, <span class="seriesInfo">DOI 10.17487/RFC2104</span>, <time datetime="1997-02" class="refDate">February 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2104">https://www.rfc-editor.org/rfc/rfc2104</a>&gt;</span>. </dd>
@@ -7200,8 +7194,12 @@ thyla.van.der@merwe.tech<a href="#section-19-1.12" class="pilcrow">¶</a>
 <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC8446">[RFC8446]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Rescorla, E.</span>, <span class="refTitle">"The Transport Layer Security (TLS) Protocol Version 1.3"</span>, <span class="seriesInfo">RFC 8446</span>, <span class="seriesInfo">DOI 10.17487/RFC8446</span>, <time datetime="2018-08" class="refDate">August 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8446">https://www.rfc-editor.org/rfc/rfc8446</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9180">[RFC9180]</dt>
+      <dd>
+<span class="refAuthor">Barnes, R.</span>, <span class="refAuthor">Bhargavan, K.</span>, <span class="refAuthor">Lipp, B.</span>, and <span class="refAuthor">C. Wood</span>, <span class="refTitle">"Hybrid Public Key Encryption"</span>, <span class="seriesInfo">RFC 9180</span>, <span class="seriesInfo">DOI 10.17487/RFC9180</span>, <time datetime="2022-02" class="refDate">February 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9180">https://www.rfc-editor.org/rfc/rfc9180</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
