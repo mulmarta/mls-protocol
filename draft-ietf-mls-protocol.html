@@ -1559,256 +1559,301 @@ shared keys with costs that scale as the log of the group size.<a href="#section
 <a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-change-log" class="section-name selfRef">Change Log</a>
         </h3>
 <p id="section-1.1-1">RFC EDITOR PLEASE DELETE THIS SECTION.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
-<p id="section-1.1-2">draft-12<a href="#section-1.1-2" class="pilcrow">¶</a></p>
+<p id="section-1.1-2">draft-13<a href="#section-1.1-2" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-3.1">Use the GroupContext to derive the joiner_secret (*)<a href="#section-1.1-3.1" class="pilcrow">¶</a>
+<li class="normal" id="section-1.1-3.1">TLS syntax updates (including variable-header-length vectors) (*)<a href="#section-1.1-3.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-3.2">Make PreSharedKeys non optional in GroupSecrets (*)<a href="#section-1.1-3.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-3.2">Stop generating redundant PKE key pairs. (*)<a href="#section-1.1-3.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-3.3">Update name for this particular key (*)<a href="#section-1.1-3.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-3.3">Move validation of identity change to the AS<a href="#section-1.1-3.3" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-3.4">Truncate tree size on removal (*)<a href="#section-1.1-3.4" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-3.4">Add message/mls MIME type registration<a href="#section-1.1-3.4" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-3.5">Use HPKE draft-08 (*)<a href="#section-1.1-3.5" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-3.5">Split LeafNode from KeyPackage (*)<a href="#section-1.1-3.5" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-3.6">Clarify requirements around identity in MLS groups (*)<a href="#section-1.1-3.6" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-3.6">Remove endpoint_id (*)<a href="#section-1.1-3.6" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-3.7">Signal the intended wire format for MLS messages (*)<a href="#section-1.1-3.7" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-3.7">Reorganize to make section layout more sane<a href="#section-1.1-3.7" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-3.8">Inject GroupContext as HPKE info instead of AAD (*)<a href="#section-1.1-3.8" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-3.8">Forbid proposals by reference in external commits (*)<a href="#section-1.1-3.8" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-3.9">Clarify extension handling and make extension updatable (*)<a href="#section-1.1-3.9" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-3.9">Domain separation for KeyPackage and Proposal references (*)<a href="#section-1.1-3.9" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-3.10">Improve extensibility of Proposals (*)<a href="#section-1.1-3.10" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-3.10">Downgrade MUST to SHOULD for commit senders including all valid commits<a href="#section-1.1-3.10" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-3.11">Constrain proposal in External Commit (*)<a href="#section-1.1-3.11" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-3.11">Stronger parent hashes for authenticated identities (*)<a href="#section-1.1-3.11" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-3.12">Remove the notion of a 'leaf index' (*)<a href="#section-1.1-3.12" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-3.12">Move wire_format to a separate tagged-union structure MLSMessage<a href="#section-1.1-3.12" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-3.13">Add group_context_extensions proposal ID (*)<a href="#section-1.1-3.13" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-3.13">Generalize tree extend/truncate algorithms<a href="#section-1.1-3.13" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-3.14">Add RequiredCapabilities extension (*)<a href="#section-1.1-3.14" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-3.14">Add algorithms for link-based trees<a href="#section-1.1-3.14" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-3.15">Use cascaded KDF instead of concatenation to consolidate PSKs (*)<a href="#section-1.1-3.15" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-3.15">Forbid self-Update entirely (*)<a href="#section-1.1-3.15" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-3.16">Use key package hash to index clients in message structs (*)<a href="#section-1.1-3.16" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-3.16">Consolidate resumption PSK cases (*)<a href="#section-1.1-3.16" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-3.17">Don't require PublicGroupState for external init (*)<a href="#section-1.1-3.17" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-3.17">384 Ciphersuite Addition<a href="#section-1.1-3.17" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-3.18">Make ratchet tree section clearer.<a href="#section-1.1-3.18" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-3.18">Remove explicit version pin on HPKE (*)<a href="#section-1.1-3.18" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-3.19">Handle non-member sender cases in MLSPlaintextTBS<a href="#section-1.1-3.19" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-3.19">Remove the requirement for Add in external commit (*)<a href="#section-1.1-3.19" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-3.20">Clarify encoding of signatures with NIST curves<a href="#section-1.1-3.20" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-3.20">Use smaller, fixed-size hash-based identifiers (*)<a href="#section-1.1-3.20" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-3.21">Remove OPEN ISSUEs and TODOs<a href="#section-1.1-3.21" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-1.1-3.22">Normalize the description of the zero vector<a href="#section-1.1-3.22" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-3.21">Be explicit that Credentials can attest to multiple identities (*)<a href="#section-1.1-3.21" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-1.1-4">draft-11<a href="#section-1.1-4" class="pilcrow">¶</a></p>
+<p id="section-1.1-4">draft-12<a href="#section-1.1-4" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-5.1">Include subtree keys in parent hash (*)<a href="#section-1.1-5.1" class="pilcrow">¶</a>
+<li class="normal" id="section-1.1-5.1">Use the GroupContext to derive the joiner_secret (*)<a href="#section-1.1-5.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-5.2">Pin HPKE to draft-07 (*)<a href="#section-1.1-5.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-5.2">Make PreSharedKeys non optional in GroupSecrets (*)<a href="#section-1.1-5.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-5.3">Move joiner secret to the end of the first key schedule epoch (*)<a href="#section-1.1-5.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-5.3">Update name for this particular key (*)<a href="#section-1.1-5.3" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-5.4">Add an AppAck proposal<a href="#section-1.1-5.4" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-5.4">Truncate tree size on removal (*)<a href="#section-1.1-5.4" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-5.5">Make initializations of transcript hashes consistent<a href="#section-1.1-5.5" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-5.5">Use HPKE draft-08 (*)<a href="#section-1.1-5.5" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-5.6">Clarify requirements around identity in MLS groups (*)<a href="#section-1.1-5.6" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-5.7">Signal the intended wire format for MLS messages (*)<a href="#section-1.1-5.7" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-5.8">Inject GroupContext as HPKE info instead of AAD (*)<a href="#section-1.1-5.8" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-5.9">Clarify extension handling and make extension updatable (*)<a href="#section-1.1-5.9" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-5.10">Improve extensibility of Proposals (*)<a href="#section-1.1-5.10" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-5.11">Constrain proposal in External Commit (*)<a href="#section-1.1-5.11" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-5.12">Remove the notion of a 'leaf index' (*)<a href="#section-1.1-5.12" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-5.13">Add group_context_extensions proposal ID (*)<a href="#section-1.1-5.13" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-5.14">Add RequiredCapabilities extension (*)<a href="#section-1.1-5.14" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-5.15">Use cascaded KDF instead of concatenation to consolidate PSKs (*)<a href="#section-1.1-5.15" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-5.16">Use key package hash to index clients in message structs (*)<a href="#section-1.1-5.16" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-5.17">Don't require PublicGroupState for external init (*)<a href="#section-1.1-5.17" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-5.18">Make ratchet tree section clearer.<a href="#section-1.1-5.18" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-5.19">Handle non-member sender cases in MLSPlaintextTBS<a href="#section-1.1-5.19" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-5.20">Clarify encoding of signatures with NIST curves<a href="#section-1.1-5.20" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-5.21">Remove OPEN ISSUEs and TODOs<a href="#section-1.1-5.21" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-5.22">Normalize the description of the zero vector<a href="#section-1.1-5.22" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-1.1-6">draft-10<a href="#section-1.1-6" class="pilcrow">¶</a></p>
+<p id="section-1.1-6">draft-11<a href="#section-1.1-6" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-7.1">Allow new members to join via an external Commit (*)<a href="#section-1.1-7.1" class="pilcrow">¶</a>
+<li class="normal" id="section-1.1-7.1">Include subtree keys in parent hash (*)<a href="#section-1.1-7.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-7.2">Enable proposals to be sent inline in a Commit (*)<a href="#section-1.1-7.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-7.2">Pin HPKE to draft-07 (*)<a href="#section-1.1-7.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-7.3">Re-enable constant-time Add (*)<a href="#section-1.1-7.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-7.3">Move joiner secret to the end of the first key schedule epoch (*)<a href="#section-1.1-7.3" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-7.4">Change expiration extension to lifetime extension (*)<a href="#section-1.1-7.4" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-7.4">Add an AppAck proposal<a href="#section-1.1-7.4" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-7.5">Make the tree in the Welcome optional (*)<a href="#section-1.1-7.5" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-1.1-7.6">PSK injection, re-init, sub-group branching (*)<a href="#section-1.1-7.6" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-1.1-7.7">Require the initial init_secret to be a random value (*)<a href="#section-1.1-7.7" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-1.1-7.8">Remove explicit sender data nonce (*)<a href="#section-1.1-7.8" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-1.1-7.9">Do not encrypt to joiners in UpdatePath generation (*)<a href="#section-1.1-7.9" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-1.1-7.10">Move MLSPlaintext signature under the confirmation tag (*)<a href="#section-1.1-7.10" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-1.1-7.11">Explicitly authenticate group membership with MLSPLaintext (*)<a href="#section-1.1-7.11" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-1.1-7.12">Clarify X509Credential structure (*)<a href="#section-1.1-7.12" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-1.1-7.13">Remove unneeded interim transcript hash from GroupInfo (*)<a href="#section-1.1-7.13" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-1.1-7.14">IANA considerations<a href="#section-1.1-7.14" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-1.1-7.15">Derive an authentication secret<a href="#section-1.1-7.15" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-1.1-7.16">Use Extract/Expand from HPKE KDF<a href="#section-1.1-7.16" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-1.1-7.17">Clarify that application messages MUST be encrypted<a href="#section-1.1-7.17" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-7.5">Make initializations of transcript hashes consistent<a href="#section-1.1-7.5" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-1.1-8">draft-09<a href="#section-1.1-8" class="pilcrow">¶</a></p>
+<p id="section-1.1-8">draft-10<a href="#section-1.1-8" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-9.1">Remove blanking of nodes on Add (*)<a href="#section-1.1-9.1" class="pilcrow">¶</a>
+<li class="normal" id="section-1.1-9.1">Allow new members to join via an external Commit (*)<a href="#section-1.1-9.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-9.2">Change epoch numbers to uint64 (*)<a href="#section-1.1-9.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-9.2">Enable proposals to be sent inline in a Commit (*)<a href="#section-1.1-9.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-9.3">Add PSK inputs (*)<a href="#section-1.1-9.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-9.3">Re-enable constant-time Add (*)<a href="#section-1.1-9.3" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-9.4">Add key schedule exporter (*)<a href="#section-1.1-9.4" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-9.4">Change expiration extension to lifetime extension (*)<a href="#section-1.1-9.4" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-9.5">Sign the updated direct path on Commit, using "parent hashes" and one
-signature per leaf (*)<a href="#section-1.1-9.5" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-9.5">Make the tree in the Welcome optional (*)<a href="#section-1.1-9.5" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-9.6">Use structured types for external senders (*)<a href="#section-1.1-9.6" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-9.6">PSK injection, re-init, sub-group branching (*)<a href="#section-1.1-9.6" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-9.7">Redesign Welcome to include confirmation and use derived keys (*)<a href="#section-1.1-9.7" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-9.7">Require the initial init_secret to be a random value (*)<a href="#section-1.1-9.7" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-9.8">Remove ignored proposals (*)<a href="#section-1.1-9.8" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-9.8">Remove explicit sender data nonce (*)<a href="#section-1.1-9.8" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-9.9">Always include an Update with a Commit (*)<a href="#section-1.1-9.9" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-9.9">Do not encrypt to joiners in UpdatePath generation (*)<a href="#section-1.1-9.9" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-9.10">Add per-message entropy to guard against nonce reuse (*)<a href="#section-1.1-9.10" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-9.10">Move MLSPlaintext signature under the confirmation tag (*)<a href="#section-1.1-9.10" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-9.11">Use the same hash ratchet construct for both application and handshake keys (*)<a href="#section-1.1-9.11" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-9.11">Explicitly authenticate group membership with MLSPLaintext (*)<a href="#section-1.1-9.11" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-9.12">Add more ciphersuites<a href="#section-1.1-9.12" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-9.12">Clarify X509Credential structure (*)<a href="#section-1.1-9.12" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-9.13">Use HKDF to derive key pairs (*)<a href="#section-1.1-9.13" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-9.13">Remove unneeded interim transcript hash from GroupInfo (*)<a href="#section-1.1-9.13" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-9.14">Mandate expiration of ClientInitKeys (*)<a href="#section-1.1-9.14" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-9.14">IANA considerations<a href="#section-1.1-9.14" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-9.15">Add extensions to GroupContext and flesh out the extensibility story (*)<a href="#section-1.1-9.15" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-9.15">Derive an authentication secret<a href="#section-1.1-9.15" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-9.16">Rename ClientInitKey to KeyPackage<a href="#section-1.1-9.16" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-9.16">Use Extract/Expand from HPKE KDF<a href="#section-1.1-9.16" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-9.17">Clarify that application messages MUST be encrypted<a href="#section-1.1-9.17" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-1.1-10">draft-08<a href="#section-1.1-10" class="pilcrow">¶</a></p>
+<p id="section-1.1-10">draft-09<a href="#section-1.1-10" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-11.1">Change ClientInitKeys so that they only refer to one ciphersuite (*)<a href="#section-1.1-11.1" class="pilcrow">¶</a>
+<li class="normal" id="section-1.1-11.1">Remove blanking of nodes on Add (*)<a href="#section-1.1-11.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-11.2">Decompose group operations into Proposals and Commits (*)<a href="#section-1.1-11.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-11.2">Change epoch numbers to uint64 (*)<a href="#section-1.1-11.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-11.3">Enable Add and Remove proposals from outside the group (*)<a href="#section-1.1-11.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-11.3">Add PSK inputs (*)<a href="#section-1.1-11.3" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-11.4">Replace Init messages with multi-recipient Welcome message (*)<a href="#section-1.1-11.4" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-11.4">Add key schedule exporter (*)<a href="#section-1.1-11.4" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-11.5">Add extensions to ClientInitKeys for expiration and downgrade resistance (*)<a href="#section-1.1-11.5" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-11.5">Sign the updated direct path on Commit, using "parent hashes" and one
+signature per leaf (*)<a href="#section-1.1-11.5" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-11.6">Allow multiple Proposals and a single Commit in one MLSPlaintext (*)<a href="#section-1.1-11.6" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-11.6">Use structured types for external senders (*)<a href="#section-1.1-11.6" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-11.7">Redesign Welcome to include confirmation and use derived keys (*)<a href="#section-1.1-11.7" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-11.8">Remove ignored proposals (*)<a href="#section-1.1-11.8" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-11.9">Always include an Update with a Commit (*)<a href="#section-1.1-11.9" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-11.10">Add per-message entropy to guard against nonce reuse (*)<a href="#section-1.1-11.10" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-11.11">Use the same hash ratchet construct for both application and handshake keys (*)<a href="#section-1.1-11.11" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-11.12">Add more ciphersuites<a href="#section-1.1-11.12" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-11.13">Use HKDF to derive key pairs (*)<a href="#section-1.1-11.13" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-11.14">Mandate expiration of ClientInitKeys (*)<a href="#section-1.1-11.14" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-11.15">Add extensions to GroupContext and flesh out the extensibility story (*)<a href="#section-1.1-11.15" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-11.16">Rename ClientInitKey to KeyPackage<a href="#section-1.1-11.16" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-1.1-12">draft-07<a href="#section-1.1-12" class="pilcrow">¶</a></p>
+<p id="section-1.1-12">draft-08<a href="#section-1.1-12" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-13.1">Initial version of the Tree based Application Key Schedule (*)<a href="#section-1.1-13.1" class="pilcrow">¶</a>
+<li class="normal" id="section-1.1-13.1">Change ClientInitKeys so that they only refer to one ciphersuite (*)<a href="#section-1.1-13.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-13.2">Initial definition of the Init message for group creation (*)<a href="#section-1.1-13.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-13.2">Decompose group operations into Proposals and Commits (*)<a href="#section-1.1-13.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-13.3">Fix issue with the transcript used for newcomers (*)<a href="#section-1.1-13.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-13.3">Enable Add and Remove proposals from outside the group (*)<a href="#section-1.1-13.3" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-13.4">Clarifications on message framing and HPKE contexts (*)<a href="#section-1.1-13.4" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-13.4">Replace Init messages with multi-recipient Welcome message (*)<a href="#section-1.1-13.4" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-13.5">Add extensions to ClientInitKeys for expiration and downgrade resistance (*)<a href="#section-1.1-13.5" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-13.6">Allow multiple Proposals and a single Commit in one MLSPlaintext (*)<a href="#section-1.1-13.6" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-1.1-14">draft-06<a href="#section-1.1-14" class="pilcrow">¶</a></p>
+<p id="section-1.1-14">draft-07<a href="#section-1.1-14" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-15.1">Reorder blanking and update in the Remove operation (*)<a href="#section-1.1-15.1" class="pilcrow">¶</a>
+<li class="normal" id="section-1.1-15.1">Initial version of the Tree based Application Key Schedule (*)<a href="#section-1.1-15.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-15.2">Rename the GroupState structure to GroupContext (*)<a href="#section-1.1-15.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-15.2">Initial definition of the Init message for group creation (*)<a href="#section-1.1-15.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-15.3">Rename UserInitKey to ClientInitKey<a href="#section-1.1-15.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-15.3">Fix issue with the transcript used for newcomers (*)<a href="#section-1.1-15.3" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-15.4">Resolve the circular dependency that draft-05 introduced in the
-confirmation MAC calculation (*)<a href="#section-1.1-15.4" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-1.1-15.5">Cover the entire MLSPlaintext in the transcript hash (*)<a href="#section-1.1-15.5" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-15.4">Clarifications on message framing and HPKE contexts (*)<a href="#section-1.1-15.4" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-1.1-16">draft-05<a href="#section-1.1-16" class="pilcrow">¶</a></p>
+<p id="section-1.1-16">draft-06<a href="#section-1.1-16" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-17.1">Common framing for handshake and application messages (*)<a href="#section-1.1-17.1" class="pilcrow">¶</a>
+<li class="normal" id="section-1.1-17.1">Reorder blanking and update in the Remove operation (*)<a href="#section-1.1-17.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-17.2">Handshake message encryption (*)<a href="#section-1.1-17.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-17.2">Rename the GroupState structure to GroupContext (*)<a href="#section-1.1-17.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-17.3">Convert from literal state to a commitment via the "tree hash" (*)<a href="#section-1.1-17.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-17.3">Rename UserInitKey to ClientInitKey<a href="#section-1.1-17.3" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-17.4">Add credentials to the tree and remove the "roster" concept (*)<a href="#section-1.1-17.4" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-17.4">Resolve the circular dependency that draft-05 introduced in the
+confirmation MAC calculation (*)<a href="#section-1.1-17.4" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-17.5">Remove the secret field from tree node values<a href="#section-1.1-17.5" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-17.5">Cover the entire MLSPlaintext in the transcript hash (*)<a href="#section-1.1-17.5" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-1.1-18">draft-04<a href="#section-1.1-18" class="pilcrow">¶</a></p>
+<p id="section-1.1-18">draft-05<a href="#section-1.1-18" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-19.1">Updating the language to be similar to the Architecture document<a href="#section-1.1-19.1" class="pilcrow">¶</a>
+<li class="normal" id="section-1.1-19.1">Common framing for handshake and application messages (*)<a href="#section-1.1-19.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-19.2">ECIES is now renamed in favor of HPKE (*)<a href="#section-1.1-19.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-19.2">Handshake message encryption (*)<a href="#section-1.1-19.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-19.3">Using a KDF instead of a Hash in TreeKEM (*)<a href="#section-1.1-19.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-19.3">Convert from literal state to a commitment via the "tree hash" (*)<a href="#section-1.1-19.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-19.4">Add credentials to the tree and remove the "roster" concept (*)<a href="#section-1.1-19.4" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-19.5">Remove the secret field from tree node values<a href="#section-1.1-19.5" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-1.1-20">draft-03<a href="#section-1.1-20" class="pilcrow">¶</a></p>
+<p id="section-1.1-20">draft-04<a href="#section-1.1-20" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-21.1">Added ciphersuites and signature schemes (*)<a href="#section-1.1-21.1" class="pilcrow">¶</a>
+<li class="normal" id="section-1.1-21.1">Updating the language to be similar to the Architecture document<a href="#section-1.1-21.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-21.2">Re-ordered fields in UserInitKey to make parsing easier (*)<a href="#section-1.1-21.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-21.2">ECIES is now renamed in favor of HPKE (*)<a href="#section-1.1-21.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-21.3">Fixed inconsistencies between Welcome and GroupState (*)<a href="#section-1.1-21.3" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-1.1-21.4">Added encryption of the Welcome message (*)<a href="#section-1.1-21.4" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-21.3">Using a KDF instead of a Hash in TreeKEM (*)<a href="#section-1.1-21.3" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-1.1-22">draft-02<a href="#section-1.1-22" class="pilcrow">¶</a></p>
+<p id="section-1.1-22">draft-03<a href="#section-1.1-22" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-23.1">Removed ART (*)<a href="#section-1.1-23.1" class="pilcrow">¶</a>
+<li class="normal" id="section-1.1-23.1">Added ciphersuites and signature schemes (*)<a href="#section-1.1-23.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-23.2">Allowed partial trees to avoid double-joins (*)<a href="#section-1.1-23.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-23.2">Re-ordered fields in UserInitKey to make parsing easier (*)<a href="#section-1.1-23.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-23.3">Added explicit key confirmation (*)<a href="#section-1.1-23.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-23.3">Fixed inconsistencies between Welcome and GroupState (*)<a href="#section-1.1-23.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-23.4">Added encryption of the Welcome message (*)<a href="#section-1.1-23.4" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-1.1-24">draft-01<a href="#section-1.1-24" class="pilcrow">¶</a></p>
+<p id="section-1.1-24">draft-02<a href="#section-1.1-24" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-25.1">Initial description of the Message Protection mechanism. (*)<a href="#section-1.1-25.1" class="pilcrow">¶</a>
+<li class="normal" id="section-1.1-25.1">Removed ART (*)<a href="#section-1.1-25.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-25.2">Initial specification proposal for the Application Key Schedule
-using the per-participant chaining of the Application Secret design. (*)<a href="#section-1.1-25.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-25.2">Allowed partial trees to avoid double-joins (*)<a href="#section-1.1-25.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-25.3">Initial specification proposal for an encryption mechanism to protect
-Application Messages using an AEAD scheme. (*)<a href="#section-1.1-25.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-25.3">Added explicit key confirmation (*)<a href="#section-1.1-25.3" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-25.4">Initial specification proposal for an authentication mechanism
-of Application Messages using signatures. (*)<a href="#section-1.1-25.4" class="pilcrow">¶</a>
+        </ul>
+<p id="section-1.1-26">draft-01<a href="#section-1.1-26" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.1-27.1">Initial description of the Message Protection mechanism. (*)<a href="#section-1.1-27.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-25.5">Initial specification proposal for a padding mechanism to improving
-protection of Application Messages against traffic analysis. (*)<a href="#section-1.1-25.5" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-27.2">Initial specification proposal for the Application Key Schedule
+using the per-participant chaining of the Application Secret design. (*)<a href="#section-1.1-27.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-25.6">Inversion of the Group Init Add and Application Secret derivations
+          <li class="normal" id="section-1.1-27.3">Initial specification proposal for an encryption mechanism to protect
+Application Messages using an AEAD scheme. (*)<a href="#section-1.1-27.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-27.4">Initial specification proposal for an authentication mechanism
+of Application Messages using signatures. (*)<a href="#section-1.1-27.4" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-27.5">Initial specification proposal for a padding mechanism to improving
+protection of Application Messages against traffic analysis. (*)<a href="#section-1.1-27.5" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-1.1-27.6">Inversion of the Group Init Add and Application Secret derivations
 in the Handshake Key Schedule to be ease chaining in case we switch
-design. (*)<a href="#section-1.1-25.6" class="pilcrow">¶</a>
+design. (*)<a href="#section-1.1-27.6" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-25.7">Removal of the UserAdd construct and split of GroupAdd into Add
-and Welcome messages (*)<a href="#section-1.1-25.7" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-27.7">Removal of the UserAdd construct and split of GroupAdd into Add
+and Welcome messages (*)<a href="#section-1.1-27.7" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-25.8">Initial proposal for authenticating handshake messages by signing
-over group state and including group state in the key schedule (*)<a href="#section-1.1-25.8" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-27.8">Initial proposal for authenticating handshake messages by signing
+over group state and including group state in the key schedule (*)<a href="#section-1.1-27.8" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-25.9">Added an appendix with example code for tree math<a href="#section-1.1-25.9" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-27.9">Added an appendix with example code for tree math<a href="#section-1.1-27.9" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-25.10">Changed the ECIES mechanism used by TreeKEM so that it uses nonces
-generated from the shared secret<a href="#section-1.1-25.10" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-27.10">Changed the ECIES mechanism used by TreeKEM so that it uses nonces
+generated from the shared secret<a href="#section-1.1-27.10" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-1.1-26">draft-00<a href="#section-1.1-26" class="pilcrow">¶</a></p>
+<p id="section-1.1-28">draft-00<a href="#section-1.1-28" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-27.1">Initial adoption of draft-barnes-mls-protocol-01 as a WG item.<a href="#section-1.1-27.1" class="pilcrow">¶</a>
+<li class="normal" id="section-1.1-29.1">Initial adoption of draft-barnes-mls-protocol-01 as a WG item.<a href="#section-1.1-29.1" class="pilcrow">¶</a>
 </li>
         </ul>
 </section>
@@ -3052,7 +3097,7 @@ struct {
 </pre><a href="#section-7.1-2" class="pilcrow">¶</a>
 </div>
 <p id="section-7.1-3">The <code>signature</code> field in an MLSMessageAuth object is computed using the signing
-private key corresponding to the public key, which was authenticated by the 
+private key corresponding to the public key, which was authenticated by the
 credential at the leaf of the tree indicated by the sender field. The signature
 is computed using <code>SignWithLabel</code> with label <code>"MLSMessageContentTBS"</code> and with a content
 that covers the message content and the wire format that will be used for this message.

@@ -226,6 +226,51 @@ Table of Contents
 
    RFC EDITOR PLEASE DELETE THIS SECTION.
 
+   draft-13
+
+   *  TLS syntax updates (including variable-header-length vectors) (*)
+
+   *  Stop generating redundant PKE key pairs. (*)
+
+   *  Move validation of identity change to the AS
+
+   *  Add message/mls MIME type registration
+
+   *  Split LeafNode from KeyPackage (*)
+
+   *  Remove endpoint_id (*)
+
+   *  Reorganize to make section layout more sane
+
+   *  Forbid proposals by reference in external commits (*)
+
+   *  Domain separation for KeyPackage and Proposal references (*)
+
+   *  Downgrade MUST to SHOULD for commit senders including all valid
+      commits
+
+   *  Stronger parent hashes for authenticated identities (*)
+
+   *  Move wire_format to a separate tagged-union structure MLSMessage
+
+   *  Generalize tree extend/truncate algorithms
+
+   *  Add algorithms for link-based trees
+
+   *  Forbid self-Update entirely (*)
+
+   *  Consolidate resumption PSK cases (*)
+
+   *  384 Ciphersuite Addition
+
+   *  Remove explicit version pin on HPKE (*)
+
+   *  Remove the requirement for Add in external commit (*)
+
+   *  Use smaller, fixed-size hash-based identifiers (*)
+
+   *  Be explicit that Credentials can attest to multiple identities (*)
+
    draft-12
 
    *  Use the GroupContext to derive the joiner_secret (*)
