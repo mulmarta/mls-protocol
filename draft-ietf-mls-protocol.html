@@ -1496,13 +1496,16 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.21">
-            <p id="section-toc.1-1.21.1"><a href="#appendix-A" class="xref">Appendix A</a>.  <a href="#name-array-based-trees" class="xref">Array-Based Trees</a></p>
+            <p id="section-toc.1-1.21.1"><a href="#appendix-A" class="xref">Appendix A</a>.  <a href="#name-protocol-origins-of-example" class="xref">Protocol Origins of Example Trees</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.22">
-            <p id="section-toc.1-1.22.1"><a href="#appendix-B" class="xref">Appendix B</a>.  <a href="#name-link-based-trees" class="xref">Link-Based Trees</a></p>
+            <p id="section-toc.1-1.22.1"><a href="#appendix-B" class="xref">Appendix B</a>.  <a href="#name-array-based-trees" class="xref">Array-Based Trees</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.23">
-            <p id="section-toc.1-1.23.1"><a href="#appendix-C" class="xref"></a><a href="#name-authors-addresses" class="xref">Authors' Addresses</a></p>
+            <p id="section-toc.1-1.23.1"><a href="#appendix-C" class="xref">Appendix C</a>.  <a href="#name-link-based-trees" class="xref">Link-Based Trees</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.24">
+            <p id="section-toc.1-1.24.1"><a href="#appendix-D" class="xref"></a><a href="#name-authors-addresses" class="xref">Authors' Addresses</a></p>
 </li>
         </ul>
 </nav>
@@ -2492,7 +2495,9 @@ siblings of all the nodes in its direct path, excluding the root.<a href="#secti
           <li class="normal" id="section-5.1-8.2">The copath of C is (D, U, Z)<a href="#section-5.1-8.2" class="pilcrow">¶</a>
 </li>
         </ul>
-<div class="alignLeft art-text artwork" id="section-5.1-9">
+<span id="name-a-complete-tree-with-seven-"></span><div id="full-tree">
+<figure id="figure-9">
+          <div class="alignLeft art-text artwork" id="section-5.1-9.1">
 <pre>
               X = root
         ______|______
@@ -2505,7 +2510,11 @@ siblings of all the nodes in its direct path, excluding the root.<a href="#secti
 A   B   C   D   E   F   G
 
 0   1   2   3   4   5   6
-</pre><a href="#section-5.1-9" class="pilcrow">¶</a>
+</pre>
+</div>
+<figcaption><a href="#figure-9" class="selfRef">Figure 9</a>:
+<a href="#name-a-complete-tree-with-seven-" class="selfRef">A complete tree with seven members</a>
+          </figcaption></figure>
 </div>
 <p id="section-5.1-10">A tree with <code>n</code> leaves has <code>2*n - 1</code> nodes.  For example, the above tree has 7
 leaves (A, B, C, D, E, F, G) and 13 nodes.<a href="#section-5.1-10" class="pilcrow">¶</a></p>
@@ -2518,7 +2527,7 @@ when a leaf was recently removed from the tree.<a href="#section-5.1-12" class="
 memory.  For example, left-balanced binary trees can be represented as an array
 of nodes, with node relationships computed based on nodes' indices in the array.
 Or a more traditional representation of linked node objects may be used.
-<a href="#array-based-trees" class="xref">Appendix A</a> and <a href="#link-based-trees" class="xref">Appendix B</a> provide some details on how to
+<a href="#array-based-trees" class="xref">Appendix B</a> and <a href="#link-based-trees" class="xref">Appendix C</a> provide some details on how to
 implement the tree operations required for MLS in these representations.
 MLS places no requirements on implementations' internal representations
 of ratchet trees.  An implementation MAY use any tree representation and
@@ -2633,11 +2642,15 @@ concatenating the resolution of its left child with the resolution
 of its right child, in that order<a href="#section-5.3-6.3" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-5.3-7">For example, consider the following tree, where the "_" character
+<p id="section-5.3-7">For example, consider the following subtree, where the <code>_</code> character
 represents a blank node and unmerged leaves are indicated in square
 brackets:<a href="#section-5.3-7" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.3-8">
+<span id="name-a-tree-with-blanks-and-unme"></span><div id="resolution-tree">
+<figure id="figure-10">
+          <div class="alignLeft art-text artwork" id="section-5.3-8.1">
 <pre>
+       ...
+       /
       _
     __|__
    /     \
@@ -2646,7 +2659,11 @@ brackets:<a href="#section-5.3-7" class="pilcrow">¶</a></p>
 A   _   C   D
 
 0   1   2   3
-</pre><a href="#section-5.3-8" class="pilcrow">¶</a>
+</pre>
+</div>
+<figcaption><a href="#figure-10" class="selfRef">Figure 10</a>:
+<a href="#name-a-tree-with-blanks-and-unme" class="selfRef">A tree with blanks and unmerged leaves</a>
+          </figcaption></figure>
 </div>
 <p id="section-5.3-9">In this tree, we can see all of the above rules in play:<a href="#section-5.3-9" class="pilcrow">¶</a></p>
 <ul class="normal">
@@ -2654,7 +2671,7 @@ A   _   C   D
 </li>
           <li class="normal" id="section-5.3-10.2">The resolution of leaf 1 is the empty list []<a href="#section-5.3-10.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-5.3-10.3">The resolution of root node is the list [A, Z, C]<a href="#section-5.3-10.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-5.3-10.3">The resolution of top node is the list [A, Z, C]<a href="#section-5.3-10.3" class="pilcrow">¶</a>
 </li>
         </ul>
 <p id="section-5.3-11">Every node, regardless of whether the node is blank or populated, has
@@ -3538,8 +3555,10 @@ node_priv[n], node_pub[n] = KEM.DeriveKeyPair(node_secret[n])
 secret is only used with one algorithm: The path secret is used as an input to
 DeriveSecret and the node secret is used as an input to DeriveKeyPair.<a href="#section-8.2-5" class="pilcrow">¶</a></p>
 <p id="section-8.2-6">For example, suppose there is a group with four members, with C an unmerged leaf
-at node 5:<a href="#section-8.2-6" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-8.2-7">
+at Z:<a href="#section-8.2-6" class="pilcrow">¶</a></p>
+<span id="name-a-full-tree-with-one-unmerg"></span><div id="evolution-tree">
+<figure id="figure-11">
+          <div class="alignLeft art-text artwork" id="section-8.2-7.1">
 <pre>
       Y
     __|__
@@ -3548,8 +3567,12 @@ at node 5:<a href="#section-8.2-6" class="pilcrow">¶</a></p>
  / \     / \
 A   B   C   D
 
-0 1 2 3 4 5 6
-</pre><a href="#section-8.2-7" class="pilcrow">¶</a>
+0   1   2   3
+</pre>
+</div>
+<figcaption><a href="#figure-11" class="selfRef">Figure 11</a>:
+<a href="#name-a-full-tree-with-one-unmerg" class="selfRef">A full tree with one unmerged leaf</a>
+          </figcaption></figure>
 </div>
 <p id="section-8.2-8">If member B subsequently generates an UpdatePath based on a secret
 "leaf_secret", then it would generate the following sequence
@@ -3581,7 +3604,7 @@ np[0] -&gt; X'      Z[C]
            |
            lp
 
-       0 1 2 3 4 5 6
+       0   1   2   3
 </pre><a href="#section-8.2-11" class="pilcrow">¶</a>
 </div>
 </section>
@@ -3638,7 +3661,7 @@ A   B   C &lt;-- remove leaf        A   B
 </div>
 <p id="section-8.3-6">Note that in the rest of the protocol, the rightmost leaf will only be removed when it is blank.<a href="#section-8.3-6" class="pilcrow">¶</a></p>
 <p id="section-8.3-7">Concrete algorithms for these operations on array-based and link-based trees are
-provided in <a href="#array-based-trees" class="xref">Appendix A</a> and <a href="#link-based-trees" class="xref">Appendix B</a>.  The concrete
+provided in <a href="#array-based-trees" class="xref">Appendix B</a> and <a href="#link-based-trees" class="xref">Appendix C</a>.  The concrete
 algorithms are non-normative.  An implementation MAY use any algorithm that
 produces the correct tree in its internal representation.<a href="#section-8.3-7" class="pilcrow">¶</a></p>
 </section>
@@ -3679,11 +3702,11 @@ of the non-updated child.<a href="#section-8.4-4" class="pilcrow">¶</a></p>
 <li id="section-8.4-6.1">
             <p id="section-8.4-6.1.1">Compute the updated path secrets.<a href="#section-8.4-6.1.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-8.4-6.1.2.1">Identify a node in the filtered direct path for which the local member
+<li class="normal" id="section-8.4-6.1.2.1">Identify a node in the filtered direct path for which the recipient
 is in the subtree of the non-updated child.<a href="#section-8.4-6.1.2.1" class="pilcrow">¶</a>
 </li>
               <li class="normal" id="section-8.4-6.1.2.2">Identify a node in the resolution of the copath node for
-which this node has a private key.<a href="#section-8.4-6.1.2.2" class="pilcrow">¶</a>
+which the recipient has a private key.<a href="#section-8.4-6.1.2.2" class="pilcrow">¶</a>
 </li>
               <li class="normal" id="section-8.4-6.1.2.3">Decrypt the path secret for the parent of the copath node using
 the private key from the resolution node.<a href="#section-8.4-6.1.2.3" class="pilcrow">¶</a>
@@ -3851,7 +3874,9 @@ the following way:<a href="#section-8.6-7" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-8.6-9">For example, in the following tree:<a href="#section-8.6-9" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-8.6-10">
+<span id="name-a-full-tree-unmerged-leaves"></span><div id="parent-hash-tree">
+<figure id="figure-12">
+          <div class="alignLeft art-text artwork" id="section-8.6-10.1">
 <pre>
               W [D, H]
         ______|_____
@@ -3862,7 +3887,11 @@ the following way:<a href="#section-8.6-7" class="pilcrow">¶</a></p>
   T       _       X [F]   _
  / \     / \     / \     / \
 A   B   C   D   E   F   G   H
-</pre><a href="#section-8.6-10" class="pilcrow">¶</a>
+</pre>
+</div>
+<figcaption><a href="#figure-12" class="selfRef">Figure 12</a>:
+<a href="#name-a-full-tree-unmerged-leaves" class="selfRef">A full tree unmerged leaves that illustrate parent hash computations</a>
+          </figcaption></figure>
 </div>
 <p id="section-8.6-11">With P = W and S = Y, <code>original_sibling_tree_hash</code> is the tree hash of the
 following tree:<a href="#section-8.6-11" class="pilcrow">¶</a></p>
@@ -6015,7 +6044,7 @@ optional&lt;Node&gt; ratchet_tree&lt;V&gt;;
 <p id="section-13.3-4">The nodes are listed in the order specified by a left-to-right in-order
 traversal of the rachet tree. Each node is listed between its left subtree and
 its right subtree.  (This is the same ordering as specified for the array-based
-trees outlined in <a href="#array-based-trees" class="xref">Appendix A</a>.)<a href="#section-13.3-4" class="pilcrow">¶</a></p>
+trees outlined in <a href="#array-based-trees" class="xref">Appendix B</a>.)<a href="#section-13.3-4" class="pilcrow">¶</a></p>
 <p id="section-13.3-5">The leaves of the tree are stored in even-numbered entries in
 the array (the leaf with index L in array position 2*L). The root node of the
 tree is at position 2^k - 1 of the array, where k is the largest number such
@@ -6046,10 +6075,10 @@ def subtree_root(nodes):
 </pre><a href="#section-13.3-6" class="pilcrow">¶</a>
 </div>
 <p id="section-13.3-7">(Note that this is the same ordering of nodes as in the array-based tree representation
-described in <a href="#array-based-trees" class="xref">Appendix A</a>.  The algorithms in that section may be used to
+described in <a href="#array-based-trees" class="xref">Appendix B</a>.  The algorithms in that section may be used to
 simplify decoding this extension into other representations.)<a href="#section-13.3-7" class="pilcrow">¶</a></p>
 <p id="section-13.3-8">(Note that this is the same ordering of nodes as in the array-based tree representation
-described in <a href="#array-based-trees" class="xref">Appendix A</a>.  The algorithms in that section may be used to
+described in <a href="#array-based-trees" class="xref">Appendix B</a>.  The algorithms in that section may be used to
 simplify decoding this extension into other representations.)<a href="#section-13.3-8" class="pilcrow">¶</a></p>
 <p id="section-13.3-9">The example tree in <a href="#ratchet-tree-terminology" class="xref">Section 5.1</a> would be represented as an
 array of nodes in the following form, where R represents the "subtree root" for
@@ -7267,17 +7296,89 @@ thyla.van.der@merwe.tech<a href="#section-19-1.12" class="pilcrow">¶</a>
 </dl>
 </section>
 </section>
-<div id="array-based-trees">
+<div id="protocol-origins-of-example-trees">
 <section id="appendix-A">
-      <h2 id="name-array-based-trees">
-<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-array-based-trees" class="section-name selfRef">Array-Based Trees</a>
+      <h2 id="name-protocol-origins-of-example">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-protocol-origins-of-example" class="section-name selfRef">Protocol Origins of Example Trees</a>
       </h2>
-<p id="appendix-A-1">One benefit of using left-balanced trees is that they admit a simple
+<p id="appendix-A-1">Protocol operations in MLS give rise to specific forms of ratchet tree,
+typically affecting a whole direct path at once.  In this section, we describe
+the protocol operations that could have given rise to the various example trees
+in this document.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-2">To construct the tree in <a href="#full-tree" class="xref">Figure 9</a>:<a href="#appendix-A-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A-3.1">A creates a group with B, ..., G<a href="#appendix-A-3.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="appendix-A-3.2">Each member sends an empty Commit setting its direct path<a href="#appendix-A-3.2" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="appendix-A-4">To construct the tree in <a href="#resolution-tree" class="xref">Figure 10</a>:<a href="#appendix-A-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A-5.1">A creates a group with B, C, D, as well as some members outside this subtree<a href="#appendix-A-5.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="appendix-A-5.2">D removes C, setting Z and the top node (as well as any further nodes in the
+direct path)<a href="#appendix-A-5.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="appendix-A-5.3">A member outside this subtree removes B, blanking B's direct path<a href="#appendix-A-5.3" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="appendix-A-5.4">A adds a new member at C with a partial Commit, adding it as unmerged at Z<a href="#appendix-A-5.4" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="appendix-A-6">To construct the tree in <a href="#evolution-tree" class="xref">Figure 11</a>:<a href="#appendix-A-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A-7.1">A creates a group with B, C, D<a href="#appendix-A-7.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="appendix-A-7.2">B sends a full Commit, setting X and Y<a href="#appendix-A-7.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="appendix-A-7.3">D removes C, setting Z and Y<a href="#appendix-A-7.3" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="appendix-A-7.4">
+          <p id="appendix-A-7.4.1">B adds a new member at C with a full Commit<a href="#appendix-A-7.4.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A-7.4.2.1">The Add proposal adds C as unmerged at Z and Y<a href="#appendix-A-7.4.2.1" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="appendix-A-7.4.2.2">The path in the Commit resets X and Y, clearing Y's unmerged leaves<a href="#appendix-A-7.4.2.2" class="pilcrow">¶</a>
+</li>
+          </ul>
+</li>
+      </ul>
+<p id="appendix-A-8">To construct the tree in <a href="#parent-hash-tree" class="xref">Figure 12</a>:<a href="#appendix-A-8" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A-9.1">A creates a group with B, ... G<a href="#appendix-A-9.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="appendix-A-9.2">A removes F in a full Commit, setting T, U, and W<a href="#appendix-A-9.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="appendix-A-9.3">E sends an empty Commit, setting X, Y, and W<a href="#appendix-A-9.3" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="appendix-A-9.4">A adds a new member at F in a partial Commit, adding F as unmerged at X, Y,
+and W<a href="#appendix-A-9.4" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="appendix-A-9.5">A removes D, resetting T, U, and W (in particular, F is no longer unmerged at
+W)<a href="#appendix-A-9.5" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="appendix-A-9.6">
+          <p id="appendix-A-9.6.1">A adds new memebers at D and H in a partial commit<a href="#appendix-A-9.6.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A-9.6.2.1">D is added as unmerged at U, W<a href="#appendix-A-9.6.2.1" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="appendix-A-9.6.2.2">H is added as unmerged at Y, W<a href="#appendix-A-9.6.2.2" class="pilcrow">¶</a>
+</li>
+          </ul>
+</li>
+      </ul>
+</section>
+</div>
+<div id="array-based-trees">
+<section id="appendix-B">
+      <h2 id="name-array-based-trees">
+<a href="#appendix-B" class="section-number selfRef">Appendix B. </a><a href="#name-array-based-trees" class="section-name selfRef">Array-Based Trees</a>
+      </h2>
+<p id="appendix-B-1">One benefit of using left-balanced trees is that they admit a simple
 flat array representation.  In this representation, leaf nodes are
 even-numbered nodes, with the n-th leaf at 2*n.  Intermediate nodes
 are held in odd-numbered nodes.  For example, tree with 11 leaves has
-the following structure:<a href="#appendix-A-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="appendix-A-2">
+the following structure:<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-B-2">
 <pre>
                                                    X
                            X
@@ -7286,29 +7387,29 @@ the following structure:<a href="#appendix-A-1" class="pilcrow">¶</a></p>
       X     X     X     X     X     X     X     X     X     X     X
 Node: 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20
 Leaf: 0     1     2     3     4     5     6     7     8     9    10
-</pre><a href="#appendix-A-2" class="pilcrow">¶</a>
+</pre><a href="#appendix-B-2" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A-3">This allows us to compute relationships between tree nodes simply by
+<p id="appendix-B-3">This allows us to compute relationships between tree nodes simply by
 manipulating indices, rather than having to maintain complicated structures in
 memory. The basic rule is that the high-order bits of parent and child nodes
-indices have the following relation (where <code>x</code> is an arbitrary bit string):<a href="#appendix-A-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="appendix-A-4">
+indices have the following relation (where <code>x</code> is an arbitrary bit string):<a href="#appendix-B-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-B-4">
 <pre>
 parent=01x =&gt; left=00x, right=10x
-</pre><a href="#appendix-A-4" class="pilcrow">¶</a>
+</pre><a href="#appendix-B-4" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A-5">Since node relationships are implicit, the algorithms for adding and removing
-nodes at the right edge of the tree are quite simple:<a href="#appendix-A-5" class="pilcrow">¶</a></p>
+<p id="appendix-B-5">Since node relationships are implicit, the algorithms for adding and removing
+nodes at the right edge of the tree are quite simple:<a href="#appendix-B-5" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="appendix-A-6.1">Add: Append a blank parent node to the array of nodes, then append the new
-leaf node<a href="#appendix-A-6.1" class="pilcrow">¶</a>
+<li class="normal" id="appendix-B-6.1">Add: Append a blank parent node to the array of nodes, then append the new
+leaf node<a href="#appendix-B-6.1" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="appendix-A-6.2">Remove: Remove the rightmost two nodes from the array of nodes<a href="#appendix-A-6.2" class="pilcrow">¶</a>
+        <li class="normal" id="appendix-B-6.2">Remove: Remove the rightmost two nodes from the array of nodes<a href="#appendix-B-6.2" class="pilcrow">¶</a>
 </li>
       </ul>
-<p id="appendix-A-7">The following python code demonstrates the tree computations necessary to use an
-array-based tree for MLS.<a href="#appendix-A-7" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="appendix-A-8">
+<p id="appendix-B-7">The following python code demonstrates the tree computations necessary to use an
+array-based tree for MLS.<a href="#appendix-B-7" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-B-8">
 <pre>
 # The exponent of the largest power of 2 less than x. Equivalent to:
 #   int(math.floor(math.log(x, 2)))
@@ -7443,25 +7544,25 @@ def common_ancestor_direct(x, y, _):
        xn, yn = xn &gt;&gt; 1, yn &gt;&gt; 1
        k += 1
     return (xn &lt;&lt; k) + (1 &lt;&lt; (k-1)) - 1
-</pre><a href="#appendix-A-8" class="pilcrow">¶</a>
+</pre><a href="#appendix-B-8" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
 <div id="link-based-trees">
-<section id="appendix-B">
+<section id="appendix-C">
       <h2 id="name-link-based-trees">
-<a href="#appendix-B" class="section-number selfRef">Appendix B. </a><a href="#name-link-based-trees" class="section-name selfRef">Link-Based Trees</a>
+<a href="#appendix-C" class="section-number selfRef">Appendix C. </a><a href="#name-link-based-trees" class="section-name selfRef">Link-Based Trees</a>
       </h2>
-<p id="appendix-B-1">An implementation may choose to store ratchet trees in a "link-based"
+<p id="appendix-C-1">An implementation may choose to store ratchet trees in a "link-based"
 representation, where each node stores references to its parents and/or
 children.   (As opposed to the array-based representation suggested above, where
 these relationships are computed from relationships between nodes' indices in
 the array.)  Such an implementation needs to update these links to maintain the
 left-balanced structure of the tree as the tree is extended to add new members,
-or truncated when memebers are removed.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
-<p id="appendix-B-2">The following code snippet shows how these algorithms could be implemented in
-Python.<a href="#appendix-B-2" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="appendix-B-3">
+or truncated when memebers are removed.<a href="#appendix-C-1" class="pilcrow">¶</a></p>
+<p id="appendix-C-2">The following code snippet shows how these algorithms could be implemented in
+Python.<a href="#appendix-C-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-C-3">
 <pre>
 class Node:
     def __init__(self, value, parent=None, left=None, right=None):
@@ -7537,12 +7638,12 @@ class Tree:
         Q.right = X.parent.left
         Q.right.parent = Q
         return
-</pre><a href="#appendix-B-3" class="pilcrow">¶</a>
+</pre><a href="#appendix-C-3" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
 <div id="authors-addresses">
-<section id="appendix-C">
+<section id="appendix-D">
       <h2 id="name-authors-addresses">
 <a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
       </h2>

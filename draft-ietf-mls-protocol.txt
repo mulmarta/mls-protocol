@@ -173,8 +173,9 @@ Table of Contents
    20. References
      20.1.  Normative References
      20.2.  Informative References
-   Appendix A.  Array-Based Trees
-   Appendix B.  Link-Based Trees
+   Appendix A.  Protocol Origins of Example Trees
+   Appendix B.  Array-Based Trees
+   Appendix C.  Link-Based Trees
    Authors' Addresses
 
 1.  Introduction
@@ -1065,6 +1066,8 @@ Table of Contents
 
    0   1   2   3   4   5   6
 
+                Figure 9: A complete tree with seven members
+
    A tree with n leaves has 2*n - 1 nodes.  For example, the above tree
    has 7 leaves (A, B, C, D, E, F, G) and 13 nodes.
 
@@ -1079,8 +1082,8 @@ Table of Contents
    ratchet tree in memory.  For example, left-balanced binary trees can
    be represented as an array of nodes, with node relationships computed
    based on nodes' indices in the array.  Or a more traditional
-   representation of linked node objects may be used.  Appendix A and
-   Appendix B provide some details on how to implement the tree
+   representation of linked node objects may be used.  Appendix B and
+   Appendix C provide some details on how to implement the tree
    operations required for MLS in these representations.  MLS places no
    requirements on implementations' internal representations of ratchet
    trees.  An implementation MAY use any tree representation and
@@ -1190,10 +1193,12 @@ Table of Contents
       concatenating the resolution of its left child with the resolution
       of its right child, in that order
 
-   For example, consider the following tree, where the "_" character
+   For example, consider the following subtree, where the _ character
    represents a blank node and unmerged leaves are indicated in square
    brackets:
 
+          ...
+          /
          _
        __|__
       /     \
@@ -1203,13 +1208,15 @@ Table of Contents
 
    0   1   2   3
 
+             Figure 10: A tree with blanks and unmerged leaves
+
    In this tree, we can see all of the above rules in play:
 
    *  The resolution of node Z is the list [Z, C]
 
    *  The resolution of leaf 1 is the empty list []
 
-   *  The resolution of root node is the list [A, Z, C]
+   *  The resolution of top node is the list [A, Z, C]
 
    Every node, regardless of whether the node is blank or populated, has
    a corresponding _hash_ that summarizes the contents of the subtree
@@ -2032,7 +2039,7 @@ struct {
    to DeriveKeyPair.
 
    For example, suppose there is a group with four members, with C an
-   unmerged leaf at node 5:
+   unmerged leaf at Z:
 
          Y
        __|__
@@ -2041,7 +2048,9 @@ struct {
     / \     / \
    A   B   C   D
 
-   0 1 2 3 4 5 6
+   0   1   2   3
+
+               Figure 11: A full tree with one unmerged leaf
 
    If member B subsequently generates an UpdatePath based on a secret
    "leaf_secret", then it would generate the following sequence of path
@@ -2070,7 +2079,7 @@ struct {
               |
               lp
 
-          0 1 2 3 4 5 6
+          0   1   2   3
 
 8.3.  Adding and Removing Leaves
 
@@ -2122,7 +2131,7 @@ struct {
    be removed when it is blank.
 
    Concrete algorithms for these operations on array-based and link-
-   based trees are provided in Appendix A and Appendix B.  The concrete
+   based trees are provided in Appendix B and Appendix C.  The concrete
    algorithms are non-normative.  An implementation MAY use any
    algorithm that produces the correct tree in its internal
    representation.
@@ -2160,10 +2169,10 @@ struct {
    1.  Compute the updated path secrets.
 
        *  Identify a node in the filtered direct path for which the
-          local member is in the subtree of the non-updated child.
+          recipient is in the subtree of the non-updated child.
 
        *  Identify a node in the resolution of the copath node for which
-          this node has a private key.
+          the recipient has a private key.
 
        *  Decrypt the path secret for the parent of the copath node
           using the private key from the resolution node.
@@ -2313,6 +2322,9 @@ struct {
      T       _       X [F]   _
     / \     / \     / \     / \
    A   B   C   D   E   F   G   H
+
+       Figure 12: A full tree unmerged leaves that illustrate parent
+                             hash computations
 
    With P = W and S = Y, original_sibling_tree_hash is the tree hash of
    the following tree:
@@ -4285,7 +4297,7 @@ struct {
    The nodes are listed in the order specified by a left-to-right in-
    order traversal of the rachet tree.  Each node is listed between its
    left subtree and its right subtree.  (This is the same ordering as
-   specified for the array-based trees outlined in Appendix A.)
+   specified for the array-based trees outlined in Appendix B.)
 
    The leaves of the tree are stored in even-numbered entries in the
    array (the leaf with index L in array position 2*L).  The root node
@@ -4316,12 +4328,12 @@ struct {
        return root
 
    (Note that this is the same ordering of nodes as in the array-based
-   tree representation described in Appendix A.  The algorithms in that
+   tree representation described in Appendix B.  The algorithms in that
    section may be used to simplify decoding this extension into other
    representations.)
 
    (Note that this is the same ordering of nodes as in the array-based
-   tree representation described in Appendix A.  The algorithms in that
+   tree representation described in Appendix B.  The algorithms in that
    section may be used to simplify decoding this extension into other
    representations.)
 
@@ -5306,7 +5318,68 @@ struct {
               <https://www.signal.org/docs/specifications/
               doubleratchet/>.
 
-Appendix A.  Array-Based Trees
+Appendix A.  Protocol Origins of Example Trees
+
+   Protocol operations in MLS give rise to specific forms of ratchet
+   tree, typically affecting a whole direct path at once.  In this
+   section, we describe the protocol operations that could have given
+   rise to the various example trees in this document.
+
+   To construct the tree in Figure 9:
+
+   *  A creates a group with B, ..., G
+
+   *  Each member sends an empty Commit setting its direct path
+
+   To construct the tree in Figure 10:
+
+   *  A creates a group with B, C, D, as well as some members outside
+      this subtree
+
+   *  D removes C, setting Z and the top node (as well as any further
+      nodes in the direct path)
+
+   *  A member outside this subtree removes B, blanking B's direct path
+
+   *  A adds a new member at C with a partial Commit, adding it as
+      unmerged at Z
+
+   To construct the tree in Figure 11:
+
+   *  A creates a group with B, C, D
+
+   *  B sends a full Commit, setting X and Y
+
+   *  D removes C, setting Z and Y
+
+   *  B adds a new member at C with a full Commit
+
+      -  The Add proposal adds C as unmerged at Z and Y
+
+      -  The path in the Commit resets X and Y, clearing Y's unmerged
+         leaves
+
+   To construct the tree in Figure 12:
+
+   *  A creates a group with B, ... G
+
+   *  A removes F in a full Commit, setting T, U, and W
+
+   *  E sends an empty Commit, setting X, Y, and W
+
+   *  A adds a new member at F in a partial Commit, adding F as unmerged
+      at X, Y, and W
+
+   *  A removes D, resetting T, U, and W (in particular, F is no longer
+      unmerged at W)
+
+   *  A adds new memebers at D and H in a partial commit
+
+      -  D is added as unmerged at U, W
+
+      -  H is added as unmerged at Y, W
+
+Appendix B.  Array-Based Trees
 
    One benefit of using left-balanced trees is that they admit a simple
    flat array representation.  In this representation, leaf nodes are
@@ -5475,7 +5548,7 @@ def common_ancestor_direct(x, y, _):
        k += 1
     return (xn << k) + (1 << (k-1)) - 1
 
-Appendix B.  Link-Based Trees
+Appendix C.  Link-Based Trees
 
    An implementation may choose to store ratchet trees in a "link-based"
    representation, where each node stores references to its parents and/
