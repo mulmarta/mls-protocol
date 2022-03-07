@@ -101,16 +101,17 @@ Table of Contents
        7.3.1.  Content Encryption
        7.3.2.  Sender Data Encryption
    8.  Ratchet Tree Operations
-     8.1.  Ratchet Tree Node Contents
-       8.1.1.  Leaf Node Validation
-     8.2.  Ratchet Tree Evolution
-     8.3.  Adding and Removing Leaves
-     8.4.  Synchronizing Views of the Tree
-     8.5.  Tree Hashes
-     8.6.  Parent Hash
-       8.6.1.  Using Parent Hashes
-       8.6.2.  Verifying Parent Hashes
-     8.7.  Update Paths
+     8.1.  Parent Node Contents
+     8.2.  Leaf Node Contents
+     8.3.  Leaf Node Validation
+     8.4.  Ratchet Tree Evolution
+     8.5.  Adding and Removing Leaves
+     8.6.  Synchronizing Views of the Tree
+     8.7.  Tree Hashes
+     8.8.  Parent Hash
+       8.8.1.  Using Parent Hashes
+       8.8.2.  Verifying Parent Hashes
+     8.9.  Update Paths
    9.  Key Schedule
      9.1.  Group Context
      9.2.  Transcript Hashes
@@ -1120,7 +1121,7 @@ Table of Contents
    is first added, because the process of adding the leaf does not give
    it access to all of the nodes above it in the tree.  Leaves are
    "merged" as they receive the private keys for nodes, as described in
-   Section 8.2.
+   Section 8.4.
 
    For example, consider a four-member group (A, B, C, D) where the node
    above the right two members is blank.  (This is what it would look
@@ -1175,7 +1176,7 @@ Table of Contents
    *  An ordered list of "unmerged" leaves (see Section 5.2)
 
    *  A hash of certain information about the node's parent, as of the
-      last time the node was changed (see Section 8.6).
+      last time the node was changed (see Section 8.8).
 
    The _resolution_ of a node is an ordered list of non-blank nodes that
    collectively cover all non-blank descendants of the node.  The
@@ -1221,7 +1222,7 @@ Table of Contents
    Every node, regardless of whether the node is blank or populated, has
    a corresponding _hash_ that summarizes the contents of the subtree
    below that node.  The rules for computing these hashes are described
-   in Section 8.5.
+   in Section 8.7.
 
 6.  Cryptographic Objects
 
@@ -1777,7 +1778,7 @@ struct {
    changes are made to the ratchet tree.  In this section, we describe
    the content of the tree and the required operations.
 
-8.1.  Ratchet Tree Node Contents
+8.1.  Parent Node Contents
 
    As discussed in Section 5.3, the nodes of a ratchet tree contain
    several types of data describing individual members (for leaf nodes)
@@ -1790,15 +1791,19 @@ struct {
        uint32 unmerged_leaves<V>;
    } ParentNode;
 
-   The public_key field contains a HPKE public key whose private key is
+   The public_key field contains an HPKE public key whose private key is
    held only by the members at the leaves among its descendants.  The
    parent_hash field contains a hash of this node's parent node, as
-   described in Section 8.6.  The unmerged_leaves field lists the leaves
+   described in Section 8.8.  The unmerged_leaves field lists the leaves
    under this parent node that are unmerged, according to their indices
    among all the leaves in the tree.
 
+8.2.  Leaf Node Contents
+
    A leaf node in the tree describes all the details of an individual
-   client's appearance in the group, signed by that client:
+   client's appearance in the group, signed by that client.  It is also
+   used in client KeyPackage objects to store the information that will
+   be needed to add a client to a group.
 
    enum {
        reserved(0),
@@ -1913,21 +1918,20 @@ struct {
 
    In the case where the leaf node was inserted into the tree via a
    Commit message, the parent_hash field contains the parent hash for
-   this leaf node (see Section 8.6).
+   this leaf node (see Section 8.8).
 
    The LeafNodeTBS structure covers the fields above the signature in
    the LeafNode.  In addition, when the leaf node was created in the
    context of a group (the update and commit cases), the group ID of the
    group is added as context to the signature.
 
-   Since the LeafNode is a structure which is stored in the group's
-   ratchet tree and updated depending on the evolution of the tree, each
-   modification of its content MUST be reflected by a change in its
-   signature.  This allows other members to verify the validity of the
-   LeafNode at any time, particularly in the case of a newcomer joining
-   the group.
+   LeafNode objects stored in the group's ratchet tree are updated
+   according to the evolution of the tree.  Each modification of
+   LeafNode content MUST be reflected by a change in its signature.
+   This allows other members to verify the validity of the LeafNode at
+   any time, particularly in the case of a newcomer joining the group.
 
-8.1.1.  Leaf Node Validation
+8.3.  Leaf Node Validation
 
    The validity of a LeafNode needs to be verified at a few stages:
 
@@ -1977,7 +1981,7 @@ struct {
 
    *  Verify that the leaf_node_source field has the appropriate value
       for the context in which the LeafNode is being validated (as
-      defined in Section 8.1).
+      defined in Section 8.2).
 
    *  Verify that the following fields in the LeafNode are unique among
       the members of the group (including any other members added in the
@@ -1991,29 +1995,29 @@ struct {
       for each extension in the extensions field MUST be listed in the
       field capabilities.extensions of the LeafNode.
 
-8.2.  Ratchet Tree Evolution
+8.4.  Ratchet Tree Evolution
 
    In order to provide forward secrecy and post-compromise security,
    whenever a member initiates an epoch change (i.e., commits; see
-   Section 13.2), they refresh all HPKE key pairs in the ratchet tree
-   for which they know the secret keys.  More precisely, they refresh
-   the key pairs of their leaf and of all nodes on their leaf's direct
-   path.
+   Section 13.2), they refresh the key pairs of their leaf and of all
+   nodes on their leaf's direct path (all nodes for which they know the
+   secret key).
 
    The member initiating the epoch change generates the fresh key pairs
    using the following procedure.  The procedure is designed in a way
    that allows group members to efficiently communicate the fresh secret
-   keys to other group members, as described in Section 8.7.
+   keys to other group members, as described in Section 8.9.
 
-   To begin with, the generator of the UpdatePath updates its leaf and
-   its leaf's _filtered direct path_ with new key pairs.  The filtered
-   direct path of a node is obtained from the node's direct path by
-   removing all nodes whose child on the nodes's copath has an empty
-   resolution (any unmerged leaves of the copath child count towards its
-   resolution).  Such a removed node does not need a key pair, since
-   after blanking it, its resolution consists of a single node on the
-   filtered direct path.  Using the key pair of the node in the
-   resolution is equivalent to using the key pair of the removed node.
+   Recall the definition of resolution from Section 5.3.  To begin with,
+   the generator of the UpdatePath updates its leaf and its leaf's
+   _filtered direct path_ with new key pairs.  The filtered direct path
+   of a node is obtained from the node's direct path by removing all
+   nodes whose child on the nodes's copath has an empty resolution (any
+   unmerged leaves of the copath child count towards its resolution).
+   Such a removed node does not need a key pair, since after blanking
+   it, its resolution consists of a single node on the filtered direct
+   path.  Using the key pair of the node in the resolution is equivalent
+   to using the key pair of the removed node.
 
    *  Blank all the nodes on the direct path from the leaf to the root.
 
@@ -2081,7 +2085,7 @@ struct {
 
           0   1   2   3
 
-8.3.  Adding and Removing Leaves
+8.5.  Adding and Removing Leaves
 
    In addition to the path-based updates to the tree described above, it
    is also necessary to add and remove leaves of the tree in order to
@@ -2136,10 +2140,10 @@ struct {
    algorithm that produces the correct tree in its internal
    representation.
 
-8.4.  Synchronizing Views of the Tree
+8.6.  Synchronizing Views of the Tree
 
    After generating fresh key material and applying it to ratchet
-   forward their local tree state as described in the prior section, the
+   forward their local tree state as described in the Section 8.4, the
    generator must broadcast this update to other members of the group in
    a Commit message, who apply it to keep their local views of the tree
    in sync with the sender's.  More specifically, when a member commits
@@ -2201,8 +2205,9 @@ struct {
              non-blank nodes above it.  The root node always has a zero-
              length hash for this value.
 
-       *  For nodes where a path secret was recovered in step 1, compute
-          and store the node's updated private key.
+       *  For nodes where a path secret was recovered in step 1
+          ("Compute the updated path secrets"), compute and store the
+          node's updated private key.
 
    For example, in order to communicate the example update described in
    the previous section, the sender would transmit the following values:
@@ -2229,7 +2234,7 @@ struct {
 
    *  Each outdated node key pair that was replaced by the update.
 
-8.5.  Tree Hashes
+8.7.  Tree Hashes
 
    To allow group members to verify that they agree on the public
    cryptographic state of the group, this section defines a scheme for
@@ -2260,7 +2265,7 @@ struct {
    The left_hash and right_hash fields hold the tree hashes of the
    node's left and right children, respectively.
 
-8.6.  Parent Hash
+8.8.  Parent Hash
 
    The parent_hash field in ratchet tree nodes carries information to
    authenticate the information in the ratchet tree.  Parent hashes
@@ -2379,7 +2384,7 @@ struct {
    HPKE public keys to which the corresponding HPKE secret key of V was
    encrypted by the generator of the UpdatePath.
 
-8.6.1.  Using Parent Hashes
+8.8.1.  Using Parent Hashes
 
    The Parent Hash of P appears in three types of structs.  If V is
    itself a parent node then P's Parent Hash is stored in the
@@ -2401,7 +2406,7 @@ struct {
    insider isn't assigned a leaf in the subtree rooted at V.  Indeed,
    such a ratchet tree would violate the tree invariant.
 
-8.6.2.  Verifying Parent Hashes
+8.8.2.  Verifying Parent Hashes
 
    Parent hashes are verified at two points in the protocol: When
    joining a group and when processing a Commit.
@@ -2438,7 +2443,7 @@ struct {
    the UpdatePath form a parent-hash chain from the committer's leaf to
    the root.
 
-8.7.  Update Paths
+8.9.  Update Paths
 
    As described in Section 13.2, each MLS Commit message may optionally
    transmit a LeafNode and parent node values along its direct path.
@@ -2505,8 +2510,8 @@ struct {
    The value KDF.Nh is the size of an output from KDF.Extract, in bytes.
    In the below diagram:
 
-   *  KDF.Extract takes its salt argument from the top and its IKM
-      argument from the left
+   *  KDF.Extract takes its salt argument from the top and its Input Key
+      Material (IKM) argument from the left
 
    *  DeriveSecret takes its Secret argument from the incoming arrow
 
@@ -2608,11 +2613,11 @@ struct {
    *  The group_id field is an application-defined identifier for the
       group.
 
-   *  The epoch field represents the current version of the group key.
+   *  The epoch field represents the current version of the group.
 
    *  The tree_hash field contains a commitment to the contents of the
       group's ratchet tree and the credentials for the members of the
-      group, as described in Section 8.5.
+      group, as described in Section 8.7.
 
    *  The confirmed_transcript_hash field contains a running hash over
       the messages that led to this state.
@@ -3112,7 +3117,7 @@ struct {
       match those in use in the group.
 
    *  Verify the leaf_node field of the KeyPackage according to the
-      process defined in Section 8.1.1.
+      process defined in Section 8.3.
 
    *  Verify that the signature on the KeyPackage is valid using the
       public key in leaf_node.credential.
@@ -3195,8 +3200,8 @@ struct {
    GroupContext.
 
    struct {
-       ExtensionType extensions<V>;
-       ProposalType proposals<V>;
+       ExtensionType extension_types<V>;
+       ProposalType proposal_types<V>;
    } RequiredCapabilities;
 
    This extension lists the extensions and proposal types that must be
@@ -3294,6 +3299,10 @@ struct {
    2.  A member of the group or a new member broadcasts a Commit message
        that causes one or more proposed changes to enter into effect
 
+   In cases where the Proposal and Commit are sent by the same member,
+   these two steps can be combined by sending the proposals in the
+   commit.
+
    The group thus evolves from one cryptographic state to another each
    time a Commit message is sent and processed.  These states are
    referred to as "epochs" and are uniquely identified among states of
@@ -3375,7 +3384,7 @@ struct {
    A member of the group applies an Update message by taking the
    following steps:
 
-   *  Validate the LeafNode as specified in Section 8.1.1.  The
+   *  Validate the LeafNode as specified in Section 8.3.  The
       leaf_node_source field MUST be set to update.
 
    *  Verify that the public_key value in the LeafNode is different from
@@ -3598,13 +3607,11 @@ struct {
 
    Each proposal covered by the Commit is included by a ProposalOrRef
    value, which identifies the proposal to be applied by value or by
-   reference.  Proposals supplied by value are included directly in the
-   Commit object.  Proposals supplied by reference are specified by
-   including the hash of the MLSPlaintext in which the Proposal was sent
-   (see Section 6.2).  For proposals supplied by value, the sender of
-   the proposal is the same as the sender of the Commit.  Conversely,
-   proposals sent by people other than the committer MUST be included by
-   reference.
+   reference.  Commits that refer to new Proposals from the committer
+   can be included by value.  Commits for previously sent proposals from
+   anyone (including the committer) can be sent by reference.  Proposals
+   sent by reference are specified by including the hash of the
+   MLSPlaintext in which the proposal was sent (see Section 6.2).
 
    enum {
      reserved(0),
@@ -3626,8 +3633,8 @@ struct {
        optional<UpdatePath> path;
    } Commit;
 
-   A group member that has observed one or more proposals within an
-   epoch MUST send a Commit message before sending application data.
+   A group member that has observed one or more valid proposals within
+   an epoch MUST send a Commit message before sending application data.
    This ensures, for example, that any members whose removal was
    proposed during the epoch are actually removed before any application
    data is transmitted.
@@ -3665,8 +3672,8 @@ struct {
    SHOULD NOT enforce that all valid proposals sent within the current
    epoch are referenced by the next Commit.  In the event that a valid
    proposal is omitted from the next Commit, and that proposal is still
-   valid in the current epoch, the sender of the proposal MAY retransmit
-   it.
+   valid in the current epoch, the sender of the proposal MAY resend it
+   after updating it to reflect the current epoch.
 
    A member of the group MAY send a Commit that references no proposals
    at all, which would thus have an empty proposals vector.  Such a
@@ -3678,8 +3685,8 @@ struct {
 
    By default, the path field of a Commit MUST be populated.  The path
    field MAY be omitted if (a) it covers at least one proposal and (b)
-   none proposals covered by the Commit are of "path required" types.  A
-   proposal type requires a path if it cannot change the group
+   none of the proposals covered by the Commit are of "path required"
+   types.  A proposal type requires a path if it cannot change the group
    membership in a way that requires the forward secrecy and post-
    compromise security guarantees that an UpdatePath provides.  The only
    proposal types defined in this document that do not require a path
@@ -3802,7 +3809,7 @@ struct {
 
       -  Assign this UpdatePath to the path field in the Commit.
 
-      -  Apply the UpdatePath to the tree, as described in Section 8.4,
+      -  Apply the UpdatePath to the tree, as described in Section 8.6,
          creating the new ratchet tree.  Define commit_secret as the
          value path_secret[n+1] derived from the path_secret[n] value
          assigned to the root node.
@@ -3922,13 +3929,13 @@ struct {
       provisional ratchet tree and GroupContext, to generate the new
       ratchet tree and the commit_secret:
 
-      -  Validate the LeafNode as specified in Section 8.1.1.  The
+      -  Validate the LeafNode as specified in Section 8.3.  The
          leaf_node_source field MUST be set to commit.
 
       -  Verify that the public_key value in the LeafNode is different
          from the committer's current leaf node.
 
-      -  Apply the UpdatePath to the tree, as described in Section 8.4,
+      -  Apply the UpdatePath to the tree, as described in Section 8.6,
          and store leaf_node at the committer's leaf.
 
       -  Verify that the LeafNode has a parent_hash field and that its
@@ -4053,16 +4060,9 @@ struct {
    message.  The full tree can be included via the ratchet_tree
    extension Section 13.3.
 
-   The signature on the GroupInfo struct authenticates the HPKE public
-   key, so that the joiner knows that the public key was provided by a
-   member of the group.  The fields that are not signed are included in
-   the key schedule via the GroupContext object.  If the joiner is
-   provided an inaccurate data for these fields, then its external
-   Commit will have an incorrect confirmation_tag and thus be rejected.
-
-   The information in a GroupInfo is not deemed public in general, but
-   applications can choose to make it available to new members in order
-   to allow External Commits.
+   The information in a GroupInfo is not generally public information,
+   but applications can choose to make it available to new members in
+   order to allow External Commits.
 
    In principle, External Commits work like regular Commits.  However,
    their content has to meet a specific set of requirements:
@@ -4102,9 +4102,9 @@ struct {
    *  The sender type for the MLSPlaintext encapsulating the External
       Commit MUST be new_member
 
-   In other words, External Commits come in two "flavors" -- a "join"
-   commit that adds the sender to the group or a "resync" commit that
-   replaces a member's prior appearance with a new one.
+   External Commits come in two "flavors" -- a "join" commit that adds
+   the sender to the group or a "resync" commit that replaces a member's
+   prior appearance with a new one.
 
    Note that the "resync" operation allows an attacker that has
    compromised a member's signature private key to introduce themselves
@@ -4115,30 +4115,30 @@ struct {
    salient can choose to disallow external commits that contain a
    Remove, or to allow such resync commits only if they contain a
    "reinit" PSK proposal that demonstrates the joining member's presence
-   in a prior epoch of the group.  With the latter approach, the attacke
-   would need to compromise the PSK as well as the signing key, but the
-   application will need to ensure that continuing, non-resync'ing
-   members have the required PSK.
+   in a prior epoch of the group.  With the latter approach, the
+   attacker would need to compromise the PSK as well as the signing key,
+   but the application will need to ensure that continuing, non-
+   resynchronizing members have the required PSK.
 
 13.2.3.2.  Joining via Welcome Message
 
-   The sender of a Commit message is responsible for sending a Welcome
-   message to any new members added via Add proposals.  The Welcome
-   message provides the new members with the current state of the group,
-   after the application of the Commit message.  The new members will
-   not be able to decrypt or verify the Commit message, but will have
-   the secrets they need to participate in the epoch initiated by the
-   Commit message.
+   The sender of a Commit message is responsible for sending a single
+   Welcome message to all the new members added via Add proposals.  The
+   Welcome message provides the new members with the current state of
+   the group, after the application of the Commit message.  The new
+   members will not be able to decrypt or verify the Commit message, but
+   will have the secrets they need to participate in the epoch initiated
+   by the Commit message.
 
    In order to allow the same Welcome message to be sent to all new
    members, information describing the group is encrypted with a
    symmetric key and nonce derived from the joiner_secret for the new
    epoch.  The joiner_secret is then encrypted to each new member using
    HPKE.  In the same encrypted package, the committer transmits the
-   path secret for the lowest node contained in the direct paths of both
-   the committer and the new member.  This allows the new member to
-   compute private keys for nodes in its direct path that are being
-   reset by the corresponding Commit.
+   path secret for the lowest (closest to the leaf) node which is
+   contained in the direct paths of both the committer and the new
+   member.  This allows the new member to compute private keys for nodes
+   in its direct path that are being reset by the corresponding Commit.
 
    If the sender of the Welcome message wants the receiving member to
    include a PSK in the derivation of the epoch_secret, they can
@@ -4217,7 +4217,7 @@ struct {
          be considered instead.
 
       -  For each non-empty leaf node, validate the LeafNode as
-         described in Section 8.1.1.
+         described in Section 8.3.
 
    *  Identify a leaf in the tree array (any even-numbered node) whose
       LeafNode is identical to the one in the KeyPackage.  If no such
@@ -4326,11 +4326,6 @@ struct {
        root.left = subtree_root(nodes[:R])
        root.right = subtree_root(nodes[(R+1):])
        return root
-
-   (Note that this is the same ordering of nodes as in the array-based
-   tree representation described in Appendix B.  The algorithms in that
-   section may be used to simplify decoding this extension into other
-   representations.)
 
    (Note that this is the same ordering of nodes as in the array-based
    tree representation described in Appendix B.  The algorithms in that
@@ -4743,7 +4738,7 @@ struct {
    group by crafting an invalid UpdatePath.  Recall that an UpdatePath
    encrypts a sequence of path secrets to different subtrees of the
    group's ratchet trees.  These path secrets should be derived in a
-   sequence as described in Section 8.2, but the UpdatePath syntax
+   sequence as described in Section 8.4, but the UpdatePath syntax
    allows the sender to encrypt arbitrary, unrelated secrets.  The
    syntax also does not guarantee that the encrypted path secret
    encrypted for a given node corresponds to the public key provided for
