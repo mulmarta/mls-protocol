@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-03-06T01:14:54.859551+00:00",
+  "timestamp": "2022-03-08T01:16:17.758626+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -6037,15 +6037,15 @@
       "id": "I_kwDOBoyH6c5DYEA3",
       "title": "Add version to MLSMessage",
       "url": "https://github.com/mlswg/mls-protocol/issues/590",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "To enable version agility, we need MLSMessages to indicate what version they are intended for.  Since version is included in signature labels, we need to deconflict these two indicators.",
       "createdAt": "2022-02-10T16:05:41Z",
-      "updatedAt": "2022-02-10T16:05:41Z",
-      "closedAt": null,
+      "updatedAt": "2022-03-06T16:35:55Z",
+      "closedAt": "2022-03-06T16:35:55Z",
       "comments": []
     },
     {
@@ -6137,30 +6137,76 @@
       "id": "I_kwDOBoyH6c5FDYSX",
       "title": "Should `GroupInfoTBS` contain the protocol version?",
       "url": "https://github.com/mlswg/mls-protocol/issues/607",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "stefunctional",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "[The section about adding members to a group](https://messaginglayersecurity.rocks/mls-protocol/draft-ietf-mls-protocol.html#name-adding-members-to-the-group) defines `GroupInfo` and ` GroupInfoTBS` and states the following:\r\n> The signature covers the following structure, comprising all the fields in the GroupInfo above signature\r\n\r\nAll the fields above `signature` in `GroupInfo` includes `version`, but `version` is not in `GroupInfoTBS`. Should it be or should the wording about which fields are included be amended?\r\n\r\nThank you.",
       "createdAt": "2022-03-03T14:59:54Z",
-      "updatedAt": "2022-03-03T14:59:54Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2022-03-07T14:57:55Z",
+      "closedAt": "2022-03-06T16:38:00Z",
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "In #600, the `version` field was removed from `GroupInfo`, so I think this ambiguity has been resolved.  Note that the version is still authenticated via the version string in `SignWithLabel`.",
+          "createdAt": "2022-03-06T16:37:59Z",
+          "updatedAt": "2022-03-06T16:37:59Z"
+        },
+        {
+          "author": "stefunctional",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Thank you.",
+          "createdAt": "2022-03-07T14:57:55Z",
+          "updatedAt": "2022-03-07T14:57:55Z"
+        }
+      ]
     },
     {
       "number": 608,
       "id": "I_kwDOBoyH6c5FJAX4",
       "title": "Completely remove leaf_index (or keep it)",
       "url": "https://github.com/mlswg/mls-protocol/issues/608",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "rohan-wire",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Under the list of changes, one of these says that leaf_index is removed. However a search for index and indeces still shows several references to the leaf_index. These should be removed/replaced as well, or explain why we need Leaf Node Reference and leaf_index and when one gets used.",
       "createdAt": "2022-03-04T19:43:38Z",
-      "updatedAt": "2022-03-04T19:43:38Z",
+      "updatedAt": "2022-03-07T18:56:57Z",
+      "closedAt": "2022-03-07T18:56:57Z",
+      "comments": [
+        {
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "`leaf_index` was first removed in #487 in favor of node indices, and afterward re-introduced to remove node indices in #522.\r\nDraft 12 was out between these two pull requests, I'm guessing the latter change will appear in the changelog of draft 13!",
+          "createdAt": "2022-03-06T09:17:14Z",
+          "updatedAt": "2022-03-06T09:17:14Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "It looks to me like the following mentions of leaf index still exist:\r\n\r\n1. The leaf node input to the tree hash\r\n2. The ratchet tree serialization scheme (for the `ratchet_tree` extension)\r\n3. The example code for array-based trees\r\n\r\nCase (3) is optional, so I don't think it's an issue.  For case (2), removing the notion of indices would make it a lot harder to describe the serialization.  For case (1), removing the index would remove some of the rigidity of the tree hash (in particular, a blank subtree of the same size would have the same hash anywhere).\r\n\r\nOverall, I'm not inclined to make this change.",
+          "createdAt": "2022-03-06T16:42:32Z",
+          "updatedAt": "2022-03-06T16:42:32Z"
+        }
+      ]
+    },
+    {
+      "number": 616,
+      "id": "I_kwDOBoyH6c5FQitd",
+      "title": "Remove or refine preconfigured senders",
+      "url": "https://github.com/mlswg/mls-protocol/issues/616",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "As [Raphael pointed out on the mailing list](https://mailarchive.ietf.org/arch/msg/mls/VWzhGx2XwgBqHoHIE0fvuZS1sm4/), the current preconfigured sender mechanism isn't interoperably specified.  There is no confirmation that the members of a group agree on who the allowed preconfigured senders are, so different members might respond differently.  It seems like there are two options here:\r\n\r\n1. Add the required details.  We would need a `preconfigured_senders` extension to confirm agreement to use the mechanism at all, and would probably need to have a list of senders there as well.\r\n\r\n2. Remove the feature from the base protocol.  Since an extension is required in any case, there's no pressing need to have the feature in the base protocol.\r\n\r\nPersonally, I would lean toward (2).  Early deployment experience doesn't show a lot of need for this feature.  For example, in Webex, we just have the server forward a KeyPackage instead of synthesizing an Add proposal under a preconfigured signer; the TLS authentication is as good as a preconfigured signer signature.  As long as the SenderType enum is around, the extension should be a small follow-on spec if it is really needed.",
+      "createdAt": "2022-03-07T21:53:31Z",
+      "updatedAt": "2022-03-07T21:53:31Z",
       "closedAt": null,
       "comments": []
     }
@@ -44116,24 +44162,26 @@
       "id": "PR_kwDOBoyH6c4zHpZQ",
       "title": "Add version to MLSMessage",
       "url": "https://github.com/mlswg/mls-protocol/pull/600",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Fixes #590 ",
       "createdAt": "2022-02-18T20:29:01Z",
-      "updatedAt": "2022-03-02T07:47:13Z",
+      "updatedAt": "2022-03-06T16:35:55Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "079e1bfbdeff8013b5ca7a7f49b03c4da7ae82bf",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "message-version",
       "headRefOid": "bd67356ecbd4f68be4409ee6a4648fde02ced3b2",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2022-03-06T16:35:55Z",
+      "mergedAt": "2022-03-06T16:35:54Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "fe5ec3acea1e8270f9ec9cdbf5f5378744bba14a"
+      },
       "comments": [
         {
           "author": "bifurcation",
@@ -44183,6 +44231,13 @@
           "body": "Thanks for the explanation, that makes the intent a bit clearer to me. However, I still don't see the scenario where something like `MLSMessage{version=1.1, KeyPackage{version=1.0,...}}` is a valid message in the context of the MLS spec. I agree that you should be able to publish KeyPackages of multiple versions and that version agility is important. \r\n\r\nDo I understand correctly, that in the scenario you describe (`MLSMessage{version=1.1, KeyPackage{version=1.0,...}}`) you're uploading a KeyPackage to the DS? I guess I don't understand why that would be an MLSMessage and not some message in the proprietary protocol you use to upload KeyPackages.",
           "createdAt": "2022-03-02T07:47:12Z",
           "updatedAt": "2022-03-02T07:47:12Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@rohan-wire - You don't need `MLSMessage{mls11, KeyPackage{mls10,...}})` to allow for uploading both 1.0 and 1.1 key packages -- you just have the client upload both `MLSMessage{mls10, KeyPackage{mls10,...}})` and `MLSMessage{mls11, KeyPackage{mls11,...}})`.\r\n\r\nSince there doesn't seem to be a compelling case here for allowing the versions to differ, I'm going to go ahead and merge with the requirement that they be the same.",
+          "createdAt": "2022-03-06T16:35:47Z",
+          "updatedAt": "2022-03-06T16:35:47Z"
         }
       ],
       "reviews": []
@@ -44444,7 +44499,7 @@
       "labels": [],
       "body": "This allows applications to express the MIME type of the application_data if desired.",
       "createdAt": "2022-02-24T05:10:27Z",
-      "updatedAt": "2022-03-01T23:41:57Z",
+      "updatedAt": "2022-03-06T16:30:04Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "13955995bc4bb81f8f15f92014fad49494a4acf1",
@@ -44476,6 +44531,13 @@
           "body": "\r\n> @rohan-wire why should this not just go inside of `application_data`? HTTPS doesn't specify Content-Type at the TLS layer. \r\n\r\nTLS is usually running directly on IPv4 or IPv6 and was reached by a specific port or started inside an Application protocol with STARTTLS. The format of the thing inside TLS is known from the port number or the outer protocol. Most of the protocols running inside TLS (SMTP, HTTP, IMAP, SIP) have their own way of advertising content, most of them using MIME headers. All of them are 1:1 and most are client-to-server. None of the protocols running inside TLS are 1:N protocols.\r\n\r\nNow take the case of MLS. MLS does not know how to run on top of IP. You could write a profile to do that, but it would be a lot of work to make a standardized protocol that covers all the corner cases. It would be useful for some applications but almost certainly not for the basic messaging applications which motivate it. It needs to run on some other protocol. See my map below. So, what goes inside an MLS message? \r\n\r\nA: content goes here\r\nP: MLS   <- You are here\r\nS: HTTP\r\nT: TLS  <- not here\r\nN: IPv4 or v6\r\nD: 802.3\r\nP: 1000BASE-T\r\n\r\nIn a proprietary application you can just have all the MLS clients agree, but what about if you want to support an interoperable IM system, or an interoperable Pub/Sub messaging bus for IoT devices? What are you going to use to communicate the content of the message?  HTTP won't work for 1:N messages. Do you really want to require an ASCII Content-Type header at the top of each message just so you know what is inside it? That's a pretty fundamental thing to know. \r\n\r\nFor me this is a no-brainer. If you don't need it, you lose 1 octet to carry a zero-length MIME type. If you need it, you have it built-in. You don't need messy content-encodings, line folding, optional whitespace, header capitalization arguments, etc which have dogged IETF text-based protocols for decades. If the MIME type of your MLS application message is application/vnd.foo-pubsub, application/cbor, text/html, application/geo+json, message/cpim, or message/vnd.bar-protocol you don't have to guess. You can easily migrate from one format to another. You can even use multipart/alternative to send a vendor-proprietary version usable to some clients in a group and a standardized interoperable version to others.\r\n",
           "createdAt": "2022-03-01T23:41:57Z",
           "updatedAt": "2022-03-01T23:41:57Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I think I've got a different view of the protocol stack:\r\n\r\n```\r\n1. Actual user content\r\n2. Message framing\r\n3. MLS as used in context\r\n4. Transport\r\n```\r\n\r\nIn order to get to an interoperable system, there's going to have to be work on (2), (3 \"as used\"), and (4).  (And I expect the work-split among those layers to be a point of significant debate!)  My point is that any of those could handle the content negotiation: \r\n\r\n* Transport says \"this is the content type inside the MLS-protected thing\"\r\n* \"As used\" specifies a format for `authenticated_data` that specifies the content type\r\n* Inner message framing specifies concrete type  \r\n\r\nAll of that is possible without this PR.  So in other words, I think merging this PR would be getting ahead of ourselves in the full-stack interoperability discussion.",
+          "createdAt": "2022-03-06T16:30:04Z",
+          "updatedAt": "2022-03-06T16:30:04Z"
         }
       ],
       "reviews": []
@@ -44504,6 +44566,541 @@
       "mergedBy": "bifurcation",
       "mergeCommit": {
         "oid": "fac538f3e705e2224ff69547a0d339f49a21273a"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 609,
+      "id": "PR_kwDOBoyH6c40B4pJ",
+      "title": "Rename generic LeafNode object to ClientInfo and move ahead of # Ratchet Tree Operations",
+      "url": "https://github.com/mlswg/mls-protocol/pull/609",
+      "state": "CLOSED",
+      "author": "rohan-wire",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The LeafNode text is self-contradictory when it tries to refer to KeyPackages. To avoid these problems, I wrote a version with a separate ClientInfo object (basically the LeafNode object today) and put the generic stuff there. There is an alias for LeafNode to ClientInfo and the KeyPackage uses ClientInfo as one of its components. Stuff which is unique to the usage as a LeafNode or KeyPackage is in the relevant section.\r\n\r\nComments welcome. Probably more than one way to do resolve this, but the text now has lots of duplication.",
+      "createdAt": "2022-03-07T09:50:13Z",
+      "updatedAt": "2022-03-07T16:09:15Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "fe5ec3acea1e8270f9ec9cdbf5f5378744bba14a",
+      "headRepository": "rohan-wire/mls-protocol",
+      "headRefName": "rohan/clientinfo",
+      "headRefOid": "fd15f107d115980da1939845973a7dbb00984a8b",
+      "closedAt": "2022-03-07T16:09:15Z",
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Closing in favor of #612 ",
+          "createdAt": "2022-03-07T16:09:15Z",
+          "updatedAt": "2022-03-07T16:09:15Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c41wG4a",
+          "commit": {
+            "abbreviatedOid": "fd15f10"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "Bunch of comments inline.  Overall, I think there are a bunch of helpful clarifications in here around KeyPackages, but I'm not sure the LeafNode -> ClientInfo rename is worthwhile, since we end up having to refer to LeafNodes anyway.",
+          "createdAt": "2022-03-07T14:55:57Z",
+          "updatedAt": "2022-03-07T15:21:25Z",
+          "comments": [
+            {
+              "originalPosition": 49,
+              "body": "Redundant, since the Add has KeyPackage in it.",
+              "createdAt": "2022-03-07T14:55:57Z",
+              "updatedAt": "2022-03-07T15:21:25Z"
+            },
+            {
+              "originalPosition": 70,
+              "body": "I don't love the aesthetics of this.  I would like to maintain the invariants that (a) extensions are always at the end of the message and (b) FooTBS is always clearly an extension of Foo.  You've done (b) here, but it's a little hidden in the `select`.  I think the original structs here are clearer, if a bit chattier.",
+              "createdAt": "2022-03-07T15:05:09Z",
+              "updatedAt": "2022-03-07T15:21:25Z"
+            },
+            {
+              "originalPosition": 32,
+              "body": "I would probably keep this under `# Ratchet Tree Node Contents`, even if we're going to rename to `ClientInfo`.  In general, struct are introduced in context, e.g., GroupInfo and Welcome are introduced in the context of the relevant join operations.",
+              "createdAt": "2022-03-07T15:06:40Z",
+              "updatedAt": "2022-03-07T15:21:25Z"
+            },
+            {
+              "originalPosition": 152,
+              "body": "This is incorrect.  The ClientInfo is used as a leaf in the tree for TreeKEM, regardless of how it got there.  This field says how it got there, thus `source`.",
+              "createdAt": "2022-03-07T15:08:42Z",
+              "updatedAt": "2022-03-07T15:21:25Z"
+            },
+            {
+              "originalPosition": 170,
+              "body": "```suggestion\r\nIn the case where the ClientInfo represents a leaf node inserted into the tree\r\n```",
+              "createdAt": "2022-03-07T15:09:38Z",
+              "updatedAt": "2022-03-07T15:21:25Z"
+            },
+            {
+              "originalPosition": 249,
+              "body": "Should this be LeafNode, to be consistent with the above?",
+              "createdAt": "2022-03-07T15:17:20Z",
+              "updatedAt": "2022-03-07T15:21:25Z"
+            },
+            {
+              "originalPosition": 387,
+              "body": "You removed this and never re-added it.  It needs to be defined somewhere.",
+              "createdAt": "2022-03-07T15:18:43Z",
+              "updatedAt": "2022-03-07T15:21:25Z"
+            },
+            {
+              "originalPosition": 400,
+              "body": "This trails off.",
+              "createdAt": "2022-03-07T15:19:05Z",
+              "updatedAt": "2022-03-07T15:21:26Z"
+            },
+            {
+              "originalPosition": 400,
+              "body": "In any case, this section should be deleted, because Lifetime isn't an extension any more.",
+              "createdAt": "2022-03-07T15:20:30Z",
+              "updatedAt": "2022-03-07T15:21:26Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c41wUa5",
+          "commit": {
+            "abbreviatedOid": "fd15f10"
+          },
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-03-07T15:33:49Z",
+          "updatedAt": "2022-03-07T15:33:50Z",
+          "comments": [
+            {
+              "originalPosition": 152,
+              "body": "The idea of how it got there being relevant even days later is a little weird, so adding an extra sentence or two explaining this would be useful. I started originally trying to do a lighter edit, and trying to say something reasonable that applies to KeyPackages, Proposals, and Commits without tripping over myself was a challenge.",
+              "createdAt": "2022-03-07T15:33:49Z",
+              "updatedAt": "2022-03-07T15:33:50Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c41wVEY",
+          "commit": {
+            "abbreviatedOid": "fd15f10"
+          },
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-03-07T15:35:39Z",
+          "updatedAt": "2022-03-07T15:35:39Z",
+          "comments": [
+            {
+              "originalPosition": 170,
+              "body": "Yours is better. What do you think of:\r\n...represents a leaf node once it is inserted into the tree.\r\n?",
+              "createdAt": "2022-03-07T15:35:39Z",
+              "updatedAt": "2022-03-07T15:35:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c41wVqI",
+          "commit": {
+            "abbreviatedOid": "fd15f10"
+          },
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-03-07T15:37:21Z",
+          "updatedAt": "2022-03-07T15:37:22Z",
+          "comments": [
+            {
+              "originalPosition": 249,
+              "body": "There was one place in the KeyPackage section where we were talking about lifetimes. In that case, I think the lifetime originally referred to the lifetime of the KeyPackage.",
+              "createdAt": "2022-03-07T15:37:21Z",
+              "updatedAt": "2022-03-07T15:37:22Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c41wV2M",
+          "commit": {
+            "abbreviatedOid": "fd15f10"
+          },
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-03-07T15:37:55Z",
+          "updatedAt": "2022-03-07T15:37:55Z",
+          "comments": [
+            {
+              "originalPosition": 387,
+              "body": "oops. My intent was only that it not appear in KeyPackages.",
+              "createdAt": "2022-03-07T15:37:55Z",
+              "updatedAt": "2022-03-07T15:37:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c41wV-5",
+          "commit": {
+            "abbreviatedOid": "fd15f10"
+          },
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-03-07T15:38:17Z",
+          "updatedAt": "2022-03-07T15:38:18Z",
+          "comments": [
+            {
+              "originalPosition": 400,
+              "body": "agreed.",
+              "createdAt": "2022-03-07T15:38:18Z",
+              "updatedAt": "2022-03-07T15:38:18Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 610,
+      "id": "PR_kwDOBoyH6c40B9Ht",
+      "title": "Explicitly allow for deniable signature keys",
+      "url": "https://github.com/mlswg/mls-protocol/pull/610",
+      "state": "OPEN",
+      "author": "kkohbrok",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "So far, deniable signature keys were permitted by the description of how to perform signature keys in the Content Authentication section, but not by the description of how to verify these signatures in the \"Processing a Commit\" section. This PR explicitly introduces the deniable signature keys and makes the handling of signatures consistent in both sections.",
+      "createdAt": "2022-03-07T10:09:33Z",
+      "updatedAt": "2022-03-07T17:00:58Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "fe5ec3acea1e8270f9ec9cdbf5f5378744bba14a",
+      "headRepository": "kkohbrok/mls-protocol",
+      "headRefName": "signature-key-indirection",
+      "headRefOid": "beac8e068dc59005d96d5a8951b1c1a19543bae5",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "#437 didn't happen in a vacuum, but was merged after a discussion on the mailing list with the intent to leave a gap to allow for \"deniable\" keys.\r\n\r\nTo make sure that we're not claiming anything that we can't hold, I've changed the PR to not explicitly talk about \"deniable\" keys, but instead about \"alternative\" keys, the properties of which depend on their mode of distribution.\r\n\r\nAnother addition (as suggested by @bifurcation oob) that I intend to make is that of an explicit group context extension that ensures that group members agree on the use of these types of keys. I'll add this if there's agreement on the ML that we actually want all of this.",
+          "createdAt": "2022-03-07T16:59:05Z",
+          "updatedAt": "2022-03-07T17:00:18Z"
+        },
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I realize now that \"alternative keys\" is probably not the best name... but again, that can be changed if we agree that this is something we want.",
+          "createdAt": "2022-03-07T17:00:58Z",
+          "updatedAt": "2022-03-07T17:00:58Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c41wIiP",
+          "commit": {
+            "abbreviatedOid": "0f9fd60"
+          },
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "state": "CHANGES_REQUESTED",
+          "body": "Thanks, this was indeed inconsistent and didn't reflect what @claucece contributed a while back.",
+          "createdAt": "2022-03-07T15:00:19Z",
+          "updatedAt": "2022-03-07T15:04:34Z",
+          "comments": [
+            {
+              "originalPosition": 19,
+              "body": "Given that this mostly has to do with how the AS works (and therefore it's out-of-scope for the spec), it might be more concise and also sufficient to say that signature keys must be authenticated by the AS, and cite the distribution of signature keys over a deniable channel as an example.",
+              "createdAt": "2022-03-07T15:00:20Z",
+              "updatedAt": "2022-03-07T15:04:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c41wXn_",
+          "commit": {
+            "abbreviatedOid": "0f9fd60"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "I strongly object to this PR.  This is WONTFIX in my view.\r\n\r\nThis is introducing new ambiguity in the spec that is not there now.  Right now, the spec is clear that the keys used for signatures are the ones in the credential.\r\n\r\nIIUC the confusion here hinges on the following change from #437: Changing \"private key corresponding to the credential\" to \"private key corresponding to the public key authenticated by the credential\".\r\n\r\nThe current PR seems to assume that this allows the public key used to verify signatures to differ from the public key in the credential.  I don't see any plausible reading where that is the case.  Consider X.509 certificates -- the public key authenticated by the certificate is the public key in the certificate.\r\n\r\nIf other folks are unclear on that, we should clarify in the opposite direction, probably just by reverting #437.",
+          "createdAt": "2022-03-07T15:42:45Z",
+          "updatedAt": "2022-03-07T15:42:45Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 611,
+      "id": "PR_kwDOBoyH6c40B_JI",
+      "title": "Proposed editorial changes",
+      "url": "https://github.com/mlswg/mls-protocol/pull/611",
+      "state": "MERGED",
+      "author": "rohan-wire",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Work in Progress editorial changes.",
+      "createdAt": "2022-03-07T10:17:28Z",
+      "updatedAt": "2022-03-07T18:54:56Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "fe5ec3acea1e8270f9ec9cdbf5f5378744bba14a",
+      "headRepository": "rohan-wire/mls-protocol",
+      "headRefName": "rohan/editorial",
+      "headRefOid": "39af0dd426955673a8ff1004741522a39c2807e1",
+      "closedAt": "2022-03-07T18:54:56Z",
+      "mergedAt": "2022-03-07T18:54:56Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "35ad66dc8ded97407cf32b0a31894c67b6fe5179"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c41xG0F",
+          "commit": {
+            "abbreviatedOid": "44fcb9a"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-03-07T18:06:40Z",
+          "updatedAt": "2022-03-07T18:09:04Z",
+          "comments": [
+            {
+              "originalPosition": 89,
+              "body": "```suggestion\r\nThe Credentials presented by the clients in a group authenticate\r\n```\r\n\r\n\"Credentials\" is the subject of \"authenticate\".",
+              "createdAt": "2022-03-07T18:06:40Z",
+              "updatedAt": "2022-03-07T18:09:04Z"
+            },
+            {
+              "originalPosition": 135,
+              "body": "```suggestion\r\nprivate key corresponding to the public key, which was authenticated by the \r\ncredential at the leaf of the tree indicated by the sender field. The signature\r\n```\r\n\r\nReverting this in light of ongoing discussion in #610 and on the mailing list.",
+              "createdAt": "2022-03-07T18:07:42Z",
+              "updatedAt": "2022-03-07T18:09:04Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 612,
+      "id": "PR_kwDOBoyH6c40DV9W",
+      "title": "Clean up LeafNode vs. KeyPackage",
+      "url": "https://github.com/mlswg/mls-protocol/pull/612",
+      "state": "MERGED",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This PR picks up changes from #609 clarifying and cleaning up a few issues around LeafNode.",
+      "createdAt": "2022-03-07T16:08:48Z",
+      "updatedAt": "2022-03-07T16:14:41Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "fe5ec3acea1e8270f9ec9cdbf5f5378744bba14a",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "leafnode-rohan",
+      "headRefOid": "0b08934efd7308adf9399785ba911cfcbc31be2f",
+      "closedAt": "2022-03-07T16:14:41Z",
+      "mergedAt": "2022-03-07T16:14:41Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "3c1c4f49ed5e9b56dc0dbc09d077b5f498b771cf"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c41wil0",
+          "commit": {
+            "abbreviatedOid": "0b08934"
+          },
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "A big improvement in readability and correctness.",
+          "createdAt": "2022-03-07T16:13:47Z",
+          "updatedAt": "2022-03-07T16:13:47Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 613,
+      "id": "PR_kwDOBoyH6c40Dx-x",
+      "title": "Clarify some things about trees",
+      "url": "https://github.com/mlswg/mls-protocol/pull/613",
+      "state": "MERGED",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This PR adds two clarifications suggested by @rohan-wire:\r\n\r\n1. Clarifying some antecedents in UpdatePath processing\r\n2. Explaining how the example trees can come about in practice",
+      "createdAt": "2022-03-07T18:04:16Z",
+      "updatedAt": "2022-03-07T18:55:11Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "3c1c4f49ed5e9b56dc0dbc09d077b5f498b771cf",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "tree-clarify",
+      "headRefOid": "38a229f06d6936739a13342c7dc573b21e5f052d",
+      "closedAt": "2022-03-07T18:55:10Z",
+      "mergedAt": "2022-03-07T18:55:10Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "79f60a52062070b4683352b75d920002bd1c41e9"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 614,
+      "id": "PR_kwDOBoyH6c40D_dH",
+      "title": "More editorial changes from # Ratchet Tree Ops through # Group Evolution",
+      "url": "https://github.com/mlswg/mls-protocol/pull/614",
+      "state": "MERGED",
+      "author": "rohan-wire",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2022-03-07T19:10:23Z",
+      "updatedAt": "2022-03-07T21:13:01Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "79f60a52062070b4683352b75d920002bd1c41e9",
+      "headRepository": "rohan-wire/mls-protocol",
+      "headRefName": "rohan/editorial2",
+      "headRefOid": "9f7770b7341b0681b27a39aee77837a908ed026e",
+      "closedAt": "2022-03-07T21:13:01Z",
+      "mergedAt": "2022-03-07T21:13:01Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "a481ebfdfebe641323c568144df3fc930827285a"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c41xcCB",
+          "commit": {
+            "abbreviatedOid": "5f5ebff"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-03-07T19:25:42Z",
+          "updatedAt": "2022-03-07T19:45:11Z",
+          "comments": [
+            {
+              "originalPosition": 139,
+              "body": "```suggestion\r\nIn MLS, each such change is accomplished by a two-step process:\r\n```\r\n\r\nSince every change requires a proposal, stating this as Proposal/Commit first, then one-step below.",
+              "createdAt": "2022-03-07T19:25:42Z",
+              "updatedAt": "2022-03-07T19:45:11Z"
+            },
+            {
+              "originalPosition": 145,
+              "body": "```suggestion\r\n2. A member of the group or a new member broadcasts a Commit message that causes\r\n   one or more proposed changes to enter into effect\r\n   \r\nIn cases where the Proposal and Commit are sent by the same member, these two steps\r\ncan be combined by sending the proposals in the commit.\r\n```",
+              "createdAt": "2022-03-07T19:26:36Z",
+              "updatedAt": "2022-03-07T19:45:11Z"
+            },
+            {
+              "originalPosition": 163,
+              "body": "```suggestion\r\nidentifies the proposal to be applied by value or by reference.  Commits that\r\nrefer to new Proposals from the committer can be included by value. Commits\r\nfor previously sent proposals from anyone (including the committer) can be sent\r\nby reference.  Proposals sent by reference are specified by including the hash of\r\nthe MLSPlaintext in which the proposal was sent (see {{hash-based-identifiers}}).\r\n```",
+              "createdAt": "2022-03-07T19:30:27Z",
+              "updatedAt": "2022-03-07T19:45:11Z"
+            },
+            {
+              "originalPosition": 199,
+              "body": "```suggestion\r\nproposal type requires a path, then the proposal type requires a path. This\r\n```\r\n\r\nReverting because the emphasis here is on the \"requires path\" attribute being at the level of proposal types.",
+              "createdAt": "2022-03-07T19:31:47Z",
+              "updatedAt": "2022-03-07T19:45:11Z"
+            },
+            {
+              "originalPosition": 209,
+              "body": "```suggestion\r\n* Generate the provisional ratchet tree and GroupContext by applying the proposals\r\n```\r\n\r\nReverting because the choice of proposals happens earlier.  All proposals included in the initial commit need to be applied.",
+              "createdAt": "2022-03-07T19:32:59Z",
+              "updatedAt": "2022-03-07T19:45:11Z"
+            },
+            {
+              "originalPosition": 220,
+              "body": "```suggestion\r\n* If not populating the `path` field: Set the `path` field in the Commit to the\r\n  null optional.  Define `commit_secret` as the all-zero vector of length\r\n```\r\n\r\nReverting because the `path` field has type `optional<UpdatePath>`.",
+              "createdAt": "2022-03-07T19:33:59Z",
+              "updatedAt": "2022-03-07T19:45:11Z"
+            },
+            {
+              "originalPosition": 231,
+              "body": "```suggestion\r\n  * `group_id`: The group ID for the current group\r\n  * `epoch`: The epoch that the group will be in after this Commit\r\n```\r\n\r\nReverting because the PSK here refers to the last epoch of the earlier group.  So it has to use the old group's information.",
+              "createdAt": "2022-03-07T19:36:26Z",
+              "updatedAt": "2022-03-07T19:45:11Z"
+            },
+            {
+              "originalPosition": 240,
+              "body": "This is wrong, because we're talking about GroupInfo that the joiner consumes.  But this whole paragraph is wrong; will remove in a subsequent commit.",
+              "createdAt": "2022-03-07T19:41:20Z",
+              "updatedAt": "2022-03-07T19:45:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c41x2OK",
+          "commit": {
+            "abbreviatedOid": "9f7770b"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-03-07T21:12:53Z",
+          "updatedAt": "2022-03-07T21:12:53Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 615,
+      "id": "PR_kwDOBoyH6c40EbLH",
+      "title": "Add changelog for draft-13",
+      "url": "https://github.com/mlswg/mls-protocol/pull/615",
+      "state": "MERGED",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2022-03-07T21:27:47Z",
+      "updatedAt": "2022-03-07T21:29:31Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "a481ebfdfebe641323c568144df3fc930827285a",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "changelog-13",
+      "headRefOid": "c80b1442d754f5e5a56bb53474a88f6bbab78bf6",
+      "closedAt": "2022-03-07T21:29:22Z",
+      "mergedAt": "2022-03-07T21:29:22Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "c0079c6f9840d4589f574d1fef4c106b69653a8a"
       },
       "comments": [],
       "reviews": []
