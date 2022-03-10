@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-03-08T01:16:17.758626+00:00",
+  "timestamp": "2022-03-10T01:22:43.538169+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -6206,9 +6206,73 @@
       "labels": [],
       "body": "As [Raphael pointed out on the mailing list](https://mailarchive.ietf.org/arch/msg/mls/VWzhGx2XwgBqHoHIE0fvuZS1sm4/), the current preconfigured sender mechanism isn't interoperably specified.  There is no confirmation that the members of a group agree on who the allowed preconfigured senders are, so different members might respond differently.  It seems like there are two options here:\r\n\r\n1. Add the required details.  We would need a `preconfigured_senders` extension to confirm agreement to use the mechanism at all, and would probably need to have a list of senders there as well.\r\n\r\n2. Remove the feature from the base protocol.  Since an extension is required in any case, there's no pressing need to have the feature in the base protocol.\r\n\r\nPersonally, I would lean toward (2).  Early deployment experience doesn't show a lot of need for this feature.  For example, in Webex, we just have the server forward a KeyPackage instead of synthesizing an Add proposal under a preconfigured signer; the TLS authentication is as good as a preconfigured signer signature.  As long as the SenderType enum is around, the extension should be a small follow-on spec if it is really needed.",
       "createdAt": "2022-03-07T21:53:31Z",
-      "updatedAt": "2022-03-07T21:53:31Z",
+      "updatedAt": "2022-03-09T19:05:16Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "tomleavy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "@psyoptix and I would probably prefer the first option. I will write up a more detailed reason and post to the mailing list, but the TLDR is basically that in a really long session in async messaging, server driven proposals save you from some painful logic, and the extension would improve this to allow for interop / federation cases.",
+          "createdAt": "2022-03-08T03:24:10Z",
+          "updatedAt": "2022-03-08T03:24:10Z"
+        },
+        {
+          "author": "psyoptix",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I am pretty clearly in favor of option 1. Pre-configured senders are playing a key role for us in implementing automation of backend-initiated changes to the group. Things like:\r\n - initiating the removal of Bob('s phone) because his account (or device) was deprovisioned.\r\n - announcing a change to the group's properties due to system wide policy changes.\r\n \r\nHaving an audit trail (i.e. the preconfigured sender's signature on the proposal) makes this a lot easier for the group to authenticate why this action is being committed to by group members. (Also, external commits are not a good alternative as they have the unwanted side-effect of the preconfigured sender learning the new epoch's key schedule.)\r\n\r\nAs for how to agree on preconfigured sender public keys, I think a minimal solution could be to have a list of preconfigured sender public keys as a group context extension. We already have a mechanism to change it during the life time of the group (via group_context_extensions proposal) so its a pretty small change to the the RFC.",
+          "createdAt": "2022-03-08T15:34:09Z",
+          "updatedAt": "2022-03-08T15:56:04Z"
+        },
+        {
+          "author": "tomleavy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Thanks Jo\u00ebl, @bifurcation that covers my feedback as well, no need for mailing list follow up",
+          "createdAt": "2022-03-08T15:39:41Z",
+          "updatedAt": "2022-03-08T15:39:41Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "That sounds fine to me. @tomleavy want to write up a PR?  It seems like something of the following form:\r\n\r\n```\r\n## Preconfigured Senders Extension\r\n\r\n[[ Introductory prose ]]\r\n\r\n~~~\r\nstruct {\r\n    BasicCredential senders<V>; // `identity` fields must be distinct\r\n} PreconfiguredSenders;\r\n~~~\r\n```\r\n\r\nThe idea being that BasicCredential already has the (id, public key) pair that you would need, so you would just need to say that when `sender.type = preconfigured`, `sender.sender_id` is the `identity` field from the corresponding BasicCredential.  (Also probably rename `sender_id` to `identity`.) ",
+          "createdAt": "2022-03-08T17:35:56Z",
+          "updatedAt": "2022-03-08T17:35:56Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Or actually, you could do things even more simply by just having the extension be a list of `SignaturePublicKey`, and having `sender_id` be a `uint32` index into the array.",
+          "createdAt": "2022-03-08T17:37:35Z",
+          "updatedAt": "2022-03-08T17:37:35Z"
+        },
+        {
+          "author": "tomleavy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Ok no problem. I'll take a look today and propose something and we can iterate ",
+          "createdAt": "2022-03-09T13:56:57Z",
+          "updatedAt": "2022-03-09T13:56:57Z"
+        },
+        {
+          "author": "tomleavy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "What do you think about it just being credential instead of basic credential? ",
+          "createdAt": "2022-03-09T13:59:42Z",
+          "updatedAt": "2022-03-09T13:59:42Z"
+        },
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I had the same thought. Since I kicked off the discussion, I felt the need to take a stab at closing it and I included the input from this threat and the list. See #617.\r\n\r\nMy main goal was to consolidate the instructions on signature computation and verification and I thought I might as well deal with the preconfigured senders as well. Let me know if you want to take your own stab at the preconfigured senders extension and I'll remove that part from the PR.",
+          "createdAt": "2022-03-09T14:07:32Z",
+          "updatedAt": "2022-03-09T14:10:50Z"
+        },
+        {
+          "author": "tomleavy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Thanks @kkohbrok , glad I put this off until now :-) I'll take a look at your PR",
+          "createdAt": "2022-03-09T19:05:16Z",
+          "updatedAt": "2022-03-09T19:05:16Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -44499,7 +44563,7 @@
       "labels": [],
       "body": "This allows applications to express the MIME type of the application_data if desired.",
       "createdAt": "2022-02-24T05:10:27Z",
-      "updatedAt": "2022-03-06T16:30:04Z",
+      "updatedAt": "2022-03-09T18:27:01Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "13955995bc4bb81f8f15f92014fad49494a4acf1",
@@ -44538,6 +44602,13 @@
           "body": "I think I've got a different view of the protocol stack:\r\n\r\n```\r\n1. Actual user content\r\n2. Message framing\r\n3. MLS as used in context\r\n4. Transport\r\n```\r\n\r\nIn order to get to an interoperable system, there's going to have to be work on (2), (3 \"as used\"), and (4).  (And I expect the work-split among those layers to be a point of significant debate!)  My point is that any of those could handle the content negotiation: \r\n\r\n* Transport says \"this is the content type inside the MLS-protected thing\"\r\n* \"As used\" specifies a format for `authenticated_data` that specifies the content type\r\n* Inner message framing specifies concrete type  \r\n\r\nAll of that is possible without this PR.  So in other words, I think merging this PR would be getting ahead of ourselves in the full-stack interoperability discussion.",
           "createdAt": "2022-03-06T16:30:04Z",
           "updatedAt": "2022-03-06T16:30:04Z"
+        },
+        {
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Renumbering your stack:\r\n\r\n> ```\r\n> 7 1/2. Actual user content\r\n> 7. Message framing ??\r\n> 6. MLS as used in context\r\n> 4 + 5. Transport + Session\r\n> ```\r\n> \r\n> In order to get to an interoperable system, there's going to have to be work on (7), (6 \"as used\"), and (4+5). (And I expect the work-split among those layers to be a point of significant debate!) My point is that any of those could handle the content negotiation:\r\n\r\nI don't think we need to define 4 + 5 and probably should not because we want to allow multiple protocols with gateways. In my example TLS and HTTP work just fine without modification, but you could use any number of protocols here. What these protocols should say about their contents is that the contents are message/mls. **Saying anything more is likely to leak private data.**\r\n\r\nWe shouldn't need to define a lot of new things for MLS either. In fact I don't see any reason you couldn't implement a basic instant messaging system with MLS using the base spec.\r\n\r\nAs for what goes inside MLS, whatever it is either has or should have a MIME type. IETF protocols provide a way to specify what is in the next layer. **The next layer cannot be responsible for describing itself.** Unless there is only a single message framing layer that an implementer is allowed to run inside MLS, then MLS needs to describe what runs inside. \r\n\r\nAs for a definition of 7 as a separate layer, I think you are artificially mandating a specific number of layers on top of MLS. I already made a concrete proposal for how to do common instant messaging features on top of MLS in my draft:\r\nhttps://www.ietf.org/archive/id/draft-mahy-dispatch-immi-content-00.html\r\n\r\n",
+          "createdAt": "2022-03-09T18:27:00Z",
+          "updatedAt": "2022-03-09T18:27:00Z"
         }
       ],
       "reviews": []
@@ -45104,6 +45175,86 @@
       },
       "comments": [],
       "reviews": []
+    },
+    {
+      "number": 617,
+      "id": "PR_kwDOBoyH6c40LKxN",
+      "title": "Preconfigured senders extension and removal of signature key indirection",
+      "url": "https://github.com/mlswg/mls-protocol/pull/617",
+      "state": "OPEN",
+      "author": "kkohbrok",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This PR:\r\n- consolidates instructions on which key should be used to compute (and verify) a signature on an MLS message depending on the sender type\r\n- reverts #437 \r\n- introduces a `preconfigured_senders` extension that ensures that group members agree on preconfigured signature keys, as discussed in #616 and on the mailing list\r\n\r\nFixes #616.\r\n\r\n",
+      "createdAt": "2022-03-09T14:04:30Z",
+      "updatedAt": "2022-03-09T19:09:57Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "c0079c6f9840d4589f574d1fef4c106b69653a8a",
+      "headRepository": "kkohbrok/mls-protocol",
+      "headRefName": "preconfigured-senders",
+      "headRefOid": "1ddf05be09e43afd088719879d1f3b606a33deca",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c4167Ai",
+          "commit": {
+            "abbreviatedOid": "1ddf05b"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Thanks @kkohbrok, this looks good to me.\r\n\r\nI wonder if it would be better to change \"preconfigured\" to \"external\". They're not really \"preconfigured\" in the sense of being \"configured out of band\", they're merely additional signers who are not in the group.",
+          "createdAt": "2022-03-09T16:26:10Z",
+          "updatedAt": "2022-03-09T19:06:39Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "```suggestion\r\n            uint32 sender_id;\r\n```",
+              "createdAt": "2022-03-09T16:26:10Z",
+              "updatedAt": "2022-03-09T19:06:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c417uPb",
+          "commit": {
+            "abbreviatedOid": "1ddf05b"
+          },
+          "author": "tomleavy",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-03-09T19:09:13Z",
+          "updatedAt": "2022-03-09T19:09:14Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "I agree based on the changes made here that `external` makes more sense now",
+              "createdAt": "2022-03-09T19:09:14Z",
+              "updatedAt": "2022-03-09T19:09:14Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c417ubS",
+          "commit": {
+            "abbreviatedOid": "1ddf05b"
+          },
+          "author": "tomleavy",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Thanks for tackling this, looks good",
+          "createdAt": "2022-03-09T19:09:57Z",
+          "updatedAt": "2022-03-09T19:09:57Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
