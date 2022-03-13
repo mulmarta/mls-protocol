@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-03-10T01:22:43.538169+00:00",
+  "timestamp": "2022-03-13T01:13:51.303559+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -43707,7 +43707,7 @@
       "labels": [],
       "body": "- Adds an `extra_data` field to BasicCredential to hold application-specific data about a user (examples: link to avatar, information about device)\r\n- Adds a ProofCredential to cover a lot of the cases we're currently missing, particularly:\r\n  - credentials that are just BasicCredential signed with a fixed public key\r\n  - credentials that are authenticated by a system like Key Transparency\r\n  - credentials authenticated by secure hardware",
       "createdAt": "2022-02-10T20:01:06Z",
-      "updatedAt": "2022-03-03T18:53:56Z",
+      "updatedAt": "2022-03-10T16:22:48Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "13955995bc4bb81f8f15f92014fad49494a4acf1",
@@ -43781,6 +43781,20 @@
           "body": "There's no structure prescribed to `authority_id`, much like `group_id` it's an opaque identifier. An implementation that relies on it having a certain structure wouldn't be compliant with the specification.",
           "createdAt": "2022-03-03T18:53:56Z",
           "updatedAt": "2022-03-03T18:53:56Z"
+        },
+        {
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> There's no structure prescribed to `authority_id`, much like `group_id` it's an opaque identifier. An implementation that relies on it having a certain structure wouldn't be compliant with the specification.\r\n\r\nWith an additional field with no structure, the ability to interoperate later will be even more difficult. I am already uncomfortable that there isn't even any optional structure in the Identity in a BasicCredential. As I said, look at what happened with Subject name in X.509.",
+          "createdAt": "2022-03-10T08:51:29Z",
+          "updatedAt": "2022-03-10T08:51:29Z"
+        },
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@rohan-wire I'm not sure why this concern doesn't apply to `group_id` but I could add some text to the PR along the lines of what I said in my last comment?\r\n\r\n```\r\nImplementations MAY construct the value of the `authority_id` field to have a particular \r\nformat, but MUST NOT enforce that the `authority_id` field always has that format. \r\n```",
+          "createdAt": "2022-03-10T16:22:48Z",
+          "updatedAt": "2022-03-10T16:22:48Z"
         }
       ],
       "reviews": []
@@ -44849,21 +44863,21 @@
       "id": "PR_kwDOBoyH6c40B9Ht",
       "title": "Explicitly allow for deniable signature keys",
       "url": "https://github.com/mlswg/mls-protocol/pull/610",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "kkohbrok",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "So far, deniable signature keys were permitted by the description of how to perform signature keys in the Content Authentication section, but not by the description of how to verify these signatures in the \"Processing a Commit\" section. This PR explicitly introduces the deniable signature keys and makes the handling of signatures consistent in both sections.",
       "createdAt": "2022-03-07T10:09:33Z",
-      "updatedAt": "2022-03-07T17:00:58Z",
+      "updatedAt": "2022-03-11T17:56:25Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "fe5ec3acea1e8270f9ec9cdbf5f5378744bba14a",
       "headRepository": "kkohbrok/mls-protocol",
       "headRefName": "signature-key-indirection",
       "headRefOid": "beac8e068dc59005d96d5a8951b1c1a19543bae5",
-      "closedAt": null,
+      "closedAt": "2022-03-11T17:56:24Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
@@ -44881,6 +44895,13 @@
           "body": "I realize now that \"alternative keys\" is probably not the best name... but again, that can be changed if we agree that this is something we want.",
           "createdAt": "2022-03-07T17:00:58Z",
           "updatedAt": "2022-03-07T17:00:58Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Closing in favor of #617 in light of mailing list discussion",
+          "createdAt": "2022-03-11T17:56:24Z",
+          "updatedAt": "2022-03-11T17:56:24Z"
         }
       ],
       "reviews": [
@@ -45188,13 +45209,13 @@
       "labels": [],
       "body": "This PR:\r\n- consolidates instructions on which key should be used to compute (and verify) a signature on an MLS message depending on the sender type\r\n- reverts #437 \r\n- introduces a `preconfigured_senders` extension that ensures that group members agree on preconfigured signature keys, as discussed in #616 and on the mailing list\r\n\r\nFixes #616.\r\n\r\n",
       "createdAt": "2022-03-09T14:04:30Z",
-      "updatedAt": "2022-03-09T19:09:57Z",
+      "updatedAt": "2022-03-10T13:48:37Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "c0079c6f9840d4589f574d1fef4c106b69653a8a",
       "headRepository": "kkohbrok/mls-protocol",
       "headRefName": "preconfigured-senders",
-      "headRefOid": "1ddf05be09e43afd088719879d1f3b606a33deca",
+      "headRefOid": "a1e63a7e4e73c074049aaf1f996149e4b22b5021",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -45253,6 +45274,46 @@
           "createdAt": "2022-03-09T19:09:57Z",
           "updatedAt": "2022-03-09T19:09:57Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOBoyH6c41_duS",
+          "commit": {
+            "abbreviatedOid": "ebf2bce"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-03-10T13:27:05Z",
+          "updatedAt": "2022-03-10T13:27:06Z",
+          "comments": [
+            {
+              "originalPosition": 45,
+              "body": "```suggestion\r\n* `external`: The signature key contained in the Credential at the index\r\n  indicated by the `sender_index` in the `external_senders` group context\r\n  extension (see Section {{external-senders-extension}}).  In this case, the\r\n  `content_type` of the message MUST NOT be `commit`, since only members\r\n  of the group or new joiners can send Commit messages.\r\n```",
+              "createdAt": "2022-03-10T13:27:06Z",
+              "updatedAt": "2022-03-10T13:27:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c41_eIj",
+          "commit": {
+            "abbreviatedOid": "ebf2bce"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-03-10T13:28:25Z",
+          "updatedAt": "2022-03-10T13:28:25Z",
+          "comments": [
+            {
+              "originalPosition": 45,
+              "body": "Could also be phrased as \"MUST be only `proposal` / `application`.  Or could be added below these bullets.",
+              "createdAt": "2022-03-10T13:28:25Z",
+              "updatedAt": "2022-03-10T13:28:25Z"
+            }
+          ]
         }
       ]
     }
