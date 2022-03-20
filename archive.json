@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-03-13T01:13:51.303559+00:00",
+  "timestamp": "2022-03-20T01:20:54.236415+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -45316,6 +45316,32 @@
           ]
         }
       ]
+    },
+    {
+      "number": 618,
+      "id": "PR_kwDOBoyH6c40sSIF",
+      "title": "Require init key and leaf key to be different",
+      "url": "https://github.com/mlswg/mls-protocol/pull/618",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This change ensures that the \"init\" key pair associated to the key package is one-time-use, at least to the degree that KeyPackages are one-time-use.  The init key pair is used to encrypt/decrypt the Welcome message, then never again.\r\n\r\nThe main drawback is requiring the KeyPackage sender to generate an additional key pair, which requires more computation and more entropy.",
+      "createdAt": "2022-03-19T18:22:13Z",
+      "updatedAt": "2022-03-19T18:22:13Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "c0079c6f9840d4589f574d1fef4c106b69653a8a",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "init-not-leaf",
+      "headRefOid": "cc53944479b22c41e0a1d6c75143cb45acec3b4d",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
