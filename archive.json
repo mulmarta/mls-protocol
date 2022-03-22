@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-03-20T01:20:54.236415+00:00",
+  "timestamp": "2022-03-22T01:27:28.268993+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -44577,7 +44577,7 @@
       "labels": [],
       "body": "This allows applications to express the MIME type of the application_data if desired.",
       "createdAt": "2022-02-24T05:10:27Z",
-      "updatedAt": "2022-03-09T18:27:01Z",
+      "updatedAt": "2022-03-21T10:33:26Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "13955995bc4bb81f8f15f92014fad49494a4acf1",
@@ -44623,6 +44623,20 @@
           "body": "Renumbering your stack:\r\n\r\n> ```\r\n> 7 1/2. Actual user content\r\n> 7. Message framing ??\r\n> 6. MLS as used in context\r\n> 4 + 5. Transport + Session\r\n> ```\r\n> \r\n> In order to get to an interoperable system, there's going to have to be work on (7), (6 \"as used\"), and (4+5). (And I expect the work-split among those layers to be a point of significant debate!) My point is that any of those could handle the content negotiation:\r\n\r\nI don't think we need to define 4 + 5 and probably should not because we want to allow multiple protocols with gateways. In my example TLS and HTTP work just fine without modification, but you could use any number of protocols here. What these protocols should say about their contents is that the contents are message/mls. **Saying anything more is likely to leak private data.**\r\n\r\nWe shouldn't need to define a lot of new things for MLS either. In fact I don't see any reason you couldn't implement a basic instant messaging system with MLS using the base spec.\r\n\r\nAs for what goes inside MLS, whatever it is either has or should have a MIME type. IETF protocols provide a way to specify what is in the next layer. **The next layer cannot be responsible for describing itself.** Unless there is only a single message framing layer that an implementer is allowed to run inside MLS, then MLS needs to describe what runs inside. \r\n\r\nAs for a definition of 7 as a separate layer, I think you are artificially mandating a specific number of layers on top of MLS. I already made a concrete proposal for how to do common instant messaging features on top of MLS in my draft:\r\nhttps://www.ietf.org/archive/id/draft-mahy-dispatch-immi-content-00.html\r\n\r\n",
           "createdAt": "2022-03-09T18:27:00Z",
           "updatedAt": "2022-03-09T18:27:00Z"
+        },
+        {
+          "author": "martinthomson",
+          "authorAssociation": "NONE",
+          "body": "My sense is that what Richard is describing is probably better than this.\r\n\r\nLet's say that you use CPIM.  There, you define that the payload of the message is MIME, which includes `Content-Type`.  The `Content-Type` header is then found in the payload of the message along with other MIME header fields.\r\n\r\nThis design is better in the sense that you can switch hit between outer content types without any risk of ambiguity/confusion attack, but that is a feature that is rarely needed, and building it within the payload is probably sensible.  Many applications will  have a single message format with other means of unambiguously indicating its type.  For those that do want different interpretations, MIME media types aren't the only way in which they might want to negotiate the type of content.  @bemasc suggested at the DISPATCH meeting the possibility that the label might be ALPN instead (though that assumes a very different context. so I'm not sure if that makes sense).\r\n\r\nAt a minimum, I would suggest that this would need to be a negotiated extension to MLS.",
+          "createdAt": "2022-03-21T10:18:38Z",
+          "updatedAt": "2022-03-21T10:18:38Z"
+        },
+        {
+          "author": "bemasc",
+          "authorAssociation": "NONE",
+          "body": "What I meant by \"ALPN\" was just that this \"type signal\" describes something interactive (more like a protocol than a format) and needs negotiation.  Having more than two parties makes it different from ALPN.\r\n\r\nI'd like to see some more thought to agility and forward-compatibility.  How can we gracefully upgrade the group across both small (e.g. new text formatting option) and large (e.g. HTTP/1.1 -> H2) transitions?  This seems like a major challenge.",
+          "createdAt": "2022-03-21T10:33:25Z",
+          "updatedAt": "2022-03-21T10:33:25Z"
         }
       ],
       "reviews": []
@@ -45336,6 +45350,32 @@
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "init-not-leaf",
       "headRefOid": "cc53944479b22c41e0a1d6c75143cb45acec3b4d",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 619,
+      "id": "PR_kwDOBoyH6c40xVgS",
+      "title": "Clean up code blocks",
+      "url": "https://github.com/mlswg/mls-protocol/pull/619",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "A few changes to make code blocks a little more consistent / usable / pretty:\r\n\r\n* Fence every code block with exactly three tildes\r\n* Mark each code block with a type (`aasvg` / `ascii-art` / `pseudocode` / `tls` / `python`)\r\n\r\nMarking with `aasvg` generates slightly prettier pictures for the ladder diagrams in the introduction.  Marking with `tls` makes it easy to programmatically extract the TLS syntax definitions in case we want to produce a syntax summary appendix like [the one TLS has](https://datatracker.ietf.org/doc/html/rfc8446#appendix-B), or in case implementers want to quickly get a listing of all the structs they need.  \r\n\r\nThe only substantive changes I made here were:\r\n\r\n1. Removing the `ReInit` lines from the branch and re-inject PSK illustrations\r\n2. Splitting pseudocode from TLS syntax in a few cases.",
+      "createdAt": "2022-03-21T21:47:49Z",
+      "updatedAt": "2022-03-21T21:47:49Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "c0079c6f9840d4589f574d1fef4c106b69653a8a",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "figure-pretty",
+      "headRefOid": "795b702e9291e29962331e222aeff34e4a847fb5",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
