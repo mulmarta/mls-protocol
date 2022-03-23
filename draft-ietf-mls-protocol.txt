@@ -5,7 +5,7 @@
 Network Working Group                                          R. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                             B. Beurdouche
-Expires: 8 September 2022                                Inria & Mozilla
+Expires: 24 September 2022                               Inria & Mozilla
                                                                R. Robert
                                                                         
                                                              J. Millican
@@ -14,7 +14,7 @@ Expires: 8 September 2022                                Inria & Mozilla
                                                                   Google
                                                           K. Cohn-Gordon
                                                     University of Oxford
-                                                            7 March 2022
+                                                           23 March 2022
 
 
               The Messaging Layer Security (MLS) Protocol
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 8 September 2022.
+   This Internet-Draft will expire on 24 September 2022.
 
 Copyright Notice
 
@@ -831,13 +831,13 @@ Table of Contents
   A                B                C            Directory       Channel
   |                |                |                |              |
   | KeyPackageA    |                |                |              |
-  |------------------------------------------------->|              |
+  +------------------------------------------------->|              |
   |                |                |                |              |
   |                | KeyPackageB    |                |              |
-  |                |-------------------------------->|              |
+  |                +-------------------------------->|              |
   |                |                |                |              |
   |                |                | KeyPackageC    |              |
-  |                |                |--------------->|              |
+  |                |                +--------------->|              |
   |                |                |                |              |
 
     Figure 2: Clients A, B, and C publish KeyPackages to the directory
@@ -859,31 +859,31 @@ Table of Contents
    A              B              C          Directory            Channel
    |              |              |              |                   |
    |         KeyPackageB, KeyPackageC           |                   |
-   |<-------------------------------------------|                   |
+   |<-------------------------------------------+                   |
    |              |              |              |                   |
    |              |              |              | Add(A->AB)        |
    |              |              |              | Commit(Add)       |
-   |--------------------------------------------------------------->|
+   +--------------------------------------------------------------->|
    |              |              |              |                   |
    |  Welcome(B)  |              |              |                   |
-   |------------->|              |              |                   |
+   +------------->|              |              |                   |
    |              |              |              |                   |
    |              |              |              | Add(A->AB)        |
    |              |              |              | Commit(Add)       |
-   |<---------------------------------------------------------------|
+   |<---------------------------------------------------------------+
    |              |              |              |                   |
    |              |              |              |                   |
    |              |              |              | Add(AB->ABC)      |
    |              |              |              | Commit(Add)       |
-   |--------------------------------------------------------------->|
+   +--------------------------------------------------------------->|
    |              |              |              |                   |
    |              |  Welcome(C)  |              |                   |
-   |---------------------------->|              |                   |
+   +---------------------------->|              |                   |
    |              |              |              |                   |
    |              |              |              | Add(AB->ABC)      |
    |              |              |              | Commit(Add)       |
-   |<---------------------------------------------------------------|
-   |              |<------------------------------------------------|
+   |<---------------------------------------------------------------+
+   |              |<------------------------------------------------+
    |              |              |              |                   |
 
           Figure 3: Client A creates a group with clients B and C
@@ -911,15 +911,15 @@ Table of Contents
    A              B     ...      Z          Directory        Channel
    |              |              |              |              |
    |              | Update(B)    |              |              |
-   |              |------------------------------------------->|
+   |              +------------------------------------------->|
    | Commit(Upd)  |              |              |              |
-   |---------------------------------------------------------->|
+   +---------------------------------------------------------->|
    |              |              |              |              |
    |              |              |              | Update(B)    |
    |              |              |              | Commit(Upd)  |
-   |<----------------------------------------------------------|
-   |              |<-------------------------------------------|
-   |              |              |<----------------------------|
+   |<----------------------------------------------------------+
+   |              |<-------------------------------------------+
+   |              |              |<----------------------------+
    |              |              |              |              |
 
         Figure 4: Client B proposes to update its key, and client A
@@ -941,12 +941,12 @@ Table of Contents
    |              |              |              |              |
    |              |              | Remove(B)    |              |
    |              |              | Commit(Rem)  |              |
-   |              |              |---------------------------->|
+   |              |              +---------------------------->|
    |              |              |              |              |
    |              |              |              | Remove(B)    |
    |              |              |              | Commit(Rem)  |
-   |<----------------------------------------------------------|
-   |              |              |<----------------------------|
+   |<----------------------------------------------------------+
+   |              |              |<----------------------------+
    |              |              |              |              |
 
              Figure 5: Client Z removes client B from the group
@@ -985,12 +985,6 @@ Table of Contents
 
                       Figure 6: Reinitializing a group
 
-   epoch_A_[n-1]
-        |
-        |
-        |<-- ReInit
-        |
-        V
    epoch_A_[n]           epoch_B_[0]
         |                     |
         |  PSK(usage=branch)  |
@@ -1008,12 +1002,6 @@ Table of Contents
    members at epoch n, irrespective of any changes to these members'
    keys due to Updates or Commits.
 
-   epoch_A_[n-1]
-        |
-        |
-        |<-- ReInit
-        |
-        V
    epoch_A_[n]
         |
         |  PSK(usage=application)
@@ -1339,6 +1327,10 @@ Table of Contents
 
    opaque HashReference[16];
 
+   HashReference KeyPackageRef;
+   HashReference LeafNodeRef;
+   HashReference ProposalRef;
+
    MakeKeyPackageRef(value) = KDF.expand(
      KDF.extract("", value), "MLS 1.0 KeyPackage Reference", 16)
 
@@ -1347,10 +1339,6 @@ Table of Contents
 
    MakeProposalRef(value) = KDF.expand(
      KDF.extract("", value), "MLS 1.0 Proposal Reference", 16)
-
-   HashReference KeyPackageRef;
-   HashReference LeafNodeRef;
-   HashReference ProposalRef;
 
    For a KeyPackageRef, the value input is the encoded KeyPackage, and
    the ciphersuite specified in the KeyPackage determines the KDF used.
@@ -1599,22 +1587,22 @@ Table of Contents
    MLSMessageContent is authenticated using the MLSMessageAuth
    structure.
 
-struct {
-    opaque mac_value<V>;
-} MAC;
+   struct {
+       opaque mac_value<V>;
+   } MAC;
 
-struct {
-    // SignWithLabel(., "MLSMessageContentTBS", MLSMessageContentTBS)
-    opaque signature<V>;
-    select (MLSMessageContent.content_type) {
-        case commit:
-            // MAC(confirmation_key, GroupContext.confirmed_transcript_hash)
-            MAC confirmation_tag;
-        case application:
-        case proposal:
-            struct{};
-    }
-} MLSMessageAuth;
+   struct {
+       // SignWithLabel(., "MLSMessageContentTBS", MLSMessageContentTBS)
+       opaque signature<V>;
+       select (MLSMessageContent.content_type) {
+           case commit:
+               // MAC(confirmation_key, GroupContext.confirmed_transcript_hash)
+               MAC confirmation_tag;
+           case application:
+           case proposal:
+               struct{};
+       }
+   } MLSMessageAuth;
 
    The signature field in an MLSMessageAuth object is computed using the
    signing private key corresponding to the public key, which was
@@ -1671,7 +1659,7 @@ struct {
      MLSMessageAuth auth;
    } MLSMessageContentTBM;
 
-   membership_tag = MAC(membership_key, MLSMessageContentTBM);
+   membership_tag = MAC(membership_key, MLSMessageContentTBM)
 
    When decoding a MLSPlaintext into a MLSMessageContentAuth, the
    application MUST check membership_tag, and MUST check that the
@@ -2073,14 +2061,14 @@ struct {
       path_secret[0] refers to the first parent node in the filtered
       direct path, path_secret[1] to the second parent node, and so on.
 
-      path_secret[0] is sampled at random
-      path_secret[n] = DeriveSecret(path_secret[n-1], "path")
+   path_secret[0] is sampled at random
+   path_secret[n] = DeriveSecret(path_secret[n-1], "path")
 
    *  Compute the sequence of HPKE key pairs (node_priv,node_pub), one
       for each node on the leaf's direct path, as follows.
 
-      node_secret[n] = DeriveSecret(path_secret[n], "node")
-      node_priv[n], node_pub[n] = KEM.DeriveKeyPair(node_secret[n])
+   node_secret[n] = DeriveSecret(path_secret[n], "node")
+   node_priv[n], node_pub[n] = KEM.DeriveKeyPair(node_secret[n])
 
    The node secret is derived as a temporary intermediate secret so that
    each secret is only used with one algorithm: The path secret is used
@@ -2541,6 +2529,9 @@ struct {
    ExpandWithLabel(Secret, Label, Context, Length) =
        KDF.Expand(Secret, KDFLabel, Length)
 
+   DeriveSecret(Secret, Label) =
+       ExpandWithLabel(Secret, Label, "", KDF.Nh)
+
    Where KDFLabel is specified as:
 
    struct {
@@ -2548,9 +2539,6 @@ struct {
        opaque label<V> = "MLS 1.0 " + Label;
        opaque context<V> = Context;
    } KDFLabel;
-
-   DeriveSecret(Secret, Label) =
-       ExpandWithLabel(Secret, Label, "", KDF.Nh)
 
    The value KDF.Nh is the size of an output from KDF.Extract, in bytes.
    In the below diagram:
@@ -5454,139 +5442,139 @@ Appendix B.  Array-Based Trees
    The following python code demonstrates the tree computations
    necessary to use an array-based tree for MLS.
 
-# The exponent of the largest power of 2 less than x. Equivalent to:
-#   int(math.floor(math.log(x, 2)))
-def log2(x):
-    if x == 0:
-        return 0
+   # The exponent of the largest power of 2 less than x. Equivalent to:
+   #   int(math.floor(math.log(x, 2)))
+   def log2(x):
+       if x == 0:
+           return 0
 
-    k = 0
-    while (x >> k) > 0:
-        k += 1
-    return k-1
+       k = 0
+       while (x >> k) > 0:
+           k += 1
+       return k-1
 
-# The level of a node in the tree. Leaves are level 0, their parents are
-# level 1, etc. If a node's children are at different levels, then its
-# level is the max level of its children plus one.
-def level(x):
-    if x & 0x01 == 0:
-        return 0
+   # The level of a node in the tree. Leaves are level 0, their parents are
+   # level 1, etc. If a node's children are at different levels, then its
+   # level is the max level of its children plus one.
+   def level(x):
+       if x & 0x01 == 0:
+           return 0
 
-    k = 0
-    while ((x >> k) & 0x01) == 1:
-        k += 1
-    return k
+       k = 0
+       while ((x >> k) & 0x01) == 1:
+           k += 1
+       return k
 
-# The number of nodes needed to represent a tree with n leaves.
-def node_width(n):
-    if n == 0:
-        return 0
-    else:
-        return 2*(n - 1) + 1
+   # The number of nodes needed to represent a tree with n leaves.
+   def node_width(n):
+       if n == 0:
+           return 0
+       else:
+           return 2*(n - 1) + 1
 
-# The index of the root node of a tree with n leaves.
-def root(n):
-    w = node_width(n)
-    return (1 << log2(w)) - 1
+   # The index of the root node of a tree with n leaves.
+   def root(n):
+       w = node_width(n)
+       return (1 << log2(w)) - 1
 
-# The left child of an intermediate node. Note that because the tree is
-# left-balanced, there is no dependency on the size of the tree.
-def left(x):
-    k = level(x)
-    if k == 0:
-        raise Exception('leaf node has no children')
+   # The left child of an intermediate node. Note that because the tree is
+   # left-balanced, there is no dependency on the size of the tree.
+   def left(x):
+       k = level(x)
+       if k == 0:
+           raise Exception('leaf node has no children')
 
-    return x ^ (0x01 << (k - 1))
+       return x ^ (0x01 << (k - 1))
 
-# The right child of an intermediate node. Depends on the number of
-# leaves because the straightforward calculation can take you beyond the
-# edge of the tree.
-def right(x, n):
-    k = level(x)
-    if k == 0:
-        raise Exception('leaf node has no children')
+   # The right child of an intermediate node. Depends on the number of
+   # leaves because the straightforward calculation can take you beyond the
+   # edge of the tree.
+   def right(x, n):
+       k = level(x)
+       if k == 0:
+           raise Exception('leaf node has no children')
 
-    r = x ^ (0x03 << (k - 1))
-    while r >= node_width(n):
-        r = left(r)
-    return r
+       r = x ^ (0x03 << (k - 1))
+       while r >= node_width(n):
+           r = left(r)
+       return r
 
-# The immediate parent of a node. May be beyond the right edge of the
-# tree.
-def parent_step(x):
-    k = level(x)
-    b = (x >> (k + 1)) & 0x01
-    return (x | (1 << k)) ^ (b << (k + 1))
+   # The immediate parent of a node. May be beyond the right edge of the
+   # tree.
+   def parent_step(x):
+       k = level(x)
+       b = (x >> (k + 1)) & 0x01
+       return (x | (1 << k)) ^ (b << (k + 1))
 
-# The parent of a node. As with the right child calculation, we have to
-# walk back until the parent is within the range of the tree.
-def parent(x, n):
-    if x == root(n):
-        raise Exception('root node has no parent')
+   # The parent of a node. As with the right child calculation, we have to
+   # walk back until the parent is within the range of the tree.
+   def parent(x, n):
+       if x == root(n):
+           raise Exception('root node has no parent')
 
-    p = parent_step(x)
-    while p >= node_width(n):
-        p = parent_step(p)
-    return p
+       p = parent_step(x)
+       while p >= node_width(n):
+           p = parent_step(p)
+       return p
 
-# The other child of the node's parent.
-def sibling(x, n):
-    p = parent(x, n)
-    if x < p:
-        return right(p, n)
-    else:
-        return left(p)
+   # The other child of the node's parent.
+   def sibling(x, n):
+       p = parent(x, n)
+       if x < p:
+           return right(p, n)
+       else:
+           return left(p)
 
-# The direct path of a node, ordered from leaf to root.
-def direct_path(x, n):
-    r = root(n)
-    if x == r:
-        return []
+   # The direct path of a node, ordered from leaf to root.
+   def direct_path(x, n):
+       r = root(n)
+       if x == r:
+           return []
 
-    d = []
-    while x != r:
-        x = parent(x, n)
-        d.append(x)
-    return d
+       d = []
+       while x != r:
+           x = parent(x, n)
+           d.append(x)
+       return d
 
-# The copath of a node, ordered from leaf to root.
-def copath(x, n):
-    if x == root(n):
-        return []
+   # The copath of a node, ordered from leaf to root.
+   def copath(x, n):
+       if x == root(n):
+           return []
 
-    d = direct_path(x, n)
-    d.insert(0, x)
-    d.pop()
-    return [sibling(y, n) for y in d]
+       d = direct_path(x, n)
+       d.insert(0, x)
+       d.pop()
+       return [sibling(y, n) for y in d]
 
-# The common ancestor of two nodes is the lowest node that is in the
-# direct paths of both leaves.
-def common_ancestor_semantic(x, y, n):
-    dx = set([x]) | set(direct_path(x, n))
-    dy = set([y]) | set(direct_path(y, n))
-    dxy = dx & dy
-    if len(dxy) == 0:
-        raise Exception('failed to find common ancestor')
+   # The common ancestor of two nodes is the lowest node that is in the
+   # direct paths of both leaves.
+   def common_ancestor_semantic(x, y, n):
+       dx = set([x]) | set(direct_path(x, n))
+       dy = set([y]) | set(direct_path(y, n))
+       dxy = dx & dy
+       if len(dxy) == 0:
+           raise Exception('failed to find common ancestor')
 
-    return min(dxy, key=level)
+       return min(dxy, key=level)
 
-# The common ancestor of two nodes is the lowest node that is in the
-# direct paths of both leaves.
-def common_ancestor_direct(x, y, _):
-    # Handle cases where one is an ancestor of the other
-    lx, ly = level(x)+1, level(y)+1
-    if (lx <= ly) and (x>>ly == y>>ly):
-      return y
-    elif (ly <= lx) and (x>>lx == y>>lx):
-      return x
+   # The common ancestor of two nodes is the lowest node that is in the
+   # direct paths of both leaves.
+   def common_ancestor_direct(x, y, _):
+       # Handle cases where one is an ancestor of the other
+       lx, ly = level(x)+1, level(y)+1
+       if (lx <= ly) and (x>>ly == y>>ly):
+         return y
+       elif (ly <= lx) and (x>>lx == y>>lx):
+         return x
 
-    # Handle other cases
-    xn, yn = x, y
-    k = 0
-    while xn != yn:
-       xn, yn = xn >> 1, yn >> 1
-       k += 1
-    return (xn << k) + (1 << (k-1)) - 1
+       # Handle other cases
+       xn, yn = x, y
+       k = 0
+       while xn != yn:
+          xn, yn = xn >> 1, yn >> 1
+          k += 1
+       return (xn << k) + (1 << (k-1)) - 1
 
 Appendix C.  Link-Based Trees
 
