@@ -3071,7 +3071,7 @@ enum {
 enum {
     reserved(0),
     member(1),
-    preconfigured(2),
+    external(2),
     new_member(3),
     (255)
 } SenderType;
@@ -3081,8 +3081,8 @@ struct {
     switch (sender_type) {
         case member:
             LeafNodeRef member_ref;
-        case preconfigured:
-            opaque sender_id&lt;V&gt;;
+        case external:
+            uint32 sender_index;
         case new_member:
             struct{};
     }
@@ -3172,15 +3172,40 @@ struct {
 } MLSMessageAuth;
 </pre><a href="#section-7.1-2" class="pilcrow">¶</a>
 </div>
-<p id="section-7.1-3">The <code>signature</code> field in an MLSMessageAuth object is computed using the signing
-private key corresponding to the public key, which was authenticated by the
-credential at the leaf of the tree indicated by the sender field. The signature
-is computed using <code>SignWithLabel</code> with label <code>"MLSMessageContentTBS"</code> and with a content
-that covers the message content and the wire format that will be used for this message.
-If the sender is a member of the group, the content also covers the
-GroupContext for the current epoch, so that signatures are specific to a given
-group and epoch.<a href="#section-7.1-3" class="pilcrow">¶</a></p>
-<div id="section-7.1-4">
+<p id="section-7.1-3">The signature is computed using <code>SignWithLabel</code> with label
+<code>"MLSMessageContentTBS"</code> and with a content that covers the message content and
+the wire format that will be used for this message. If the sender's
+<code>sender_type</code> is <code>Member</code>, the content also covers the GroupContext for the
+current epoch, so that signatures are specific to a given group and epoch.<a href="#section-7.1-3" class="pilcrow">¶</a></p>
+<p id="section-7.1-4">The sender MUST use the private key corresponding to the following signature key
+depending on the sender's <code>sender_type</code>:<a href="#section-7.1-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7.1-5.1">
+            <code>member</code>: The signature key contained in the Credential at the leaf with the
+sender's <code>LeafNodeRef</code><a href="#section-7.1-5.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-7.1-5.2">
+            <code>external</code>: The signature key contained in the Credential at the index
+indicated by the <code>sender_index</code> in the <code>external_senders</code> group context
+extension (see Section <a href="#external-senders-extension" class="xref">Section 13.1.9.1</a>).  In this case, the
+<code>content_type</code> of the message MUST NOT be <code>commit</code>, since only members
+of the group or new joiners can send Commit messages.<a href="#section-7.1-5.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-7.1-5.3">
+            <p id="section-7.1-5.3.1"><code>new_member</code>: The signature key depends on the <code>content_type</code>:<a href="#section-7.1-5.3.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7.1-5.3.2.1">
+                <code>proposal</code>: The signature key in the credential contained in KeyPackage in
+the Add proposal (see Section <a href="#external-proposals" class="xref">Section 13.1.9</a>).<a href="#section-7.1-5.3.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-7.1-5.3.2.2">
+                <code>commit</code>: The signature key in the credential contained in the KeyPackage in
+the Commit's path (see Section <a href="#external-initialization" class="xref">Section 9.3</a>).<a href="#section-7.1-5.3.2.2" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ul>
+<div id="section-7.1-6">
 <pre class="lang-tls sourcecode">
 struct {
     ProtocolVersion version = mls10;
@@ -3191,16 +3216,18 @@ struct {
         case new_member:
             GroupContext context;
 
-        case preconfigured:
+        case external:
             struct{};
     }
 } MLSMessageContentTBS;
-</pre><a href="#section-7.1-4" class="pilcrow">¶</a>
+</pre><a href="#section-7.1-6" class="pilcrow">¶</a>
 </div>
-<p id="section-7.1-5">The confirmation tag value confirms that the members of the group have arrived
-at the same state of the group.<a href="#section-7.1-5" class="pilcrow">¶</a></p>
-<p id="section-7.1-6">A MLSMessageAuth is said to be valid when both the <code>signature</code> and
-<code>confirmation_tag</code> fields are valid.<a href="#section-7.1-6" class="pilcrow">¶</a></p>
+<p id="section-7.1-7">Recipients of an MLSMessage MUST verify the signature with the key depending on
+the <code>sender_type</code> of the sender as described above.<a href="#section-7.1-7" class="pilcrow">¶</a></p>
+<p id="section-7.1-8">The confirmation tag value confirms that the members of the group have arrived
+at the same state of the group.<a href="#section-7.1-8" class="pilcrow">¶</a></p>
+<p id="section-7.1-9">A MLSMessageAuth is said to be valid when both the <code>signature</code> and
+<code>confirmation_tag</code> fields are valid.<a href="#section-7.1-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="encoding-and-decoding-a-plaintext">
@@ -3217,7 +3244,7 @@ struct {
     select(MLSPlaintext.content.sender.sender_type) {
         case member:
             MAC membership_tag;
-        case preconfigured:
+        case external:
         case new_member:
             struct{};
     }
@@ -4921,6 +4948,9 @@ defined in <a href="#leaf-node-validation" class="xref">Section 8.3</a>.<a href=
           <li class="normal" id="section-11.1-4.3">Verify that the signature on the KeyPackage is valid using the public key
 in <code>leaf_node.credential</code>.<a href="#section-11.1-4.3" class="pilcrow">¶</a>
 </li>
+          <li class="normal" id="section-11.1-4.4">Verify that the value of <code>leaf_node.public_key</code> is different from the value of
+the <code>init_key</code> field.<a href="#section-11.1-4.4" class="pilcrow">¶</a>
+</li>
         </ul>
 </section>
 </div>
@@ -5425,26 +5455,36 @@ group agree on the extensions in use.<a href="#section-13.1.8-5" class="pilcrow"
 that is outside the group.  For example, a Delivery Service might propose to
 remove a member of a group who has been inactive for a long time, or propose adding
 a newly-hired staff member to a group representing a real-world team.  Proposals
-originating outside the group are identified by a <code>preconfigured</code> or
+originating outside the group are identified by a <code>external</code> or
 <code>new_member</code> SenderType in MLSPlaintext.<a href="#section-13.1.9-1" class="pilcrow">¶</a></p>
-<p id="section-13.1.9-2">ReInit proposals can also be sent to the group by a <code>preconfigured</code> sender, for
+<p id="section-13.1.9-2">ReInit proposals can also be sent to the group by a <code>external</code> sender, for
 example to enforce a changed policy regarding MLS version or ciphersuite.<a href="#section-13.1.9-2" class="pilcrow">¶</a></p>
 <p id="section-13.1.9-3">The <code>new_member</code> SenderType is used for clients proposing that they themselves
 be added.  For this ID type the sender value MUST be zero and the Proposal type
 MUST be Add. The MLSPlaintext MUST be signed with the private key corresponding
 to the KeyPackage in the Add message.  Recipients MUST verify that the
 MLSPlaintext carrying the Proposal message is validly signed with this key.<a href="#section-13.1.9-3" class="pilcrow">¶</a></p>
-<p id="section-13.1.9-4">The <code>preconfigured</code> SenderType is reserved for signers that are pre-provisioned
-to the clients within a group.  If proposals with these sender IDs are to be
-accepted within a group, the members of the group MUST be provisioned by the
-application with a mapping between these IDs and authorized signing keys.
-Recipients MUST verify that the MLSPlaintext carrying the Proposal message is
-validly signed with the corresponding key. To ensure consistent handling of
-external proposals, the application MUST ensure that the members of a group
-have the same mapping and apply the same policies to external proposals.<a href="#section-13.1.9-4" class="pilcrow">¶</a></p>
-<p id="section-13.1.9-5">An external proposal MUST be sent as an MLSPlaintext
-object, since the sender will not have the keys necessary to construct an
-MLSCiphertext object.<a href="#section-13.1.9-5" class="pilcrow">¶</a></p>
+<p id="section-13.1.9-4">The <code>external</code> SenderType is reserved for signers that are pre-provisioned
+to the clients within a group. It can only be used if the
+<code>external_senders</code> extension is present in the group's group context
+extensions.<a href="#section-13.1.9-4" class="pilcrow">¶</a></p>
+<p id="section-13.1.9-5">An external proposal MUST be sent as an MLSPlaintext object, since the sender
+will not have the keys necessary to construct an MLSCiphertext object.<a href="#section-13.1.9-5" class="pilcrow">¶</a></p>
+<div id="external-senders-extension">
+<section id="section-13.1.9.1">
+            <h5 id="name-external-senders-extension">
+<a href="#section-13.1.9.1" class="section-number selfRef">13.1.9.1. </a><a href="#name-external-senders-extension" class="section-name selfRef">External Senders Extension</a>
+            </h5>
+<p id="section-13.1.9.1-1">The <code>external_senders</code> extension is a group context extension that contains
+credentials of senders that are permitted to send external proposals to the
+group.<a href="#section-13.1.9.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-13.1.9.1-2">
+<pre>
+Credential external_senders&lt;V&gt;;
+</pre><a href="#section-13.1.9.1-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
 </section>
 </div>
 </section>
@@ -5766,9 +5806,8 @@ parameters:<a href="#section-13.2.1-4.11.1" class="pilcrow">¶</a></p>
 <li class="normal" id="section-13.2.2-2.1">Verify that the <code>epoch</code> field of the enclosing MLSMessageContent is equal
 to the <code>epoch</code> field of the current GroupContext object<a href="#section-13.2.2-2.1" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-13.2.2-2.2">Verify that the signature on the MLSMessageContent message verifies using the
-public key from the credential stored at the leaf in the tree indicated by
-the <code>sender</code> field.<a href="#section-13.2.2-2.2" class="pilcrow">¶</a>
+            <li class="normal" id="section-13.2.2-2.2">Verify that the signature on the MLSMessageContent message as described in
+Section <a href="#content-authentication" class="xref">Section 7.1</a>.<a href="#section-13.2.2-2.2" class="pilcrow">¶</a>
 </li>
             <li class="normal" id="section-13.2.2-2.3">Verify that all PreSharedKey proposals in the <code>proposals</code> vector have unique
 PreSharedKeyIDs and are available.<a href="#section-13.2.2-2.3" class="pilcrow">¶</a>
