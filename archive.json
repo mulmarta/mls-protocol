@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-03-22T01:27:28.268993+00:00",
+  "timestamp": "2022-03-24T01:24:45.416624+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -6199,15 +6199,15 @@
       "id": "I_kwDOBoyH6c5FQitd",
       "title": "Remove or refine preconfigured senders",
       "url": "https://github.com/mlswg/mls-protocol/issues/616",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "As [Raphael pointed out on the mailing list](https://mailarchive.ietf.org/arch/msg/mls/VWzhGx2XwgBqHoHIE0fvuZS1sm4/), the current preconfigured sender mechanism isn't interoperably specified.  There is no confirmation that the members of a group agree on who the allowed preconfigured senders are, so different members might respond differently.  It seems like there are two options here:\r\n\r\n1. Add the required details.  We would need a `preconfigured_senders` extension to confirm agreement to use the mechanism at all, and would probably need to have a list of senders there as well.\r\n\r\n2. Remove the feature from the base protocol.  Since an extension is required in any case, there's no pressing need to have the feature in the base protocol.\r\n\r\nPersonally, I would lean toward (2).  Early deployment experience doesn't show a lot of need for this feature.  For example, in Webex, we just have the server forward a KeyPackage instead of synthesizing an Add proposal under a preconfigured signer; the TLS authentication is as good as a preconfigured signer signature.  As long as the SenderType enum is around, the extension should be a small follow-on spec if it is really needed.",
       "createdAt": "2022-03-07T21:53:31Z",
-      "updatedAt": "2022-03-09T19:05:16Z",
-      "closedAt": null,
+      "updatedAt": "2022-03-23T19:33:32Z",
+      "closedAt": "2022-03-23T19:33:32Z",
       "comments": [
         {
           "author": "tomleavy",
@@ -45216,24 +45216,26 @@
       "id": "PR_kwDOBoyH6c40LKxN",
       "title": "Preconfigured senders extension and removal of signature key indirection",
       "url": "https://github.com/mlswg/mls-protocol/pull/617",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "kkohbrok",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "This PR:\r\n- consolidates instructions on which key should be used to compute (and verify) a signature on an MLS message depending on the sender type\r\n- reverts #437 \r\n- introduces a `preconfigured_senders` extension that ensures that group members agree on preconfigured signature keys, as discussed in #616 and on the mailing list\r\n\r\nFixes #616.\r\n\r\n",
       "createdAt": "2022-03-09T14:04:30Z",
-      "updatedAt": "2022-03-10T13:48:37Z",
+      "updatedAt": "2022-03-23T19:33:32Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "c0079c6f9840d4589f574d1fef4c106b69653a8a",
       "headRepository": "kkohbrok/mls-protocol",
       "headRefName": "preconfigured-senders",
-      "headRefOid": "a1e63a7e4e73c074049aaf1f996149e4b22b5021",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "827580b617d17c13a84434f1c9e67fe315702ad3",
+      "closedAt": "2022-03-23T19:33:32Z",
+      "mergedAt": "2022-03-23T19:33:32Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "1c6aa098efc94d7e9e51ed16ba6c37b873bb4a22"
+      },
       "comments": [],
       "reviews": [
         {
@@ -45328,6 +45330,26 @@
               "updatedAt": "2022-03-10T13:28:25Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c42zDLE",
+          "commit": {
+            "abbreviatedOid": "a1e63a7"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-03-23T19:31:43Z",
+          "updatedAt": "2022-03-23T19:31:44Z",
+          "comments": [
+            {
+              "originalPosition": 16,
+              "body": "```suggestion\r\n            uint32 sender_index;\r\n```",
+              "createdAt": "2022-03-23T19:31:43Z",
+              "updatedAt": "2022-03-23T19:31:44Z"
+            }
+          ]
         }
       ]
     },
@@ -45336,52 +45358,92 @@
       "id": "PR_kwDOBoyH6c40sSIF",
       "title": "Require init key and leaf key to be different",
       "url": "https://github.com/mlswg/mls-protocol/pull/618",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "This change ensures that the \"init\" key pair associated to the key package is one-time-use, at least to the degree that KeyPackages are one-time-use.  The init key pair is used to encrypt/decrypt the Welcome message, then never again.\r\n\r\nThe main drawback is requiring the KeyPackage sender to generate an additional key pair, which requires more computation and more entropy.",
       "createdAt": "2022-03-19T18:22:13Z",
-      "updatedAt": "2022-03-19T18:22:13Z",
+      "updatedAt": "2022-03-23T19:30:32Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "c0079c6f9840d4589f574d1fef4c106b69653a8a",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "init-not-leaf",
       "headRefOid": "cc53944479b22c41e0a1d6c75143cb45acec3b4d",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2022-03-23T19:30:32Z",
+      "mergedAt": "2022-03-23T19:30:32Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "a7c822eb72a597b2d46852420bb7938f1f82ad37"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c42u0vQ",
+          "commit": {
+            "abbreviatedOid": "cc53944"
+          },
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-03-23T06:25:24Z",
+          "updatedAt": "2022-03-23T06:25:24Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 619,
       "id": "PR_kwDOBoyH6c40xVgS",
       "title": "Clean up code blocks",
       "url": "https://github.com/mlswg/mls-protocol/pull/619",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "A few changes to make code blocks a little more consistent / usable / pretty:\r\n\r\n* Fence every code block with exactly three tildes\r\n* Mark each code block with a type (`aasvg` / `ascii-art` / `pseudocode` / `tls` / `python`)\r\n\r\nMarking with `aasvg` generates slightly prettier pictures for the ladder diagrams in the introduction.  Marking with `tls` makes it easy to programmatically extract the TLS syntax definitions in case we want to produce a syntax summary appendix like [the one TLS has](https://datatracker.ietf.org/doc/html/rfc8446#appendix-B), or in case implementers want to quickly get a listing of all the structs they need.  \r\n\r\nThe only substantive changes I made here were:\r\n\r\n1. Removing the `ReInit` lines from the branch and re-inject PSK illustrations\r\n2. Splitting pseudocode from TLS syntax in a few cases.",
       "createdAt": "2022-03-21T21:47:49Z",
-      "updatedAt": "2022-03-21T21:47:49Z",
+      "updatedAt": "2022-03-23T19:30:18Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "c0079c6f9840d4589f574d1fef4c106b69653a8a",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "figure-pretty",
       "headRefOid": "795b702e9291e29962331e222aeff34e4a847fb5",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
-      "reviews": []
+      "closedAt": "2022-03-23T19:30:18Z",
+      "mergedAt": "2022-03-23T19:30:18Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "0a48ed20818b70ae664619843b8b046a55b4f2e8"
+      },
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Yeah, I specifically had the idea because I wanted to pull out the TLS syntax blocks to update my implementation :)",
+          "createdAt": "2022-03-23T11:22:40Z",
+          "updatedAt": "2022-03-23T11:22:40Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c42u0pt",
+          "commit": {
+            "abbreviatedOid": "795b702"
+          },
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Nice idea! It would also allow someone to compile the document with syntax coloration for TLS formats and Python code.",
+          "createdAt": "2022-03-23T06:24:54Z",
+          "updatedAt": "2022-03-23T06:24:54Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
