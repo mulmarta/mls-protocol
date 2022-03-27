@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-03-24T01:24:45.416624+00:00",
+  "timestamp": "2022-03-27T01:36:07.323275+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -6273,6 +6273,22 @@
           "updatedAt": "2022-03-09T19:05:16Z"
         }
       ]
+    },
+    {
+      "number": 623,
+      "id": "I_kwDOBoyH6c5GdHi9",
+      "title": "Subgroup branching bug",
+      "url": "https://github.com/mlswg/mls-protocol/issues/623",
+      "state": "OPEN",
+      "author": "tomleavy",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "There is currently a logical flaw in the subgroup branching flow.\r\n\r\nIn order to branch, you need to compose a `Welcome` message . A Welcome message includes `EncryptedGroupSecrets` which is defined as follows: \r\n\r\n```\r\nstruct {\r\n  KeyPackageRef new_member;\r\n  HPKECiphertext encrypted_group_secrets;\r\n} EncryptedGroupSecrets;\r\n```\r\n\r\nThe problem with this is that the `new_member` field of type `KeyPackageRef` cannot be made for existing members of the group because the leaf nodes are now `LeafNode` types. `KeyPackageRef` is now only used to add new members to the group, so we can't reuse this for sub group initialization.",
+      "createdAt": "2022-03-26T20:10:03Z",
+      "updatedAt": "2022-03-26T20:10:15Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -45442,6 +45458,105 @@
           "createdAt": "2022-03-23T06:24:54Z",
           "updatedAt": "2022-03-23T06:24:54Z",
           "comments": []
+        }
+      ]
+    },
+    {
+      "number": 620,
+      "id": "PR_kwDOBoyH6c41ClSd",
+      "title": "Add make target to extract TLS stanzas",
+      "url": "https://github.com/mlswg/mls-protocol/pull/620",
+      "state": "OPEN",
+      "author": "rohan-wire",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Added a short python program to extract the TLS presentation language stanzas into a single file.\r\nAdded extract-tls make target to run it.\r\n\r\nAn equivalent one liner option (only in the Makefile) is commented out.",
+      "createdAt": "2022-03-25T20:11:21Z",
+      "updatedAt": "2022-03-25T20:11:21Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "1c6aa098efc94d7e9e51ed16ba6c37b873bb4a22",
+      "headRepository": "rohan-wire/mls-protocol",
+      "headRefName": "rohan/export-tls",
+      "headRefOid": "0079588aaaef3b7161069bcc2450af299c1e6ae0",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 621,
+      "id": "PR_kwDOBoyH6c41CpNO",
+      "title": "Add directions for newly required aasvg tools to README.md",
+      "url": "https://github.com/mlswg/mls-protocol/pull/621",
+      "state": "OPEN",
+      "author": "rohan-wire",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Describe in README.md how to fetch the now required aasvg (ASCII art to SVG) and svgcheck tools.",
+      "createdAt": "2022-03-25T20:34:14Z",
+      "updatedAt": "2022-03-25T20:34:14Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "1c6aa098efc94d7e9e51ed16ba6c37b873bb4a22",
+      "headRepository": "rohan-wire/mls-protocol",
+      "headRefName": "rohan/readme-aasvg",
+      "headRefOid": "354afe54a69d2cc91e272d29bb356283f6e508b3",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 622,
+      "id": "PR_kwDOBoyH6c41CtvE",
+      "title": "Continue to make HTML drafts prettier with more SVG",
+      "url": "https://github.com/mlswg/mls-protocol/pull/622",
+      "state": "OPEN",
+      "author": "rohan-wire",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Make more ASCII art render as SVG in HTML version of draft.\r\nFix one instance of pseudocode marked as TLS Presentation Language.",
+      "createdAt": "2022-03-25T21:03:17Z",
+      "updatedAt": "2022-03-26T04:32:32Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "1c6aa098efc94d7e9e51ed16ba6c37b873bb4a22",
+      "headRepository": "rohan-wire/mls-protocol",
+      "headRefName": "rohan/more-aasvg",
+      "headRefOid": "0ef3dc0cc0668ed8573171703ab948df67cbc448",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c42-IOn",
+          "commit": {
+            "abbreviatedOid": "e66efa6"
+          },
+          "author": "hrxi",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-03-26T02:55:56Z",
+          "updatedAt": "2022-03-26T02:55:57Z",
+          "comments": [
+            {
+              "originalPosition": 111,
+              "body": "```suggestion\r\n~~~ pseudocode\r\n```",
+              "createdAt": "2022-03-26T02:55:56Z",
+              "updatedAt": "2022-03-26T02:55:57Z"
+            }
+          ]
         }
       ]
     }
