@@ -7644,28 +7644,58 @@ MLS DE, that MLS DE SHOULD defer to the judgment of the other MLS DEs.<a href="#
         </h3>
 <p id="section-18.6-1">This document registers the "message/mls" MIME media type in order to allow other
 protocols (ex: HTTP <span>[<a href="#RFC7540" class="xref">RFC7540</a>]</span>) to convey MLS messages.<a href="#section-18.6-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-ascii-art art-text artwork" id="section-18.6-2">
-<pre>
-  Media type name: message
-  Media subtype name: mls
-  Required parameters: none
-  Optional parameters: version
-     version: The MLS protocol version expressed as a string
-     &lt;major&gt;.&lt;minor&gt;.  If omitted the version is "1.0", which
-     corresponds to MLS ProtocolVersion mls10. If for some reason
-     the version number in the MIME type parameter differs from the
-     ProtocolVersion embedded in the protocol, the protocol takes
-     precedence.
-
-  Encoding scheme: MLS messages are represented using the TLS
-     presentation language [RFC8446]. Therefore MLS messages need to be
-     treated as binary data.
-
-  Security considerations: MLS is an encrypted messaging layer designed
-     to be transmitted over arbitrary lower layer protocols. The
-     security considerations in this document (RFC XXXX) also apply.
-</pre><a href="#section-18.6-2" class="pilcrow">¶</a>
-</div>
+<span class="break"></span><dl class="dlParallel" id="section-18.6-2">
+          <dt id="section-18.6-2.1">Media type name:</dt>
+          <dd style="margin-left: 1.5em" id="section-18.6-2.2">
+            <p id="section-18.6-2.2.1">message<a href="#section-18.6-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-18.6-2.3">Media subtype name:</dt>
+          <dd style="margin-left: 1.5em" id="section-18.6-2.4">
+            <p id="section-18.6-2.4.1">mls<a href="#section-18.6-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-18.6-2.5">Required parameters:</dt>
+          <dd style="margin-left: 1.5em" id="section-18.6-2.6">
+            <p id="section-18.6-2.6.1">none<a href="#section-18.6-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-18.6-2.7">Optional parameters:</dt>
+          <dd style="margin-left: 1.5em" id="section-18.6-2.8">
+            <span class="break"></span><dl class="dlParallel" id="section-18.6-2.8.1">
+              <dt id="section-18.6-2.8.1.1">version</dt>
+              <dd style="margin-left: 1.5em" id="section-18.6-2.8.1.2">
+                <p id="section-18.6-2.8.1.2.1"></p><a href="#section-18.6-2.8.1.2" class="pilcrow">¶</a>
+</dd>
+              <dd class="break"></dd>
+<dt id="section-18.6-2.8.1.3"> version:</dt>
+              <dd style="margin-left: 1.5em" id="section-18.6-2.8.1.4">
+                <p id="section-18.6-2.8.1.4.1">The MLS protocol version expressed as a string
+ <code>&lt;major&gt;.&lt;minor&gt;</code>.  If omitted the version is "1.0", which
+ corresponds to MLS ProtocolVersion mls10. If for some reason
+ the version number in the MIME type parameter differs from the
+ ProtocolVersion embedded in the protocol, the protocol takes
+ precedence.<a href="#section-18.6-2.8.1.4.1" class="pilcrow">¶</a></p>
+</dd>
+            <dd class="break"></dd>
+</dl>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-18.6-2.9">Encoding scheme:</dt>
+          <dd style="margin-left: 1.5em" id="section-18.6-2.10">
+            <p id="section-18.6-2.10.1">MLS messages are represented using the TLS
+presentation language <span>[<a href="#RFC8446" class="xref">RFC8446</a>]</span>. Therefore MLS messages need to be
+treated as binary data.<a href="#section-18.6-2.10.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-18.6-2.11">Security considerations:</dt>
+          <dd style="margin-left: 1.5em" id="section-18.6-2.12">
+            <p id="section-18.6-2.12.1">MLS is an encrypted messaging layer designed
+ to be transmitted over arbitrary lower layer protocols. The
+ security considerations in this document (RFC XXXX) also apply.<a href="#section-18.6-2.12.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
 </section>
 </div>
 </section>
