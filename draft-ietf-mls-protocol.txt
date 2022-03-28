@@ -738,13 +738,13 @@ Table of Contents
                              epoch_secret
                            _      |      _
   |\ Ratchet              /      ...      \                    Secret /|
-  | \ Tree                :       |       :                     Tree / |
-  |  \                    :       |       :                         /  |
-  |   \                   :       V       :                        /   |
+  | \ Tree                |       |       |                     Tree / |
+  |  \                    |       |       |                         /  |
+  |   \                   |       V       |                        /   |
   |    --> commit_secret --> epoch_secret --> encryption_secret -->    |
-  |   /                   :       |       :                        \   |
-  |  /                    :      ...      > Key Schedule            \  |
-  | /                     :       |       :                          \ |
+  |   /                   |       |       |                        \   |
+  |  /                    |      ...      --> Key Schedule          \  |
+  | /                     |       |       |                          \ |
   |/                      \_      |      _/                           \|
                                   V
                              epoch_secret
