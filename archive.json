@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-03-27T01:36:07.323275+00:00",
+  "timestamp": "2022-03-29T01:38:53.855047+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -6286,9 +6286,38 @@
       "labels": [],
       "body": "There is currently a logical flaw in the subgroup branching flow.\r\n\r\nIn order to branch, you need to compose a `Welcome` message . A Welcome message includes `EncryptedGroupSecrets` which is defined as follows: \r\n\r\n```\r\nstruct {\r\n  KeyPackageRef new_member;\r\n  HPKECiphertext encrypted_group_secrets;\r\n} EncryptedGroupSecrets;\r\n```\r\n\r\nThe problem with this is that the `new_member` field of type `KeyPackageRef` cannot be made for existing members of the group because the leaf nodes are now `LeafNode` types. `KeyPackageRef` is now only used to add new members to the group, so we can't reuse this for sub group initialization.",
       "createdAt": "2022-03-26T20:10:03Z",
-      "updatedAt": "2022-03-26T20:10:15Z",
+      "updatedAt": "2022-03-28T22:46:23Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I'm not sure I understand correctly. Are you suggesting when branching a group off of another group, one re-uses the leaves of the old group? If so, that's not how it's meant to work. The new group created in the process of subgroup branching should be independent from the \"parent\" group safe for the PSK, which all member have to provide upon creation of the group. In fact one should never use the same key material in the leaves of multiple groups except when the supply of key packages that a party provides via the DS is exhausted (see Section 17.4).",
+          "createdAt": "2022-03-28T12:25:06Z",
+          "updatedAt": "2022-03-28T12:25:06Z"
+        },
+        {
+          "author": "tomleavy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "That was part of my question. When there were key packages in the leaves, you theoretically could fork the group from a given point in time and reuse the current tree, but I wasn't sure if that was a proper solution or not. Sounds like it isn't, but either way, I think there should be clarification in the document about this. Let me write up a quick PR on it.",
+          "createdAt": "2022-03-28T13:50:02Z",
+          "updatedAt": "2022-03-28T13:50:02Z"
+        },
+        {
+          "author": "tomleavy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "@kkohbrok opened https://github.com/mlswg/mls-protocol/pull/624. Would like your feedback there. We have conflicting wording here as well. What threw me off in the first place was the line indicating that LeafNodes should be the same in the sub-group, and if we are fetching new key packages they will not be the same.",
+          "createdAt": "2022-03-28T15:55:49Z",
+          "updatedAt": "2022-03-28T15:56:28Z"
+        },
+        {
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> I'm not sure I understand correctly. Are you suggesting when branching a group off of another group, one re-uses the leaves of the old group? If so, that's not how it's meant to work. The new group created in the process of subgroup branching should be independent from the \"parent\" group safe for the PSK, which all member have to provide upon creation of the group. In fact one should never use the same key material in the leaves of multiple groups except when the supply of key packages that a party provides via the DS is exhausted (see Section 17.4).\r\n\r\n@kkohbrok Konrad, could you safely derive new keys for the members of the subgroup instead? If so, that would be an enormous increase in efficiency and (especially in the federated case) make group creation timing consistent enough to do dynamically.",
+          "createdAt": "2022-03-28T22:46:22Z",
+          "updatedAt": "2022-03-28T22:46:22Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -45466,76 +45495,117 @@
       "id": "PR_kwDOBoyH6c41ClSd",
       "title": "Add make target to extract TLS stanzas",
       "url": "https://github.com/mlswg/mls-protocol/pull/620",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "rohan-wire",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Added a short python program to extract the TLS presentation language stanzas into a single file.\r\nAdded extract-tls make target to run it.\r\n\r\nAn equivalent one liner option (only in the Makefile) is commented out.",
       "createdAt": "2022-03-25T20:11:21Z",
-      "updatedAt": "2022-03-25T20:11:21Z",
+      "updatedAt": "2022-03-28T18:22:58Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "1c6aa098efc94d7e9e51ed16ba6c37b873bb4a22",
       "headRepository": "rohan-wire/mls-protocol",
       "headRefName": "rohan/export-tls",
-      "headRefOid": "0079588aaaef3b7161069bcc2450af299c1e6ae0",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "a8536efb482528b573ee3f626de3888ff6148e9f",
+      "closedAt": "2022-03-28T18:22:58Z",
+      "mergedAt": "2022-03-28T18:22:58Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "fb7657fbb1a9303d44ae73f58e3d320985694c85"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c43DHej",
+          "commit": {
+            "abbreviatedOid": "0079588"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-03-28T18:21:28Z",
+          "updatedAt": "2022-03-28T18:22:36Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "```suggestion\r\n```\r\n\r\nHaving a separate script is OK with me.",
+              "createdAt": "2022-03-28T18:21:28Z",
+              "updatedAt": "2022-03-28T18:22:36Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 621,
       "id": "PR_kwDOBoyH6c41CpNO",
       "title": "Add directions for newly required aasvg tools to README.md",
       "url": "https://github.com/mlswg/mls-protocol/pull/621",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "rohan-wire",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Describe in README.md how to fetch the now required aasvg (ASCII art to SVG) and svgcheck tools.",
       "createdAt": "2022-03-25T20:34:14Z",
-      "updatedAt": "2022-03-25T20:34:14Z",
+      "updatedAt": "2022-03-28T18:23:28Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "1c6aa098efc94d7e9e51ed16ba6c37b873bb4a22",
       "headRepository": "rohan-wire/mls-protocol",
       "headRefName": "rohan/readme-aasvg",
       "headRefOid": "354afe54a69d2cc91e272d29bb356283f6e508b3",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2022-03-28T18:23:28Z",
+      "mergedAt": "2022-03-28T18:23:28Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "64824117512f7d458f40d62f05a034c6f7e503f6"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c43DH-Z",
+          "commit": {
+            "abbreviatedOid": "354afe5"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-03-28T18:23:23Z",
+          "updatedAt": "2022-03-28T18:23:23Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 622,
       "id": "PR_kwDOBoyH6c41CtvE",
       "title": "Continue to make HTML drafts prettier with more SVG",
       "url": "https://github.com/mlswg/mls-protocol/pull/622",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "rohan-wire",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Make more ASCII art render as SVG in HTML version of draft.\r\nFix one instance of pseudocode marked as TLS Presentation Language.",
       "createdAt": "2022-03-25T21:03:17Z",
-      "updatedAt": "2022-03-26T04:32:32Z",
+      "updatedAt": "2022-03-28T19:02:12Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "1c6aa098efc94d7e9e51ed16ba6c37b873bb4a22",
       "headRepository": "rohan-wire/mls-protocol",
       "headRefName": "rohan/more-aasvg",
-      "headRefOid": "0ef3dc0cc0668ed8573171703ab948df67cbc448",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "d92a53c066824f23defb1d681403604a1e28e1f9",
+      "closedAt": "2022-03-28T18:37:57Z",
+      "mergedAt": "2022-03-28T18:37:57Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "000b9d04bac2a4da6c221b489f927e0f758d4058"
+      },
       "comments": [],
       "reviews": [
         {
@@ -45544,7 +45614,7 @@
             "abbreviatedOid": "e66efa6"
           },
           "author": "hrxi",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2022-03-26T02:55:56Z",
@@ -45557,6 +45627,156 @@
               "updatedAt": "2022-03-26T02:55:57Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c43DJap",
+          "commit": {
+            "abbreviatedOid": "0ef3dc0"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-03-28T18:28:51Z",
+          "updatedAt": "2022-03-28T18:35:50Z",
+          "comments": [
+            {
+              "originalPosition": 57,
+              "body": "```suggestion\r\n~~~ ascii-art\r\n```\r\n\r\nThis one doesn't work; the vertical arrows don't render. ",
+              "createdAt": "2022-03-28T18:28:51Z",
+              "updatedAt": "2022-03-28T18:35:50Z"
+            },
+            {
+              "originalPosition": 102,
+              "body": "```suggestion\r\n~~~ ascii-art\r\n```\r\n\r\nThis one doesn't quite work either; the bottom lines of the key/nonce forks don't render properly.",
+              "createdAt": "2022-03-28T18:31:01Z",
+              "updatedAt": "2022-03-28T18:35:50Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c43DMoq",
+          "commit": {
+            "abbreviatedOid": "d92a53c"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-03-28T18:36:41Z",
+          "updatedAt": "2022-03-28T18:36:41Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 624,
+      "id": "PR_kwDOBoyH6c41Kpcq",
+      "title": "Sub-group branching requires fresh key packages for each member",
+      "url": "https://github.com/mlswg/mls-protocol/pull/624",
+      "state": "OPEN",
+      "author": "tomleavy",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Based on #623 , it should be made explicit that sub-group branching requires a fresh key package for each member. I think there is still a conflict of wording here that I would like feedback on because of this line (which is what triggered me thinking there was a bug)\r\n\r\n```\r\nEach LeafNode in the new group's tree MUST be a leaf in the old group's tree at the epoch indicated in the PreSharedKey\r\n```",
+      "createdAt": "2022-03-28T15:53:51Z",
+      "updatedAt": "2022-03-28T15:53:51Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "1c6aa098efc94d7e9e51ed16ba6c37b873bb4a22",
+      "headRepository": "tomleavy/mls-protocol",
+      "headRefName": "branching-update",
+      "headRefOid": "f98cc4c388c28f04adb24b96afce10dd603f770d",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 625,
+      "id": "PR_kwDOBoyH6c41LjtZ",
+      "title": "More aasvg usage",
+      "url": "https://github.com/mlswg/mls-protocol/pull/625",
+      "state": "MERGED",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Continuing to convert more figures to SVG.\r\n\r\nThe remaining `ascii-art` figures are that way for two reasons:\r\n\r\n* Trees with blank nodes `_` render poorly with `aasvg`.  Replacements for the `_` character, like `-`, don't do much better.\r\n* The diagram showing the reuse guard application benefits from the byte-by-byte markers",
+      "createdAt": "2022-03-28T19:53:21Z",
+      "updatedAt": "2022-03-28T20:18:12Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "000b9d04bac2a4da6c221b489f927e0f758d4058",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "more-aasvg",
+      "headRefOid": "cdaac8bcc4d9bf832cc0406dd64d15b0652e2c08",
+      "closedAt": "2022-03-28T20:18:11Z",
+      "mergedAt": "2022-03-28T20:18:11Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "984f2a4c4ff4a0b82e22d03b60b4f8f5bd5d90c1"
+      },
+      "comments": [
+        {
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I think these look good. I didn't modify the trees for the reasons you mentioned. In general I have two concerns to keep an eye out for:\r\n- Make sure the overall width of aasvg ASCII version does not exceed 72 chars\r\n- ASCII version of the art shouldn't look substantially worse. Using . and + in some cases looks a bit worse but is still understandable\r\n\r\nIs the Key Schedule the oblong blob or is it derived from the blob?  My read of that section was that it is derived from the blob.\r\n",
+          "createdAt": "2022-03-28T20:08:35Z",
+          "updatedAt": "2022-03-28T20:08:35Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "* All the `ascii-art` figures fit within 72 columns.  I trimmed some `tls` and `python` ones to fit\r\n* I think the ASCII still looks OK with these.  Guess people can opine in WGLC if they don't like it :)\r\n* Key Schedule is the blob (IMO)",
+          "createdAt": "2022-03-28T20:18:02Z",
+          "updatedAt": "2022-03-28T20:18:02Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 626,
+      "id": "PR_kwDOBoyH6c41Ll4H",
+      "title": "Move MIME type registration from ascii-art to definition list",
+      "url": "https://github.com/mlswg/mls-protocol/pull/626",
+      "state": "MERGED",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2022-03-28T20:02:13Z",
+      "updatedAt": "2022-03-28T20:18:20Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "000b9d04bac2a4da6c221b489f927e0f758d4058",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "iana-mime-style",
+      "headRefOid": "95f3b3a374c2de0d3ea31b820bed1c5a820ce97f",
+      "closedAt": "2022-03-28T20:18:20Z",
+      "mergedAt": "2022-03-28T20:18:20Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "75dc112c95e546ea7c888202c14e154798439355"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c43Dl0E",
+          "commit": {
+            "abbreviatedOid": "95f3b3a"
+          },
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-03-28T20:09:41Z",
+          "updatedAt": "2022-03-28T20:09:41Z",
+          "comments": []
         }
       ]
     }
