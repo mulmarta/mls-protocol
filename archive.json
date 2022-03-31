@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-03-29T01:38:53.855047+00:00",
+  "timestamp": "2022-03-31T01:36:12.154741+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -6286,7 +6286,7 @@
       "labels": [],
       "body": "There is currently a logical flaw in the subgroup branching flow.\r\n\r\nIn order to branch, you need to compose a `Welcome` message . A Welcome message includes `EncryptedGroupSecrets` which is defined as follows: \r\n\r\n```\r\nstruct {\r\n  KeyPackageRef new_member;\r\n  HPKECiphertext encrypted_group_secrets;\r\n} EncryptedGroupSecrets;\r\n```\r\n\r\nThe problem with this is that the `new_member` field of type `KeyPackageRef` cannot be made for existing members of the group because the leaf nodes are now `LeafNode` types. `KeyPackageRef` is now only used to add new members to the group, so we can't reuse this for sub group initialization.",
       "createdAt": "2022-03-26T20:10:03Z",
-      "updatedAt": "2022-03-28T22:46:23Z",
+      "updatedAt": "2022-03-29T06:10:44Z",
       "closedAt": null,
       "comments": [
         {
@@ -6316,8 +6316,31 @@
           "body": "> I'm not sure I understand correctly. Are you suggesting when branching a group off of another group, one re-uses the leaves of the old group? If so, that's not how it's meant to work. The new group created in the process of subgroup branching should be independent from the \"parent\" group safe for the PSK, which all member have to provide upon creation of the group. In fact one should never use the same key material in the leaves of multiple groups except when the supply of key packages that a party provides via the DS is exhausted (see Section 17.4).\r\n\r\n@kkohbrok Konrad, could you safely derive new keys for the members of the subgroup instead? If so, that would be an enormous increase in efficiency and (especially in the federated case) make group creation timing consistent enough to do dynamically.",
           "createdAt": "2022-03-28T22:46:22Z",
           "updatedAt": "2022-03-28T22:46:22Z"
+        },
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "@rohan-wire Nice idea! But it's tricky, since we're dealing with public key pairs that the creator of the new group doesn't know the private keys for. If we were only using HPKE schemes that support updateable public key encryption, the creator of the new group could indeed update the key in the existing group and send the \"delta\" encrypted to each corresponding member (which would still represent an overhead, but we might be able to optimize this somehow). This is similar to the RTreeKEM mechanism that @psyoptix et al. proposed at some point. To go all the way here, we'd have to do the same for the public key material in the credentials as well, which is not something we had considered before. It would be a new primitive, something like an updateable signature scheme? Probably something to consider for HPKE/MLS 2.0.\r\n\r\nWe could also allow the re-use of LeadNodes for this particular case. It would be the simpler solution and I don't think it would be catastrophic, since we have to assume that LeafNode (or KeyPackage) key material is re-used in the \"last resort\" scenario anyway, but this would definitely be something we should discuss on the mailing list, as it would break a pretty basic assumption we've made until now.",
+          "createdAt": "2022-03-29T06:10:44Z",
+          "updatedAt": "2022-03-29T06:10:44Z"
         }
       ]
+    },
+    {
+      "number": 627,
+      "id": "I_kwDOBoyH6c5GoQWG",
+      "title": "\"MLS Proposal Types\" table template does not describe \"path required\"",
+      "url": "https://github.com/mlswg/mls-protocol/issues/627",
+      "state": "OPEN",
+      "author": "dkg",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "the \"MLS Proposal Types\" section defines a table with columns \r\n\r\n- Value\r\n- Name\r\n- Recommended\r\n- Path Required\r\n- Reference\r\n\r\nBut the template directly above the table only mentions four of the five columns.  It does not mention or describe what \"Path Required\" means.\r\nIt should probably at least make clear that the field should be either `Y` or `N`, and reference section \"Commit\" where the path requirement is discussed.\r\n",
+      "createdAt": "2022-03-29T14:26:16Z",
+      "updatedAt": "2022-03-29T14:26:16Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -45681,7 +45704,7 @@
       "labels": [],
       "body": "Based on #623 , it should be made explicit that sub-group branching requires a fresh key package for each member. I think there is still a conflict of wording here that I would like feedback on because of this line (which is what triggered me thinking there was a bug)\r\n\r\n```\r\nEach LeafNode in the new group's tree MUST be a leaf in the old group's tree at the epoch indicated in the PreSharedKey\r\n```",
       "createdAt": "2022-03-28T15:53:51Z",
-      "updatedAt": "2022-03-28T15:53:51Z",
+      "updatedAt": "2022-03-29T06:00:36Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "1c6aa098efc94d7e9e51ed16ba6c37b873bb4a22",
@@ -45692,7 +45715,15 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Thanks for the PR and thanks for digging into this. I think what the sentence is meant to say is that the receiver MUST check that the members of the new group are a subset of the members of the old group at that specific epoch.\r\n\r\nSince we're using new LeafNodes in the new group and we don't have a fixed notion of identity (at least not within MLS), we have to refer to the application/the AS to ensure that the identity expressed by the credential in each LeafNode in the subgroup has a corresponding identity (i.e. one that represents the same party) expressed by a credential in a LeafNode in the original group.\r\n\r\nMaybe something like:\r\n```\r\nThe members of the new group MUST be a subset of the members of the old group. When comparing identifiers across the old and the new group, the identifiers of a member in the new group MUST be such that they would represent a valid set of identifiers for the corresponding member in the old group as described in Section 8.3.    \r\n```\r\nThis leaves the possibility of a collision, where the identifiers in a given leaf in the new group would be valid updates to more than one member in the old group. This should probably be forbidden in general, although outside of this case it's not really a problem, because updates are always specific to one leaf. Alternatively, we could somehow include LeafNodeRefs that specifically indicate which member represents which other member. Or just leave it up to the application to sort this all out.",
+          "createdAt": "2022-03-29T06:00:36Z",
+          "updatedAt": "2022-03-29T06:00:36Z"
+        }
+      ],
       "reviews": []
     },
     {
