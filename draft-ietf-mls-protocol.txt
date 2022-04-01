@@ -5,7 +5,7 @@
 Network Working Group                                          R. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                             B. Beurdouche
-Expires: 29 September 2022                               Inria & Mozilla
+Expires: 3 October 2022                                  Inria & Mozilla
                                                                R. Robert
                                                                         
                                                              J. Millican
@@ -14,7 +14,7 @@ Expires: 29 September 2022                               Inria & Mozilla
                                                                   Google
                                                           K. Cohn-Gordon
                                                     University of Oxford
-                                                           28 March 2022
+                                                            1 April 2022
 
 
               The Messaging Layer Security (MLS) Protocol
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 29 September 2022.
+   This Internet-Draft will expire on 3 October 2022.
 
 Copyright Notice
 
@@ -5098,6 +5098,9 @@ psk_secret (or 0) --> KDF.Extract
       adding a value with a "Recommended" value of "Y" requires
       Standards Action [RFC8126].  IESG Approval is REQUIRED for a Y->N
       transition.
+
+   *  Path Required: Whether a Commit covering a proposal of this type
+      is required to have its path field populated (see Section 13.2).
 
    *  Reference: The document where this extension is defined
 
