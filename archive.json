@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-03-31T01:36:12.154741+00:00",
+  "timestamp": "2022-04-03T01:41:33.985346+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -6286,7 +6286,7 @@
       "labels": [],
       "body": "There is currently a logical flaw in the subgroup branching flow.\r\n\r\nIn order to branch, you need to compose a `Welcome` message . A Welcome message includes `EncryptedGroupSecrets` which is defined as follows: \r\n\r\n```\r\nstruct {\r\n  KeyPackageRef new_member;\r\n  HPKECiphertext encrypted_group_secrets;\r\n} EncryptedGroupSecrets;\r\n```\r\n\r\nThe problem with this is that the `new_member` field of type `KeyPackageRef` cannot be made for existing members of the group because the leaf nodes are now `LeafNode` types. `KeyPackageRef` is now only used to add new members to the group, so we can't reuse this for sub group initialization.",
       "createdAt": "2022-03-26T20:10:03Z",
-      "updatedAt": "2022-03-29T06:10:44Z",
+      "updatedAt": "2022-03-31T20:37:32Z",
       "closedAt": null,
       "comments": [
         {
@@ -6323,6 +6323,13 @@
           "body": "@rohan-wire Nice idea! But it's tricky, since we're dealing with public key pairs that the creator of the new group doesn't know the private keys for. If we were only using HPKE schemes that support updateable public key encryption, the creator of the new group could indeed update the key in the existing group and send the \"delta\" encrypted to each corresponding member (which would still represent an overhead, but we might be able to optimize this somehow). This is similar to the RTreeKEM mechanism that @psyoptix et al. proposed at some point. To go all the way here, we'd have to do the same for the public key material in the credentials as well, which is not something we had considered before. It would be a new primitive, something like an updateable signature scheme? Probably something to consider for HPKE/MLS 2.0.\r\n\r\nWe could also allow the re-use of LeadNodes for this particular case. It would be the simpler solution and I don't think it would be catastrophic, since we have to assume that LeafNode (or KeyPackage) key material is re-used in the \"last resort\" scenario anyway, but this would definitely be something we should discuss on the mailing list, as it would break a pretty basic assumption we've made until now.",
           "createdAt": "2022-03-29T06:10:44Z",
           "updatedAt": "2022-03-29T06:10:44Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Just catching up on this.  @tomleavy nice catch here.\r\n\r\nIt seems like we have two options here:\r\n1. Require new KeyPackages (as in #624)\r\n2. Invent some way to make a new group based on LeafNodes alone\r\n\r\nI probably agree that we should do (1) in the short term, but (2) also has some appeal -- it doesn't feel right to require new KeyPackages for folks you're already in touch with -- despite it probably being more spec text.  So here's a sketch of (2) in the interest of completeness.\r\n\r\nSuppose we defined a message of the following form:\r\n\r\n```\r\nstruct {\r\n  opaque new_group_id<V>;\r\n  LeafNodeRef subgroup_members<V>;\r\n  UpdatePath path;\r\n  Extensions group_context_extensions<V>;\r\n} Branch;\r\n```\r\n\r\n... which would pretty closely parallel to Commit.  You would send it in\r\nMLSMessage and require a `confirmation_tag` in MLSMessageAuth.  Where Commit instructs the recipient to create a new epoch from the current one within the same group, Branch would instruct the recipient to create a new epoch that is the first epoch of a new group.\r\n\r\n| Field           | Commit                               | Branch                                       |\r\n|-----------------|--------------------------------------|----------------------------------------------|\r\n| Group ID        | `group_id`                           | `new_group_id`                               |\r\n| Epoch           | `epoch + 1`                          | `0`                                          |\r\n| Tree            | Tree with proposals applied          | Tree with specified leaves, otherwise empty  |\r\n| Transcript hash | Updated with Commit                  | `\"\"`                                         |\r\n| Extensions      | Carried over / specified in proposal | As specified                                 |\r\n| PSKs            | Specified in proposal(s)             | Branch PSK from the current epoch            |\r\n\r\nIn both cases, you would form an epoch / GroupContext as specified, then use the `path` to ratchet into the new epoch.\r\n\r\nI'm pretty sure that would work and have the expected security properties, though obviously formal analysis would be appreciated.  The main awkardness that occurs to me is that any members joining after the branch would have to provide new key packages.  And obviously, it would require a fair bit more spec text.\r\n\r\nAll that said, though, the exercise of working all that out has increased my impression that we should do (1) for now.  If we want something like (2) later, it can be done pretty cleanly in an extension.",
+          "createdAt": "2022-03-31T20:37:31Z",
+          "updatedAt": "2022-03-31T20:37:31Z"
         }
       ]
     },
@@ -6331,14 +6338,46 @@
       "id": "I_kwDOBoyH6c5GoQWG",
       "title": "\"MLS Proposal Types\" table template does not describe \"path required\"",
       "url": "https://github.com/mlswg/mls-protocol/issues/627",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "dkg",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "the \"MLS Proposal Types\" section defines a table with columns \r\n\r\n- Value\r\n- Name\r\n- Recommended\r\n- Path Required\r\n- Reference\r\n\r\nBut the template directly above the table only mentions four of the five columns.  It does not mention or describe what \"Path Required\" means.\r\nIt should probably at least make clear that the field should be either `Y` or `N`, and reference section \"Commit\" where the path requirement is discussed.\r\n",
       "createdAt": "2022-03-29T14:26:16Z",
-      "updatedAt": "2022-03-29T14:26:16Z",
+      "updatedAt": "2022-04-01T15:03:15Z",
+      "closedAt": "2022-04-01T15:03:15Z",
+      "comments": []
+    },
+    {
+      "number": 630,
+      "id": "I_kwDOBoyH6c5G7N8Q",
+      "title": "Secrets and Keys",
+      "url": "https://github.com/mlswg/mls-protocol/issues/630",
+      "state": "OPEN",
+      "author": "br-hale",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The spec currently uses a mix of terminologies for keys/secrets. In the key schedule we have the following:\r\n------\r\nsender_data_secret | \"sender data\"\r\nencryption_secret | \"encryption\"\r\nexporter_secret | \"exporter\"\r\nauthentication_secret | \"authentication\"\r\nexternal_secret | \"external\"\r\nconfirmation_key | \"confirm\"\r\nmembership_key | \"membership\"\r\nresumption_secret | \"resumption\"\r\n-------\r\n\r\nIt would be best to provide a coherency to how we use these terms and check for consistency throughout, to avoid confusion for readers:\r\n\r\n- A simple solution would be to use \"secret\" for all cases, i.e., changing membership_key to membership_secret. \r\n\r\n- Another alternative, which may take more refining but could be useful to readers is to separate out terms based on items that are for internal protocol use versus external protocol use. For example, encryption, confirmation, membership, etc., would use \"key\" and exporter, authentication, etc., could use \"secret\", or vice versa. \r\n\r\n\r\n--Break--\r\n\r\n\r\nRef the mailinglist on confirmation vs authentication secrets, perhaps the naming of these two are a little misleading - authentication normally being within bounds of a protocol while confirmation is external to it. This confusion probably sparked some of that discussion to begin with. It _could_ be worth considering switching those terms for clarity.\r\n\r\n",
+      "createdAt": "2022-04-01T15:04:35Z",
+      "updatedAt": "2022-04-01T15:04:35Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 633,
+      "id": "I_kwDOBoyH6c5G-bup",
+      "title": "Editorial",
+      "url": "https://github.com/mlswg/mls-protocol/issues/633",
+      "state": "OPEN",
+      "author": "br-hale",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The following statement is no longer up-to-date, given addition of P-384:\r\n\"For ciphersuites using ECDSA with the NIST curves P-256 or P-521, the public key is...\"\r\n\r\nTo avoid tracking too many changes in the future for the document, I suggest the simple edit:\r\n\"For ciphersuites using ECDSA with the NIST curves, the public key is...\"",
+      "createdAt": "2022-04-03T00:17:39Z",
+      "updatedAt": "2022-04-03T00:17:39Z",
       "closedAt": null,
       "comments": []
     }
@@ -43775,7 +43814,7 @@
       "labels": [],
       "body": "- Adds an `extra_data` field to BasicCredential to hold application-specific data about a user (examples: link to avatar, information about device)\r\n- Adds a ProofCredential to cover a lot of the cases we're currently missing, particularly:\r\n  - credentials that are just BasicCredential signed with a fixed public key\r\n  - credentials that are authenticated by a system like Key Transparency\r\n  - credentials authenticated by secure hardware",
       "createdAt": "2022-02-10T20:01:06Z",
-      "updatedAt": "2022-03-10T16:22:48Z",
+      "updatedAt": "2022-04-01T18:42:48Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "13955995bc4bb81f8f15f92014fad49494a4acf1",
@@ -43863,6 +43902,20 @@
           "body": "@rohan-wire I'm not sure why this concern doesn't apply to `group_id` but I could add some text to the PR along the lines of what I said in my last comment?\r\n\r\n```\r\nImplementations MAY construct the value of the `authority_id` field to have a particular \r\nformat, but MUST NOT enforce that the `authority_id` field always has that format. \r\n```",
           "createdAt": "2022-03-10T16:22:48Z",
           "updatedAt": "2022-03-10T16:22:48Z"
+        },
+        {
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "What if every credential contains a BasicCredential and you can just build on top of it?\r\nex:  https://github.com/mlswg/mls-protocol/pull/628",
+          "createdAt": "2022-04-01T02:23:52Z",
+          "updatedAt": "2022-04-01T02:23:52Z"
+        },
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Hey @rohan-wire, that idea doesn't really address the same problem as this PR. With this PR merged, any baseline implementation of MLS would support a restricted set of credential types: those where you can condense the necessary proof information into the \"proof\" field, and the implementation can call an application-provided callback to verify the proof. The application only needs to provide a callback that implements the verification logic because the wire format and data plumbing is already set up.\r\n\r\nWithout this PR, and also with #628, any new credential type has to be implemented as an extension to the protocol which would reasonably require modifying the MLS implementation. That's a lot of work and creates a maintenance burden.",
+          "createdAt": "2022-04-01T18:42:48Z",
+          "updatedAt": "2022-04-01T18:42:48Z"
         }
       ],
       "reviews": []
@@ -44645,7 +44698,7 @@
       "labels": [],
       "body": "This allows applications to express the MIME type of the application_data if desired.",
       "createdAt": "2022-02-24T05:10:27Z",
-      "updatedAt": "2022-03-21T10:33:26Z",
+      "updatedAt": "2022-04-01T02:13:16Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "13955995bc4bb81f8f15f92014fad49494a4acf1",
@@ -44705,6 +44758,20 @@
           "body": "What I meant by \"ALPN\" was just that this \"type signal\" describes something interactive (more like a protocol than a format) and needs negotiation.  Having more than two parties makes it different from ALPN.\r\n\r\nI'd like to see some more thought to agility and forward-compatibility.  How can we gracefully upgrade the group across both small (e.g. new text formatting option) and large (e.g. HTTP/1.1 -> H2) transitions?  This seems like a major challenge.",
           "createdAt": "2022-03-21T10:33:25Z",
           "updatedAt": "2022-03-21T10:33:25Z"
+        },
+        {
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I just submitted a draft that proposes to do content negotiation when it's GroupContext extension is present.\r\n\r\n> My sense is that what Richard is describing is probably better than this.\r\n> \r\n> Let's say that you use CPIM. There, you define that the payload of the message is MIME, which includes `Content-Type`. The `Content-Type` header is then found in the payload of the message along with other MIME header fields.\r\n> \r\n> This design is better in the sense that you can switch hit between outer content types without any risk of ambiguity/confusion attack, but that is a feature that is rarely needed, and building it within the payload is probably sensible. Many applications will have a single message format with other means of unambiguously indicating its type. For those that do want different interpretations, MIME media types aren't the only way in which they might want to negotiate the type of content. @bemasc suggested at the DISPATCH meeting the possibility that the label might be ALPN instead (though that assumes a very different context. so I'm not sure if that makes sense).\r\n> \r\n> At a minimum, I would suggest that this would need to be a negotiated extension to MLS.\r\n\r\nStill I think replying to two specific things:\r\n>Many applications will have a single message format with other means of unambiguously indicating its type.\r\nYes, in which case this PR would have allowed the mime_type to be an empty string. This would have result with one extra byte for the length (0) for folks that don't need it.\r\n\r\n>but that is a feature that is rarely needed\r\nmembers in a group who want to upgrade their communications format (which happens all the time) would definitely be able to take advantage of this feature. I have rarely seen a system that doesn't end up wanting to make some incremental non-backwards compatible format change. It's really nice when you can do that without having to create a new group or have a flag-day upgrade.\r\n\r\n",
+          "createdAt": "2022-04-01T02:07:24Z",
+          "updatedAt": "2022-04-01T02:07:24Z"
+        },
+        {
+          "author": "rohan-wire",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Just submitted the following:\r\nhttps://www.ietf.org/archive/id/draft-mahy-mls-content-neg-00.html\r\n",
+          "createdAt": "2022-04-01T02:13:16Z",
+          "updatedAt": "2022-04-01T02:13:16Z"
         }
       ],
       "reviews": []
@@ -45704,7 +45771,7 @@
       "labels": [],
       "body": "Based on #623 , it should be made explicit that sub-group branching requires a fresh key package for each member. I think there is still a conflict of wording here that I would like feedback on because of this line (which is what triggered me thinking there was a bug)\r\n\r\n```\r\nEach LeafNode in the new group's tree MUST be a leaf in the old group's tree at the epoch indicated in the PreSharedKey\r\n```",
       "createdAt": "2022-03-28T15:53:51Z",
-      "updatedAt": "2022-03-29T06:00:36Z",
+      "updatedAt": "2022-04-01T14:58:47Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "1c6aa098efc94d7e9e51ed16ba6c37b873bb4a22",
@@ -45722,9 +45789,44 @@
           "body": "Thanks for the PR and thanks for digging into this. I think what the sentence is meant to say is that the receiver MUST check that the members of the new group are a subset of the members of the old group at that specific epoch.\r\n\r\nSince we're using new LeafNodes in the new group and we don't have a fixed notion of identity (at least not within MLS), we have to refer to the application/the AS to ensure that the identity expressed by the credential in each LeafNode in the subgroup has a corresponding identity (i.e. one that represents the same party) expressed by a credential in a LeafNode in the original group.\r\n\r\nMaybe something like:\r\n```\r\nThe members of the new group MUST be a subset of the members of the old group. When comparing identifiers across the old and the new group, the identifiers of a member in the new group MUST be such that they would represent a valid set of identifiers for the corresponding member in the old group as described in Section 8.3.    \r\n```\r\nThis leaves the possibility of a collision, where the identifiers in a given leaf in the new group would be valid updates to more than one member in the old group. This should probably be forbidden in general, although outside of this case it's not really a problem, because updates are always specific to one leaf. Alternatively, we could somehow include LeafNodeRefs that specifically indicate which member represents which other member. Or just leave it up to the application to sort this all out.",
           "createdAt": "2022-03-29T06:00:36Z",
           "updatedAt": "2022-03-29T06:00:36Z"
+        },
+        {
+          "author": "tomleavy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Curious what you think about saying the the credential has to be equal? We can determine equality of the credential itself just by doing tls serialization.",
+          "createdAt": "2022-03-31T13:45:44Z",
+          "updatedAt": "2022-03-31T13:45:44Z"
+        },
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Sure, requiring the credential to be exactly the same would be a simple way to figure out if it's the same party in both groups. However, I can imagine that some applications will want distinct credentials for each group. If we mandate that credentials are the same, this would force the application to use the same credential in every key package/LeafNode. Since subgroups can potentially be branched at any time and in any group, all key packages that a party publishes then have to have the same credential as all of the groups that party is in, so another party branching a subgroup can get hold of a KeyPackage with the same credential as the group the subgroup is branched off of.\r\n\r\nPersonally, I'd prefer asking the application to check that the identities of the new group are a subset of the identities of the original group.",
+          "createdAt": "2022-03-31T13:52:59Z",
+          "updatedAt": "2022-03-31T13:52:59Z"
+        },
+        {
+          "author": "tomleavy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I can see that being an issue, although I am somewhat worried about us not being opinionated in same way about how to determine equality here, mainly because of interop type things. We punt on how to validate the credentials as well in general so I guess this is in line with prior decisions",
+          "createdAt": "2022-03-31T13:59:18Z",
+          "updatedAt": "2022-03-31T13:59:43Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c43YEyQ",
+          "commit": {
+            "abbreviatedOid": "f98cc4c"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-04-01T14:58:47Z",
+          "updatedAt": "2022-04-01T14:58:47Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 625,
@@ -45810,6 +45912,141 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 628,
+      "id": "PR_kwDOBoyH6c41dKSR",
+      "title": "Strawman proposal to include BasicCredential in any Credential type",
+      "url": "https://github.com/mlswg/mls-protocol/pull/628",
+      "state": "OPEN",
+      "author": "rohan-wire",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "I was thinking about a possible proliferation of credentials. This could mean a lot more KeyPackages and it could lead to situations where some members are added to a group and use some fancy or rather esoteric credential scheme and then want to invite other new clients, but not all the new clients support that credential scheme.\r\n\r\nThis strikes me as potentially unnecessary. If all clients support BasicCredential, why not include a BasicCredential in every other Credential (it would be a copy of the identity and public key from your X.509Certificate or ProofCredential or JsonWebCredential or CborWebTokenCredential or whatever).\r\n\r\nMaybe this makes it a lot easier to add new credential types later as in the ProofCredential discussion [1] because the new credential does not prevent communication with other other clients.\r\n\r\n[1] https://github.com/mlswg/mls-protocol/pull/592",
+      "createdAt": "2022-04-01T02:22:40Z",
+      "updatedAt": "2022-04-02T06:37:04Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "75dc112c95e546ea7c888202c14e154798439355",
+      "headRepository": "rohan-wire/mls-protocol",
+      "headRefName": "rohan/basic-cred",
+      "headRefOid": "2883d6319d9e7e8571ad24544ee52746ff5733bb",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "body": "I like the general idea. Right now the spec effectively only allows X.509 certs besides BasicCredentials and that might be limiting (which is probably what motivated #592). Maybe the two ideas could be combined? Every KeyPackage would have a BasicCredential that can be used for the MLS-internal verification of signatures and additionally provide proof data that the AS can parse and validate. An X.509 certificate chain would just be one instance of such proof data. I think this would make for a nice separation between what MLS needs for its security guarantees/the stuff the AS needs to agree on.",
+          "createdAt": "2022-04-01T08:25:51Z",
+          "updatedAt": "2022-04-01T08:25:51Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I think the proposal here is actually a little incoherent.  On the one hand, you only need this proposal if the recipient doesn't know how to parse the credential and extract the public key.  On the other hand, the recipient needs to know how to parse the credential enough to read past it.  I guess you could, for example, have a stack that can parse past an X.509 cert chain, but not parse within the certificates.  But that seems like a pretty fine distinction.\r\n\r\nTo enable a recipient to be totally ignorant of the credential type, you would need to elide even more detail, something like:\r\n\r\n```\r\nstruct {\r\n    CredentialType type;\r\n    opaque authentication_info<V>; // contents defined by `type`\r\n    SignatureScheme scheme;\r\n    opaque public_key<V>;\r\n} Credential;\r\n```\r\n\r\nAll that said, it's still not totally clear to me that we should do this.  I can see the conceptual appeal to these approaches.  It's the AS's job to know about credentials, and MLS just transports them and makes sure they're signed to prevent identity mis-binding.  There are some costs, though:\r\n\r\n* Message bloat: With X509 or other schemes where credentials include the public key, you would end up repeating the public key on the inside and outside of the credential.  This could be painful for PQ schemes with huge keys.  Fixable with gzip, but still.\r\n\r\n* Error prone: Since the public key is represented in two places, the client will have to check that they correspond.\r\n\r\n* Fail slow / fail open: Allowing incompatibilities like this effectively allows for groups where some members are unauthenticated (since their credentials can't be validated by everyone else).  While this ultimately comes down to the AS anyway, there's increased risk that unintended openness at the AS (say allowing unknown credential types) will go unnoticed, since the protocol will continue to work.\r\n\r\nSo I don't have hard objections here, but I do feel a bit queasy.\r\n",
+          "createdAt": "2022-04-01T15:33:52Z",
+          "updatedAt": "2022-04-01T15:33:52Z"
+        },
+        {
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "body": "I agree with your concerns regarding duplication. The upside is however a clear split between what's relevant for the protocol (just the stuff in the BasicCredential) and the stuff for the AS. This would make for a much more modular composition of a generic protocol implementation like mlspp or OpenMLS and a more application-specific AS.",
+          "createdAt": "2022-04-01T16:53:33Z",
+          "updatedAt": "2022-04-01T16:53:33Z"
+        },
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I also don't have a strong opinion on this, but we might as well simplify it even further and remove credential types altogether. MLS doesn't care about what's in `authentication_info`, so why even communicate the type? The application might want to know, but we could leave that up to the AS in the same way as we do with the content type in application messages.\r\n\r\nThis would leave us with the same drawbacks that @bifurcation listed, but gain us some more simplicity.",
+          "createdAt": "2022-04-02T06:37:03Z",
+          "updatedAt": "2022-04-02T06:37:03Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 629,
+      "id": "PR_kwDOBoyH6c41fuQw",
+      "title": "Add Path Required to Proposal Type template",
+      "url": "https://github.com/mlswg/mls-protocol/pull/629",
+      "state": "MERGED",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes #627 ",
+      "createdAt": "2022-04-01T15:01:54Z",
+      "updatedAt": "2022-04-01T15:03:15Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "75dc112c95e546ea7c888202c14e154798439355",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "path-required-description",
+      "headRefOid": "c0c0f259f1bf82aed480d59c273776e2167e90ef",
+      "closedAt": "2022-04-01T15:03:15Z",
+      "mergedAt": "2022-04-01T15:03:14Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "d21177766dc0f3e245dcd8d668695c4283c3d58a"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 631,
+      "id": "PR_kwDOBoyH6c41gvhl",
+      "title": "Specify compatibility behavior around new credentials.",
+      "url": "https://github.com/mlswg/mls-protocol/pull/631",
+      "state": "OPEN",
+      "author": "Bren2010",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This PR adds a way for the members of a group to indicate the credential types they support, and how to negotiate which credential types may be used in a group.",
+      "createdAt": "2022-04-01T20:10:55Z",
+      "updatedAt": "2022-04-01T20:10:55Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "d21177766dc0f3e245dcd8d668695c4283c3d58a",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "brendan/credentials2",
+      "headRefOid": "3ba066fdabb9d246553d8c9cdf040fd5f9edf769",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 632,
+      "id": "PR_kwDOBoyH6c41hOpo",
+      "title": "fix the switch condition for LeafNodeSource",
+      "url": "https://github.com/mlswg/mls-protocol/pull/632",
+      "state": "OPEN",
+      "author": "suhasHere",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2022-04-02T00:20:52Z",
+      "updatedAt": "2022-04-02T00:20:52Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "d21177766dc0f3e245dcd8d668695c4283c3d58a",
+      "headRepository": "suhasHere/mls-protocol",
+      "headRefName": "suhas",
+      "headRefOid": "eca7c7c597f680c009f4afdc1e545b05e0a3f08e",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
