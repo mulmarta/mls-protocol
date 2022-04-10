@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-04-03T01:41:33.985346+00:00",
+  "timestamp": "2022-04-10T01:41:29.648719+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -43814,7 +43814,7 @@
       "labels": [],
       "body": "- Adds an `extra_data` field to BasicCredential to hold application-specific data about a user (examples: link to avatar, information about device)\r\n- Adds a ProofCredential to cover a lot of the cases we're currently missing, particularly:\r\n  - credentials that are just BasicCredential signed with a fixed public key\r\n  - credentials that are authenticated by a system like Key Transparency\r\n  - credentials authenticated by secure hardware",
       "createdAt": "2022-02-10T20:01:06Z",
-      "updatedAt": "2022-04-01T18:42:48Z",
+      "updatedAt": "2022-04-09T15:16:05Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "13955995bc4bb81f8f15f92014fad49494a4acf1",
@@ -43916,6 +43916,13 @@
           "body": "Hey @rohan-wire, that idea doesn't really address the same problem as this PR. With this PR merged, any baseline implementation of MLS would support a restricted set of credential types: those where you can condense the necessary proof information into the \"proof\" field, and the implementation can call an application-provided callback to verify the proof. The application only needs to provide a callback that implements the verification logic because the wire format and data plumbing is already set up.\r\n\r\nWithout this PR, and also with #628, any new credential type has to be implemented as an extension to the protocol which would reasonably require modifying the MLS implementation. That's a lot of work and creates a maintenance burden.",
           "createdAt": "2022-04-01T18:42:48Z",
           "updatedAt": "2022-04-01T18:42:48Z"
+        },
+        {
+          "author": "claucece",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I agree with @Bren2010 in that (as it was pointed out) it avoids the need for `implementations to add stuff off the bat`. I do see, though, the importance of being careful so we don't end up with the problems of the subject name in X.509. This seems reasonable for the latter point: https://github.com/mlswg/mls-protocol/pull/592#issuecomment-1086219398\r\n\r\n",
+          "createdAt": "2022-04-09T15:16:05Z",
+          "updatedAt": "2022-04-09T15:16:05Z"
         }
       ],
       "reviews": []
@@ -45771,13 +45778,13 @@
       "labels": [],
       "body": "Based on #623 , it should be made explicit that sub-group branching requires a fresh key package for each member. I think there is still a conflict of wording here that I would like feedback on because of this line (which is what triggered me thinking there was a bug)\r\n\r\n```\r\nEach LeafNode in the new group's tree MUST be a leaf in the old group's tree at the epoch indicated in the PreSharedKey\r\n```",
       "createdAt": "2022-03-28T15:53:51Z",
-      "updatedAt": "2022-04-01T14:58:47Z",
+      "updatedAt": "2022-04-08T07:41:21Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "1c6aa098efc94d7e9e51ed16ba6c37b873bb4a22",
       "headRepository": "tomleavy/mls-protocol",
       "headRefName": "branching-update",
-      "headRefOid": "f98cc4c388c28f04adb24b96afce10dd603f770d",
+      "headRefOid": "8f6cc1b8f27823321f5443da5a9de67d85029b97",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -45810,6 +45817,13 @@
           "body": "I can see that being an issue, although I am somewhat worried about us not being opinionated in same way about how to determine equality here, mainly because of interop type things. We punt on how to validate the credentials as well in general so I guess this is in line with prior decisions",
           "createdAt": "2022-03-31T13:59:18Z",
           "updatedAt": "2022-03-31T13:59:43Z"
+        },
+        {
+          "author": "tomleavy",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Hey @kkohbrok and @bifurcation check the change I just posted. @psyoptix and I put that together, it's a bit tough to get a generic definition of equivalency.",
+          "createdAt": "2022-04-07T14:58:00Z",
+          "updatedAt": "2022-04-07T14:58:00Z"
         }
       ],
       "reviews": [
@@ -45825,6 +45839,26 @@
           "createdAt": "2022-04-01T14:58:47Z",
           "updatedAt": "2022-04-01T14:58:47Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOBoyH6c43ytFU",
+          "commit": {
+            "abbreviatedOid": "8f6cc1b"
+          },
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Well put!",
+          "createdAt": "2022-04-08T07:40:47Z",
+          "updatedAt": "2022-04-08T07:41:21Z",
+          "comments": [
+            {
+              "originalPosition": 26,
+              "body": "```suggestion\r\n  group. In this context, a pair of LeafNodes is said to \"match\" if the\r\n```",
+              "createdAt": "2022-04-08T07:40:47Z",
+              "updatedAt": "2022-04-08T07:41:21Z"
+            }
+          ]
         }
       ]
     },
