@@ -5408,25 +5408,36 @@ considered invalid.<a href="#section-12.2-4" class="pilcrow">¶</a></p>
 <a href="#section-12.3" class="section-number selfRef">12.3. </a><a href="#name-sub-group-branching" class="section-name selfRef">Sub-group Branching</a>
         </h3>
 <p id="section-12.3-1">A new group can be formed from a subset of an existing group's members, using
-the same parameters as the old group.  The creator of the group indicates this
-situation by including a PreSharedKey of type <code>resumption</code> with usage <code>branch</code>
-in the Welcome message that creates the branched subgroup.<a href="#section-12.3-1" class="pilcrow">¶</a></p>
-<p id="section-12.3-2">A client receiving a Welcome including a PreSharedKey of type <code>resumption</code> with
-usage <code>branch</code> MUST verify that the new group reflects a subgroup branched from
-the referenced group.<a href="#section-12.3-2" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-12.3-3.1">The <code>version</code> and <code>ciphersuite</code> values in the Welcome MUST be the same as
-those used by the old group.<a href="#section-12.3-3.1" class="pilcrow">¶</a>
+the same parameters as the old group.<a href="#section-12.3-1" class="pilcrow">¶</a></p>
+<p id="section-12.3-2">A member can create a sub-group by performing the following steps:<a href="#section-12.3-2" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-12.3-3">
+<li id="section-12.3-3.1">Determine a subset of existing members that should be a part of the sub-group.<a href="#section-12.3-3.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-12.3-3.2">Each LeafNode in the new group's tree MUST be a leaf in the
-old group's tree at the epoch indicated in the PreSharedKey.<a href="#section-12.3-3.2" class="pilcrow">¶</a>
+          <li id="section-12.3-3.2">Create a new tree for the sub-group by fetching a new KeyPackage for each 
+existing member that should be included in the sub-group.<a href="#section-12.3-3.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-12.3-3.3">Create a Welcome message that includes a PreSharedKey of type <code>resumption</code> with 
+usage <code>branch</code>.<a href="#section-12.3-3.3" class="pilcrow">¶</a>
+</li>
+        </ol>
+<p id="section-12.3-4">A client receiving a Welcome including a PreSharedKey of type <code>resumption</code> with
+usage <code>branch</code> MUST verify that the new group reflects a subgroup branched from
+the referenced group.<a href="#section-12.3-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-12.3-5.1">The <code>version</code> and <code>ciphersuite</code> values in the Welcome MUST be the same as
+those used by the old group.<a href="#section-12.3-5.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-12.3-5.2">Each LeafNode in a new subgroup MUST match some LeafNode in the original
+group. In this context, a pair of LeafNodes is said to "match" if the
+identifiers presented by their respective credentials are considered
+equivalent by the application.<a href="#section-12.3-5.2" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-12.3-4">In addition, to avoid key re-use, the <code>psk_nonce</code> included in the
-<code>PreSharedKeyID</code> object MUST be a randomly sampled nonce of length <code>KDF.Nh</code>.<a href="#section-12.3-4" class="pilcrow">¶</a></p>
-<p id="section-12.3-5">Resumption PSKs with usage <code>branch</code> MUST NOT be used in other contexts.  A
+<p id="section-12.3-6">In addition, to avoid key re-use, the <code>psk_nonce</code> included in the
+<code>PreSharedKeyID</code> object MUST be a randomly sampled nonce of length <code>KDF.Nh</code>.<a href="#section-12.3-6" class="pilcrow">¶</a></p>
+<p id="section-12.3-7">Resumption PSKs with usage <code>branch</code> MUST NOT be used in other contexts.  A
 PreSharedKey proposal with type <code>resumption</code> and usage <code>branch</code> MUST be
-considered invalid.<a href="#section-12.3-5" class="pilcrow">¶</a></p>
+considered invalid.<a href="#section-12.3-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
