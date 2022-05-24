@@ -2548,6 +2548,8 @@ summarizes the state of the group:
 
 ~~~ tls
 struct {
+    ProtocolVersion version = mls10;
+    CipherSuite cipher_suite;
     opaque group_id<V>;
     uint64 epoch;
     opaque tree_hash<V>;
@@ -2558,6 +2560,7 @@ struct {
 
 The fields in this state have the following semantics:
 
+* The `cipher_suite` is the cipher suite used by the group.
 * The `group_id` field is an application-defined identifier for the
   group.
 * The `epoch` field represents the current version of the group.
@@ -3066,7 +3069,7 @@ The validity of a KeyPackage needs to be verified at a few stages:
 The client verifies the validity of a KeyPackage using the following steps:
 
 * Verify that the ciphersuite and protocol version of the KeyPackage match
-  those in use in the group.
+  those in use in the group (as included in the GroupContext).
 
 * Verify the `leaf_node` field of the KeyPackage according to the process
   defined in {{leaf-node-validation}}.
@@ -3818,7 +3821,7 @@ struct {
 } GroupInfo;
 ~~~
 
-New members MUST verify the `signature` using the public key taken from the
+New members MUST the `signature` using the public key taken from the
 credential in the leaf node of the ratchet tree with leaf index `signer`. The
 signature covers the following structure, comprising all the fields in the
 GroupInfo above `signature`:
@@ -4000,27 +4003,8 @@ welcome_nonce = KDF.Expand(welcome_secret, "nonce", AEAD.Nn)
 welcome_key = KDF.Expand(welcome_secret, "key", AEAD.Nk)
 ~~~
 
-* Verify the signature on the GroupInfo object. The signature input comprises
-  all of the fields in the GroupInfo object except the signature field. The
-  public key and algorithm are taken from the credential in the leaf node of the
-  ratchet tree with leaf index `signer`. If the node is blank or if
-  signature verification fails, return an error.
-
-* Verify the integrity of the ratchet tree.
-
-  * Verify that the tree hash of the ratchet tree matches the `tree_hash` field
-    in the GroupInfo.
-
-  * For each non-empty parent node, verify that exactly one of the node's
-    children are non-empty and have the hash of this node set as their
-    `parent_hash` value (if the child is another parent) or has a `parent_hash`
-    field in the LeafNode containing the same value (if the child is a
-    leaf). If either of the node's children is empty, and in particular does not
-    have a parent hash, then its respective children's `parent_hash` values have
-    to be considered instead.
-
-  * For each non-empty leaf node, validate the LeafNode as described in
-    {{leaf-node-validation}}.
+* Verify that the `cipher_suite` in the GroupInfo matches the `cipher_suite` in
+  the KeyPackage.
 
 * Identify a leaf in the `tree` array (any even-numbered node) whose LeafNode is
   identical to the one in the KeyPackage.  If no such field exists, return an
@@ -4165,9 +4149,14 @@ are afforded to Proposal and Commit messages.  For example, an application that
 encrypts Proposal and Commit messages might distribute ratchet trees encrypted
 using a key exchanged over the MLS channel.
 
-Regardless of how the client obtains the tree, the client MUST verify that the
-root hash of the ratchet tree matches the `tree_hash` of the GroupContext before
-using the tree for MLS operations.
+Regardless of how the client obtains the tree, before
+using the tree for MLS operations, the client MUST verify that the
+ratchet tree is valid using the following steps:
+
+* Verify that the root hash matches the `tree_hash` of the GroupInfo.
+* Verify the Parent Hashes as specified in {{verifying-parent-hashes}}.
+* For each non-empty leaf node, validate the LeafNode as described in
+  {{leaf-node-validation}}.
 
 # Extensibility
 
